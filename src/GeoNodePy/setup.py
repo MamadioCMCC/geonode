@@ -29,6 +29,9 @@ setup(name=name,
           "django-extensions",
           "httplib2"
       ],
+      scripts = [
+               'scripts/geonode',
+              ],
       zip_safe=False,
       entry_points="""
       # -*- Entry points: -*-
