@@ -287,6 +287,8 @@ SERVE_MEDIA = DEBUG;
 #GEONODE_CLIENT_LOCATION = "http://localhost:8001/geonode-client/"
 GEONODE_CLIENT_LOCATION = "/media/static/"
 
+GEONODE_DEPENDENCIES_URL = 'https://s3.amazonaws.com/geonodeariel/'
+
 try:
     from local_settings import *
 except ImportError:
