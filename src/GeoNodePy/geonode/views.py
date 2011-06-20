@@ -1,5 +1,5 @@
 from django.conf import settings
-from geonode.maps.models import Map
+from geonode.maps.models import Map, Layer
 from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -10,7 +10,10 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 def index(request): 
-    return render_to_response('index.html', RequestContext(request))
+    context = RequestContext(request)
+    context['maps'] = Map.objects.all()
+    context['layers'] = Layer.objects.all()
+    return render_to_response('index.html', context)
 
 def static(request, page):
     return render_to_response(page + '.html', RequestContext(request, {
