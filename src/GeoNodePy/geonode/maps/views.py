@@ -1276,7 +1276,7 @@ def search_result_detail(request):
         context['extra_links'] = _extract_links(rec, raw_xml)
 
     try:
-        layer = Layer.objects.get_object_or_404(uuid=uuid)
+        layer = get_object_or_404(Layer, uuid=uuid)
         layer_is_remote = False
     except Layer.DoesNotExist:
         layer = None
