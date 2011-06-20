@@ -1273,7 +1273,7 @@ def search_result_detail(request):
     if len(records) != 0:
         context['rec'] = csw.records.values()[0]
         raw_xml = csw._exml.find(nspath('MD_Metadata', namespaces['gmd']))
-        context['extra_links'] = _extract_links(rec, raw_xml)
+        context['extra_links'] = _extract_links(context['rec'], raw_xml)
 
     try:
         layer = get_object_or_404(Layer, uuid=uuid)
