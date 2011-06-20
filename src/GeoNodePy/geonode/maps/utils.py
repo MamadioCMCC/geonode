@@ -213,7 +213,7 @@ def cleanup(name, uuid):
 
 
 def save(layer, base_file, user, overwrite = True, title=None,
-         abstract=None, permissions=None, keywords = []):
+         abstract=None, permissions=None, workspace=None, keywords = []):
     """Upload layer data to Geoserver and registers it with Geonode.
 
        If specified, the layer given is overwritten, otherwise a new layer
@@ -319,8 +319,15 @@ def save(layer, base_file, user, overwrite = True, title=None,
         data = main_file
     # ------------------
 
+
+    ws = None
+    if workspace is not None:
+        ws = cat.get_workspace(workspace)
+        if ws is None:
+            ws = cat.create_workspace(workspace, 'http://'+workspace)
+
     try:
-        create_store(name, data, overwrite=overwrite)
+        create_store(name, data, workspace=ws, overwrite=overwrite)
     except geoserver.catalog.UploadError, e:
         msg = ('Could not save the layer %s, there was an upload '
                'error: %s' % (name, str(e)))
@@ -345,8 +352,8 @@ def save(layer, base_file, user, overwrite = True, title=None,
     # Step 5. Create the resource in GeoServer
     logger.info('>>> Step 5. Generating the metadata for [%s] after '
                 'successful import to GeoSever', name)
-    store = cat.get_store(name)
-    gs_resource = cat.get_resource(name=name, store=store)
+    store = cat.get_store(name, workspace=ws)
+    gs_resource = cat.get_resource(name=name, store=store, workspace=ws)
 
     # Verify the resource was created
     if gs_resource is not None:
@@ -544,7 +551,7 @@ def check_geonode_is_up():
                'GeoNetwork.' % settings.GEONETWORK_BASE_URL)
         raise GeoNodeException(msg)
 
-def file_upload(filename, user=None, title=None, overwrite=True, keywords=[]):
+def file_upload(filename, user=None, title=None, overwrite=True, workspace=None, keywords=[]):
     """Saves a layer in GeoNode asking as little information as possible.
        Only filename is required, user and title are optional.
     """
@@ -569,7 +576,7 @@ def file_upload(filename, user=None, title=None, overwrite=True, keywords=[]):
     except Layer.DoesNotExist, e:
         layer = name
 
-    new_layer = save(layer, filename, theuser, overwrite, keywords=keywords)
+    new_layer = save(layer, filename, theuser, overwrite, workspace=workspace, keywords=keywords)
 
 
     return new_layer
