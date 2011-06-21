@@ -320,11 +320,16 @@ def save(layer, base_file, user, overwrite = True, title=None,
     # ------------------
 
 
+    #FIXME: This is the ugliest construct ever to create a workspace
+    # ------------
     ws = None
     if workspace is not None:
         ws = cat.get_workspace(workspace)
         if ws is None:
             ws = cat.create_workspace(workspace, 'http://'+workspace)
+            cat._cache.clear()
+            ws = cat.get_workspace(workspace)
+    # ------------
 
     try:
         create_store(name, data, workspace=ws, overwrite=overwrite)
@@ -430,6 +435,12 @@ def save(layer, base_file, user, overwrite = True, title=None,
                     owner=user)
     saved_layer, created = Layer.objects.get_or_create(name=gs_resource.name,
                                                        defaults=defaults)
+
+
+    if workspace is not None:
+        msg = ('The saved workspace does not match the requested workspace "%s" != "%s"'
+               ' . This should never happen.' % (saved_layer.workspace, workspace))
+        assert saved_layer.workspace == workspace, msg
 
     if created:
         saved_layer.set_default_permissions()
