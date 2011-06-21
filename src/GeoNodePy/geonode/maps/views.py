@@ -840,9 +840,9 @@ Please try again, or contact and administrator if the problem continues.")
 
 @login_required
 @csrf_exempt
-def upload_layer(request):
+def upload_layer(request, template='maps/layer_upload.html', workspace=None):
     if request.method == 'GET':
-        return render_to_response('maps/layer_upload.html',
+        return render_to_response(template,
                                   RequestContext(request, {}))
     elif request.method == 'POST':
         from geonode.maps.forms import NewLayerUploadForm
@@ -855,8 +855,10 @@ def upload_layer(request):
             try:
                 tempdir, base_file = form.write_files()
                 name, __ = os.path.splitext(form.cleaned_data["base_file"].name)
+                logger.info('Using workspace "%s"' % workspace) 
                 saved_layer = save(name, base_file, request.user, 
                         overwrite = False,
+                        workspace = workspace,
                         abstract = form.cleaned_data["abstract"],
                         title = form.cleaned_data["layer_title"],
                         permissions = form.cleaned_data["permissions"]
