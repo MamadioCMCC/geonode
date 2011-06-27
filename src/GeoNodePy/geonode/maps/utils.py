@@ -33,7 +33,7 @@ from geoserver.catalog import FailedRequestError
 from geoserver.resource import FeatureType, Coverage
 
 
-logger = logging.getLogger('geonode.maps.utils')
+logger = logging.getLogger('geonode.maps')
 _separator = '\n' + ('-' * 100) + '\n'
 
 

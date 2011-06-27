@@ -2,6 +2,7 @@ import os
 import shutil
 from django.core.management.base import CommandError, NoArgsCommand
 from geonode.maps.management.commands.stop import kill_geonode
+from django.core import management
 
 class Command(NoArgsCommand):
     can_import_settings = True
@@ -20,5 +21,7 @@ class Command(NoArgsCommand):
                 shutil.rmtree(geoserver)
             if os.path.exists(geonetwork):
                 shutil.rmtree(geonetwork)
+            print "Removing GeoNode database"
+            management.call_command('flush', verbosity=0, interactive=False)
         else:
             print "This command only works in DEBUG mode to prevent you from losing data"

@@ -32,7 +32,7 @@ from django.forms.models import inlineformset_factory
 from django.db.models import Q
 import logging
 
-logger = logging.getLogger("geonode.maps.views")
+logger = logging.getLogger("geonode.maps")
 
 _user, _password = settings.GEOSERVER_CREDENTIALS
 
