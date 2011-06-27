@@ -10,7 +10,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
 
         from django.conf import settings
-        management.call_command('syncdb', interactive=False)
+        management.call_command('syncdb', verbosity=0, interactive=False)
         PROJECT_HOME = os.path.join(settings.PROJECT_ROOT, '..', '..')
         catalina = os.path.join(PROJECT_HOME, 'tomcat', 'bin', 'catalina.sh')
 

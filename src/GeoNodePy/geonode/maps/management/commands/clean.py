@@ -22,6 +22,7 @@ class Command(NoArgsCommand):
             if os.path.exists(geonetwork):
                 shutil.rmtree(geonetwork)
             print "Removing GeoNode database"
+            management.call_command('syncdb', verbosity=0, interactive=False)
             management.call_command('flush', verbosity=0, interactive=False)
         else:
             print "This command only works in DEBUG mode to prevent you from losing data"
