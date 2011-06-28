@@ -14,7 +14,10 @@ class Command(NoArgsCommand):
     can_import_settings = True
 
     def handle_noargs(self, **options):
- 
+        kill_geonode()
+
+
+def kill_geonode():
         # Kill GeoServer
         kill('tomcat', 'java')
 

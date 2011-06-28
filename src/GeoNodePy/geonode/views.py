@@ -1,15 +1,19 @@
 from django.conf import settings
-from geonode.maps.models import Map
+from geonode.maps.models import Map, Layer
 from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 def index(request): 
-    return render_to_response('index.html', RequestContext(request))
+    context = RequestContext(request)
+    context['maps'] = Map.objects.all()
+    context['layers'] = Layer.objects.all()
+    return render_to_response('index.html', context)
 
 def static(request, page):
     return render_to_response(page + '.html', RequestContext(request, {
@@ -24,13 +28,11 @@ def developer(request):
         "site": settings.SITEURL
     }))
 
-def lang(request): 
-    return render_to_response('lang.js', mimetype="text/javascript")
-
 class AjaxLoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput)
     username = forms.CharField()
 
+@csrf_exempt
 def ajax_login(request):
     if request.method != 'POST':
         return HttpResponse(
@@ -65,6 +67,7 @@ def ajax_login(request):
                 status=400
             )
 
+@csrf_exempt
 def ajax_lookup(request):
     if request.method != 'POST':
         return HttpResponse(

@@ -1,6 +1,6 @@
 from geonode.core.models import AUTHENTICATED_USERS, ANONYMOUS_USERS
 from geonode.maps.models import Map, Layer, MapLayer, Contact, ContactRole,Role, get_csw
-from geonode.maps.gs_helpers import fixup_style, cascading_delete
+from geonode.maps.gs_helpers import fixup_style, cascading_delete, delete_from_postgis
 from geonode import geonetwork
 import geoserver
 from geoserver.resource import FeatureType, Coverage
@@ -12,7 +12,6 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.conf import settings
@@ -33,7 +32,7 @@ from django.forms.models import inlineformset_factory
 from django.db.models import Q
 import logging
 
-logger = logging.getLogger("geonode.maps.views")
+logger = logging.getLogger("geonode.maps")
 
 _user, _password = settings.GEOSERVER_CREDENTIALS
 
@@ -132,7 +131,7 @@ LAYER_LEV_NAMES = {
     Layer.LEVEL_ADMIN : _('Administrative')
 }
 
-@transaction.commit_manually
+@csrf_exempt
 def maps(request, mapid=None):
     if request.method == 'GET':
         return render_to_response('maps.html', RequestContext(request))
@@ -150,10 +149,8 @@ def maps(request, mapid=None):
             map.update_from_viewer(request.raw_post_data)
             response = HttpResponse('', status=201)
             response['Location'] = map.id
-            transaction.commit()
             return response
         except Exception, e:
-            transaction.rollback()
             return HttpResponse(
                 "The server could not understand your request." + str(e),
                 status=400, 
@@ -240,6 +237,7 @@ def newmap(request):
                     continue
                     
                 layer_bbox = layer.resource.latlon_bbox
+                # assert False, str(layer_bbox)
                 if bbox is None:
                     bbox = list(layer_bbox[0:4])
                 else:
@@ -263,8 +261,14 @@ def newmap(request):
                 center = GEOSGeometry(wkt, srid=4326)
                 center.transform("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs")
 
-                width_zoom = math.log(360 / (maxx - minx), 2)
-                height_zoom = math.log(360 / (maxy - miny), 2)
+                if maxx == minx:
+                    width_zoom = 15
+                else:
+                    width_zoom = math.log(360 / (maxx - minx), 2)
+                if maxy == miny:
+                    height_zoom = 15
+                else:
+                    height_zoom = math.log(360 / (maxy - miny), 2)
 
                 map.center_x = center.x
                 map.center_y = center.y
@@ -836,14 +840,14 @@ Please try again, or contact and administrator if the problem continues.")
 
 @login_required
 @csrf_exempt
-def upload_layer(request):
+def upload_layer(request, template='maps/layer_upload.html', workspace=None):
     if request.method == 'GET':
-        return render_to_response('maps/layer_upload.html',
+        return render_to_response(template,
                                   RequestContext(request, {}))
     elif request.method == 'POST':
         from geonode.maps.forms import NewLayerUploadForm
         from geonode.maps.utils import save
-        from django.template import escape
+        from django.utils.html import escape
         import os, shutil
         form = NewLayerUploadForm(request.POST, request.FILES)
         tempdir = None
@@ -851,8 +855,10 @@ def upload_layer(request):
             try:
                 tempdir, base_file = form.write_files()
                 name, __ = os.path.splitext(form.cleaned_data["base_file"].name)
+                logger.info('Using workspace "%s"' % workspace) 
                 saved_layer = save(name, base_file, request.user, 
                         overwrite = False,
+                        workspace = workspace,
                         abstract = form.cleaned_data["abstract"],
                         title = form.cleaned_data["layer_title"],
                         permissions = form.cleaned_data["permissions"]
@@ -1262,23 +1268,26 @@ def search_result_detail(request):
     uuid = request.GET.get("uuid")
     csw = get_csw()
     csw.getrecordbyid([uuid], outputschema=namespaces['gmd'])
-    rec = csw.records.values()[0]
-    raw_xml = csw._exml.find(nspath('MD_Metadata', namespaces['gmd']))
-    extra_links = _extract_links(rec, raw_xml)
-    
+    records = csw.records.values()
+
+    context = RequestContext(request)
+
+    if len(records) != 0:
+        context['rec'] = csw.records.values()[0]
+        raw_xml = csw._exml.find(nspath('MD_Metadata', namespaces['gmd']))
+        context['extra_links'] = _extract_links(context['rec'], raw_xml)
+
     try:
-        layer = Layer.objects.get(uuid=uuid)
+        layer = get_object_or_404(Layer, uuid=uuid)
         layer_is_remote = False
-    except:
+    except Layer.DoesNotExist:
         layer = None
         layer_is_remote = True
 
-    return render_to_response('maps/search_result_snippet.html', RequestContext(request, {
-        'rec': rec,
-        'extra_links': extra_links,
-        'layer': layer,
-        'layer_is_remote': layer_is_remote
-    }))
+    context['layer'] = layer
+    context['layer_is_remote'] = layer_is_remote
+
+    return render_to_response('maps/search_result_snippet.html', context)
 
 def _extract_links(rec, xml):
     download_links = []
