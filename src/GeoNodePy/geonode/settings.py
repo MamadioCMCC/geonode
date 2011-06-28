@@ -101,7 +101,7 @@ GEONODE_UPLOAD_PATH = os.path.join(STATIC_URL, "upload/")
 ADMIN_MEDIA_PREFIX = os.path.join(STATIC_URL, "admin/")
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'myv-y4#7j-d*p-__@j#*3z@!y24fz8%^z2v6atuy4bo9vqr1_a'
+SECRET_KEY = 'z2v6atuy4bo9vqr1'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -147,7 +147,7 @@ GEOSERVER_BASE_URL = "http://localhost:8001/geoserver/"
 GEOSERVER_TOKEN = open(os.path.join(PROJECT_ROOT,"..","..", "..","geoserver_token")).readline()[0:-1]
 
 # The username and password for a user that can add and edit layer details on GeoServer
-GEOSERVER_CREDENTIALS = "geoserver_admin", GEOSERVER_TOKEN
+GEOSERVER_CREDENTIALS = "geoserver_admin", SECRET_KEY
 
 # The FULLY QUALIFIED url to the GeoNetwork instance for this GeoNode
 GEONETWORK_BASE_URL = "http://localhost:8001/geonetwork/"
