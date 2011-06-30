@@ -76,32 +76,32 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, "site_media", "media")
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, "uploads")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = "/site_media/media/"
+MEDIA_URL = "/uploads/"
 
 # Absolute path to the directory that holds static files like app media.
 # Example: "/home/media/media.lawrence.com/apps/"
-STATIC_ROOT = os.path.join(PROJECT_ROOT, "site_media", "static")
+STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 
 # URL that handles the static files like app media.
 # Example: "http://media.lawrence.com"
-STATIC_URL = "/media/"
+STATIC_URL = "/static/"
 
 # Additional directories which hold static files
 STATICFILES_DIRS = [
     os.path.join(PROJECT_ROOT, "media"),
 ]
 
-GEONODE_UPLOAD_PATH = os.path.join(STATIC_URL, "upload/")
+GEONODE_UPLOAD_PATH = os.path.join(MEDIA_URL, "geonode")
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = os.path.join(STATIC_URL, "admin/")
+ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'z2v6atuy4bo9vqr1'
@@ -222,36 +222,6 @@ MAP_BASELAYERS = [{
     "fixed": True,
 }]
 
-# NAVBAR expects a dict of dicts or a path to an ini file
-NAVBAR = \
-{'maps': {'id': '%sLink',
-               'item_class': '',
-               'link_class': '',
-               'text': 'Maps',
-               'url': 'geonode.maps.views.maps'},
- 'data': {'id': '%sLink',
-          'item_class': '',
-          'link_class': '',
-          'text': 'Data',
-          'url': "geonode.maps.views.browse_data"},
-#  'index': {'id': '%sLink',
-#            'item_class': '',
-#            'link_class': '',
-#            'text': 'Featured Map',
-#            'url': 'geonode.views.index'},
- 'master': {'id': '%sLink',
-            'item_class': '',
-            'link_class': '',
-            'text': 'This page has no tab for this navigation'},
- 'meta': {'active_class': 'here',
-          'default_id': '%sLink',
-          'default_item_class': '',
-          'default_link_class': '',
-          'end_class': 'last',
-          'id': '%sLink',
-          'item_class': '',
-          'link_class': '',
-          'visible': 'data\nmaps'}}
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -259,7 +229,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'staticfiles',
+    'django.contrib.admin.staticfiles',
     'django_extensions',
     'registration',
     'profiles',
