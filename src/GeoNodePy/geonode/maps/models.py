@@ -24,7 +24,7 @@ from xml.etree.ElementTree import parse, XML
 from gs_helpers import cascading_delete
 import logging
 
-logger = logging.getLogger("geonode.maps.models")
+logger = logging.getLogger("geonode.maps")
 
 
 def bbox_to_wkt(x0, x1, y0, y1, srid="4326"):
