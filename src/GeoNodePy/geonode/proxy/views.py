@@ -41,6 +41,14 @@ def proxy(request):
 
 @csrf_exempt
 def geoserver(request):
+    if request.method in ("PUT") and not request.user.is_authenticated():
+        return HttpResponse(
+            "You are not allowed to do this without logging in",
+            mimetype="text/plain",
+            status=405
+        )
+ 
+
     if not (request.method in ("GET") or request.user.is_authenticated() ):
         return HttpResponse(
             "You must be logged in to access GeoServer",
