@@ -1278,6 +1278,13 @@ class Map(models.Model, PermissionLevelMixin):
         configs = [l.source_config() for l in layers]
         configs.append({"ptype":"gxp_wmscsource", "url": "/geoserver/wms"})
 
+        """
+        Adds WMS servers to fullscreen map server list.
+        """
+        if hasattr(settings, 'DEFAULT_MAP_WMS'):
+            for wms in settings.DEFAULT_MAP_WMS:
+                configs.append(settings.DEFAULT_MAP_WMS[wms])
+
         i = 0
         for source in uniqify(configs):
             while str(i) in sources: i = i + 1

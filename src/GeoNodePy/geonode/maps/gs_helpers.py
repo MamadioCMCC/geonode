@@ -98,7 +98,10 @@ def get_sld_for(layer):
     # FIXME: GeoServer sometimes fails to associate a style with the data, so
     # for now we default to using a point style.(it works for lines and
     # polygons, hope this doesn't happen for rasters  though)
-    name = layer.default_style.name if layer.default_style is not None else "point"
+    if layer.default_style is not None:
+        name = layer.default_style.name
+    else:
+        name = "point"
 
     # FIXME: When gsconfig.py exposes the default geometry type for vector
     # layers we should use that rather than guessing based on the autodetected

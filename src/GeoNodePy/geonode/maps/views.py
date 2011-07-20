@@ -30,6 +30,11 @@ import unicodedata
 from django.views.decorators.csrf import csrf_exempt, csrf_response_exempt
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
+from geonode.maps.forms import LayerUploadForm
+from geonode.maps.forms import NewLayerUploadForm
+from geonode.maps.utils import save
+from django.utils.html import escape
+import os, shutil
 import logging
 
 logger = logging.getLogger("geonode.maps")
@@ -845,10 +850,6 @@ def upload_layer(request, template='maps/layer_upload.html', workspace=None):
         return render_to_response(template,
                                   RequestContext(request, {}))
     elif request.method == 'POST':
-        from geonode.maps.forms import NewLayerUploadForm
-        from geonode.maps.utils import save
-        from django.utils.html import escape
-        import os, shutil
         form = NewLayerUploadForm(request.POST, request.FILES)
         tempdir = None
         if form.is_valid():
@@ -857,7 +858,7 @@ def upload_layer(request, template='maps/layer_upload.html', workspace=None):
                 name, __ = os.path.splitext(form.cleaned_data["base_file"].name)
                 logger.info('Using workspace "%s"' % workspace) 
                 saved_layer = save(name, base_file, request.user, 
-                        overwrite = False,
+                        overwrite = True,
                         workspace = workspace,
                         abstract = form.cleaned_data["abstract"],
                         title = form.cleaned_data["layer_title"],
@@ -888,6 +889,7 @@ def _updateLayer(request, layer):
             RequestContext(request, {'error_message': 
                 _("You are not permitted to modify this layer")})), status=401)
     
+    logger.debug('Updating layer %s with method %s' % (layer, request.method))
     if request.method == 'GET':
         cat = Layer.objects.gs_catalog
         info = cat.get_resource(layer.name)
@@ -897,11 +899,6 @@ def _updateLayer(request, layer):
                                   RequestContext(request, {'layer': layer,
                                                            'is_featuretype': is_featuretype}))
     elif request.method == 'POST':
-        from geonode.maps.forms import LayerUploadForm
-        from geonode.maps.utils import save
-        from django.template import escape
-        import os, shutil
-
         form = LayerUploadForm(request.POST, request.FILES)
         tempdir = None
 

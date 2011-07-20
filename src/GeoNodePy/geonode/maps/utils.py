@@ -245,9 +245,26 @@ def save(layer, base_file, user, overwrite = True, title=None,
     # Get a short handle to the gsconfig geoserver catalog
     cat = Layer.objects.gs_catalog
 
+    #FIXME: This is the ugliest construct ever to create a workspace
+    # ------------
+    ws = None
+
+    # Even if no workspace was assigned, use the existing one
+    if overwrite == True and isinstance(layer, Layer):
+        workspace = layer.workspace
+
+    if workspace is not None:
+        ws = cat.get_workspace(workspace)
+        if ws is None:
+            ws = cat.create_workspace(workspace, 'http://'+workspace)
+            cat._cache.clear()
+            ws = cat.get_workspace(workspace)
+    # ------------
+
+
     # Check if the store exists in geoserver
     try:
-        store = cat.get_store(name)
+        store = cat.get_store(name, workspace=ws)
     except geoserver.catalog.FailedRequestError, e:
         # There is no store, ergo the road is clear
         pass
@@ -318,18 +335,6 @@ def save(layer, base_file, user, overwrite = True, title=None,
         main_file = files['base']
         data = main_file
     # ------------------
-
-
-    #FIXME: This is the ugliest construct ever to create a workspace
-    # ------------
-    ws = None
-    if workspace is not None:
-        ws = cat.get_workspace(workspace)
-        if ws is None:
-            ws = cat.create_workspace(workspace, 'http://'+workspace)
-            cat._cache.clear()
-            ws = cat.get_workspace(workspace)
-    # ------------
 
     try:
         create_store(name, data, workspace=ws, overwrite=overwrite)
