@@ -739,7 +739,7 @@ class Layer(models.Model, PermissionLevelMixin):
                         "service": "WCS",
                         "version": "1.0.0",
                         "request": "DescribeCoverage",
-                        "coverages": self.typename
+                        "coverage": self.typename
                     })
                 response, content = client.request(description_url)
                 doc = parse(StringIO(content))
