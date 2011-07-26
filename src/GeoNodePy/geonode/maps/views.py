@@ -457,6 +457,7 @@ def view_map_permissions(request, mapid):
     ctx['map'] = map
     return render_to_response("maps/permissions.html", RequestContext(request, ctx))
 
+@csrf_exempt
 def set_layer_permissions(layer, perm_spec):
     if "authenticated" in perm_spec:
         layer.set_gen_level(AUTHENTICATED_USERS, perm_spec['authenticated'])
@@ -468,6 +469,7 @@ def set_layer_permissions(layer, perm_spec):
         user = User.objects.get(username=username)
         layer.set_user_level(user, level)
 
+@csrf_exempt
 def set_map_permissions(m, perm_spec):
     if "authenticated" in perm_spec:
         m.set_gen_level(AUTHENTICATED_USERS, perm_spec['authenticated'])
@@ -479,6 +481,7 @@ def set_map_permissions(m, perm_spec):
         user = User.objects.get(username=username)
         m.set_user_level(user, level)
 
+@csrf_exempt
 def ajax_layer_permissions(request, layername):
     layer = get_object_or_404(Layer, typename=layername)
 
@@ -505,6 +508,7 @@ def ajax_layer_permissions(request, layername):
         mimetype='text/plain'
     )
 
+@csrf_exempt
 def ajax_map_permissions(request, mapid):
     map = get_object_or_404(Map, pk=mapid)
 
