@@ -381,6 +381,13 @@ community."
         layernames = [x['name'] for x in cfg['map']['layers'] if is_wms_layer(x)]
         self.assertEquals(layernames, ['base:CA',])
 
+    def test_newmap_to_json(self):
+        """ Make some assertions about the data structure produced for serialization
+            to a new JSON map configuration"""
+        response = Client().get("/maps/new/data")
+        cfg = json.loads(response.content)
+        self.assertEquals(cfg['defaultSourceType'], "gxp_wmscsource")
+
     def test_map_details(self): 
         """/maps/1 -> Test accessing the detail view of a map"""
         map = Map.objects.get(id=1) 
@@ -656,8 +663,18 @@ community."
     
     # Layer Tests
 
+    # Test layer upload endpoint
     def test_upload_layer(self):
-        pass
+        c = Client()
+
+        # Test redirection to login form when not logged in
+        response = c.get("/data/upload")
+        self.assertEquals(response.status_code,302)
+
+        # Test return of upload form when logged in
+        c.login(username="bobby", password="bob")
+        response = c.get("/data/upload")
+        self.assertEquals(response.status_code,200)
 
     def test_handle_layer_upload(self):
         pass
@@ -695,7 +712,24 @@ community."
         pass
 
     def test_metadata_search(self):
-        pass
+        c = Client()
+
+        #test around _metadata_search helper
+        with patch.object(geonode.maps.views,'_metadata_search') as mock_ms:
+            result = {
+                'rows' : [{
+                        'uuid' : 1214431  # does not exist
+                        }
+                          ]
+                }
+            mock_ms.return_value = result
+
+            response = c.get("/data/search/api?q=foo&start=5&limit=10")
+
+            call_args = geonode.maps.views._metadata_search.call_args
+            self.assertEqual(call_args[0][0], "foo")
+            self.assertEqual(call_args[0][1], 5)
+            self.assertEqual(call_args[0][2], 10)
 
     def test_search_result_detail(self):
         pass

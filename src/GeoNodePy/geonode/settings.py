@@ -40,7 +40,7 @@ LANGUAGES = (
     ('en', 'English'),
     ('es', 'Español'),
     ('it', 'Italiano'),
-    ('fr', 'François'),
+    ('fr', 'Français'),
 )
 
 SITE_ID = 1
@@ -110,7 +110,8 @@ SECRET_KEY = 'z2v6atuy4bo9vqr1'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
+    #'django.template.loaders.eggs.load_template_source',
+    'django.template.loaders.app_directories.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -230,6 +231,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'django_extensions',
     'registration',
     'profiles',
@@ -237,6 +239,7 @@ INSTALLED_APPS = (
     'geonode.core',
     'geonode.maps',
     'geonode.proxy',
+    'geonode'
 )
 
 def get_user_url(u):
