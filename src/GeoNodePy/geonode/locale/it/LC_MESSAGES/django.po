@@ -8,10 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-07-12 09:30+0200\n"
+"POT-Creation-Date: 2011-08-14 04:30-0500\n"
 "PO-Revision-Date: 2010-12-07 15:33\n"
 "Last-Translator: <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,7 +23,7 @@ msgstr ""
 msgid "title"
 msgstr "titolo"
 
-#: core/models.py:25 maps/models.py:1593
+#: core/models.py:25 maps/models.py:1602
 msgid "permissions"
 msgstr "permessi"
 
@@ -36,12 +37,12 @@ msgstr ""
 "Determina l'ordine con cui i ruoli vengono visualizzati nell'interfaccia "
 "utente"
 
-#: core/models.py:67 maps/views.py:1001
+#: core/models.py:67 maps/views.py:1014
 #: templates/maps/layer_permissions.html:18
 msgid "Anonymous Users"
 msgstr "Utente anonimo"
 
-#: core/models.py:68 maps/views.py:1005
+#: core/models.py:68 maps/views.py:1018
 #: templates/maps/layer_permissions.html:19
 msgid "Registered Users"
 msgstr "Utente registrato"
@@ -1151,163 +1152,163 @@ msgstr "Excel"
 msgid "GeoJSON"
 msgstr "GeoJSON"
 
-#: maps/models.py:784
+#: maps/models.py:785
 msgid "JPEG"
 msgstr "JPEG"
 
-#: maps/models.py:785
+#: maps/models.py:786
 msgid "PDF"
 msgstr "PDF"
 
-#: maps/models.py:786
+#: maps/models.py:787
 msgid "PNG"
 msgstr "PNG"
 
-#: maps/models.py:801
+#: maps/models.py:802
 msgid "KML"
 msgstr "KML"
 
-#: maps/models.py:802
+#: maps/models.py:803
 msgid "View in Google Earth"
 msgstr "Visualizza in Google Earth"
 
-#: maps/models.py:1152
+#: maps/models.py:1154
 msgid "Title"
 msgstr "Titolo"
 
-#: maps/models.py:1157 templates/maps/layer.html:128
+#: maps/models.py:1159 templates/maps/layer.html:128
 msgid "Abstract"
 msgstr "Abstract"
 
-#: maps/models.py:1163
+#: maps/models.py:1165
 msgid "zoom"
 msgstr "zoom"
 
-#: maps/models.py:1169
+#: maps/models.py:1171
 msgid "projection"
 msgstr "proiezione"
 
-#: maps/models.py:1175
+#: maps/models.py:1177
 msgid "center X"
 msgstr "centro X"
 
-#: maps/models.py:1181
+#: maps/models.py:1183
 msgid "center Y"
 msgstr "centro Y"
 
-#: maps/models.py:1187
+#: maps/models.py:1189
 msgid "owner"
 msgstr "proprietario"
 
-#: maps/models.py:1444
+#: maps/models.py:1453
 msgid "stack order"
 msgstr "ordinamento"
 
-#: maps/models.py:1450
+#: maps/models.py:1459
 msgid "format"
 msgstr "formato"
 
-#: maps/models.py:1456
+#: maps/models.py:1465
 msgid "name"
 msgstr "nome"
 
-#: maps/models.py:1465
+#: maps/models.py:1474
 msgid "opacity"
 msgstr "opacità"
 
-#: maps/models.py:1470
+#: maps/models.py:1479
 msgid "styles"
 msgstr "stili"
 
-#: maps/models.py:1475
+#: maps/models.py:1484
 msgid "transparent"
 msgstr "trasparente"
 
-#: maps/models.py:1480
+#: maps/models.py:1489
 msgid "fixed"
 msgstr "fissato"
 
-#: maps/models.py:1486
+#: maps/models.py:1495
 msgid "group"
 msgstr "gruppo"
 
-#: maps/models.py:1492
+#: maps/models.py:1501
 msgid "visibility"
 msgstr "visibilità"
 
-#: maps/models.py:1497
+#: maps/models.py:1506
 msgid "ows URL"
 msgstr "ows URL"
 
-#: maps/models.py:1502
+#: maps/models.py:1511
 msgid "layer params"
 msgstr "parametri del layer"
 
-#: maps/models.py:1511
+#: maps/models.py:1520
 msgid "source params"
 msgstr "parametri sorgente"
 
-#: maps/views.py:123 maps/views.py:129
+#: maps/views.py:127 maps/views.py:133
 msgid "No Permissions"
 msgstr "Nessun Permesso"
 
-#: maps/views.py:124 maps/views.py:130
+#: maps/views.py:128 maps/views.py:134
 msgid "Read Only"
 msgstr "Sola Lettura"
 
-#: maps/views.py:125 maps/views.py:131
+#: maps/views.py:129 maps/views.py:135
 msgid "Read/Write"
 msgstr "Leggere/Scrivere"
 
-#: maps/views.py:126 maps/views.py:132
+#: maps/views.py:130 maps/views.py:136
 msgid "Administrative"
 msgstr "Amministrativo"
 
-#: maps/views.py:173
+#: maps/views.py:175
 msgid "You must be logged in to save this map"
 msgstr "Devi entrare per salvare questa mappa"
 
-#: maps/views.py:212
+#: maps/views.py:213
 msgid "You are not permitted to view or copy this map."
 msgstr "Non hai i permessi per visualizzare o copiare questa mappa."
 
-#: maps/views.py:317 maps/views.py:662 maps/views.py:678 templates/401.html:10
+#: maps/views.py:334 maps/views.py:681 maps/views.py:697 templates/401.html:10
 msgid "Not Permitted"
 msgstr "Non Permesso"
 
-#: maps/views.py:452
+#: maps/views.py:469
 msgid "You are not permitted to view this map's permissions"
 msgstr "Non hai i permessi per visualizzare i privilegi su questa mappa"
 
-#: maps/views.py:560
+#: maps/views.py:579
 msgid "You are not permitted to delete this map."
 msgstr "Non hai i permessi per eliminare questa mappa."
 
-#: maps/views.py:582 maps/views.py:646
+#: maps/views.py:601 maps/views.py:665
 msgid "You are not allowed to view this map."
 msgstr "Non hai i permessi per visualizzare questa mappa."
 
-#: maps/views.py:605
+#: maps/views.py:624
 msgid "You are not allowed to modify this map's metadata."
 msgstr "Non hai i permessi per modificare i metadati di questa mappa."
 
-#: maps/views.py:697
+#: maps/views.py:716
 msgid "You are not permitted to modify this layer's metadata"
 msgstr "Non hai i permessi per modificare i metadati di questo layer"
 
-#: maps/views.py:759
+#: maps/views.py:778
 msgid "You are not permitted to delete this layer"
 msgstr "Non hai i permessi per eliminare questo layer"
 
-#: maps/views.py:779 maps/views.py:890
+#: maps/views.py:798 maps/views.py:907
 msgid "You are not permitted to modify this layer"
 msgstr "Non hai i permessi per modificare questo layer"
 
-#: maps/views.py:823
+#: maps/views.py:842
 msgid "You are not permitted to view this layer"
 msgstr "Non hai i permessi per visualizzare questo layer"
 
-#: maps/views.py:841
+#: maps/views.py:860
 msgid ""
 "There was an error while attempting to upload your data. Please try again, "
 "or contact and administrator if the problem continues."
@@ -1315,23 +1316,23 @@ msgstr ""
 "E' occorso un errore durante l'invio dei tuoi dati. Riprova o contatta un "
 "amministratore se il problema persiste."
 
-#: maps/views.py:940
+#: maps/views.py:953
 msgid "You are not permitted to view this layer's permissions"
 msgstr "Non hai i permessi per visualizzare i privilegi di questo layer"
 
-#: maps/views.py:950
+#: maps/views.py:963
 msgid "???"
 msgstr "???"
 
-#: maps/views.py:992
+#: maps/views.py:1005
 msgid "Invalid permission level."
 msgstr "Livello di permessi non valido."
 
-#: maps/views.py:1014 templates/maps/layer_permissions.html:15
+#: maps/views.py:1027 templates/maps/layer_permissions.html:15
 msgid "User"
 msgstr "Utente"
 
-#: maps/views.py:1072
+#: maps/views.py:1085
 msgid "Bad HTTP Authorization Credentials."
 msgstr "Credenziali di autorizzazione HTTP errate."
 
@@ -1470,28 +1471,28 @@ msgstr ""
 msgid "Cached tiles via WMTS:"
 msgstr ""
 
-#: templates/fullscreen.html:20 templates/page_layout.html:21
+#: templates/fullscreen.html:22 templates/page_layout.html:21
 msgid "Change password"
 msgstr "Cambia password"
 
-#: templates/fullscreen.html:20 templates/page_layout.html:21
+#: templates/fullscreen.html:22 templates/page_layout.html:21
 msgid "Log out"
 msgstr "Esci"
 
-#: templates/fullscreen.html:22 templates/page_layout.html:23
+#: templates/fullscreen.html:24 templates/page_layout.html:23
 msgid "Sign in"
 msgstr "Entra"
 
-#: templates/fullscreen.html:23
+#: templates/fullscreen.html:25
 msgid "or"
 msgstr "oppure"
 
-#: templates/fullscreen.html:23 templates/login.html:14
+#: templates/fullscreen.html:25 templates/login.html:14
 #: templates/page_layout.html:24
 msgid "Register"
 msgstr "Registrati"
 
-#: templates/fullscreen.html:24 templates/page_layout.html:25
+#: templates/fullscreen.html:26 templates/page_layout.html:25
 msgid "for extra features"
 msgstr "per l'utilizzo completo"
 
@@ -1893,6 +1894,11 @@ msgstr "Per area"
 #: templates/search_base.html:70
 msgid "Limit the search to data that includes features in the displayed area."
 msgstr "Limita la ricerca ai dati che sono inclusi nell'area visualizzata."
+
+#: templates/search_base.html:77
+#, fuzzy
+msgid "Selected Data"
+msgstr "Cerca Dati"
 
 #: templates/search_base.html:78
 msgid "Use the checkboxes in the search results to add data to your selection."
