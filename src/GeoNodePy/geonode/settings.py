@@ -21,7 +21,7 @@ MANAGERS = ADMINS
 # Django 1.3 version, backwards compatible with 1.2
 DATABASES = {
      'default':{
-         'ENGINE': 'django.contrib.db.backends.sqlite3',
+         'ENGINE': 'django.db.backends.sqlite3',
          'NAME': os.path.join(PROJECT_ROOT,"..","..","..","development.db"),
      }
 }
