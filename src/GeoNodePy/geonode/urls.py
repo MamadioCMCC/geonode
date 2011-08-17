@@ -20,7 +20,7 @@ sitemaps = {
 urlpatterns = patterns('',
     # Example:
     # (r'^geonode/', include('geonode.foo.urls')),
-    (r'^(?:index/?)?$', 'geonode.views.index'),
+    url(r'^(?:index/?)?$', 'geonode.views.index', name='index'),
     (r'^(?P<page>help)/?$', 'geonode.views.static'),
     (r'^developer/?$', 'geonode.views.developer'),
     url(r'^lang\.js$', 'django.views.generic.simple.direct_to_template',
