@@ -649,7 +649,7 @@ def upload(incoming, user=None, overwrite=True, keywords = []):
         return results
 
 
-def _create_db_featurestore(name, data, overwrite = False, charset = None):
+def _create_db_featurestore(name, data, overwrite = False, charset = None, workspace=None):
     """Create a database store then use it to import a shapefile.
 
     If the import into the database fails then delete the store
