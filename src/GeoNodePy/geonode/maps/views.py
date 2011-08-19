@@ -1140,7 +1140,9 @@ def _split_query(query):
 
 
 def browse_data(request):
-    return render_to_response('data.html', RequestContext(request, {}))
+    return render_to_response('data.html', RequestContext(request, {
+        'object_list': Layer.objects.all(),
+    }))
 
 @csrf_exempt    
 def search_page(request):
