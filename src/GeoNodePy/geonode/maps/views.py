@@ -1,7 +1,6 @@
 from geonode.core.models import AUTHENTICATED_USERS, ANONYMOUS_USERS
-from geonode.maps.models import Map, Layer, MapLayer, Contact, ContactRole,Role, get_csw
+from geonode.maps.models import Map, Layer, MapLayer, Contact, ContactRole,Role
 from geonode.maps.gs_helpers import fixup_style, cascading_delete, delete_from_postgis
-from geonode import geonetwork
 import geoserver
 from geoserver.resource import FeatureType, Coverage
 import base64
@@ -139,7 +138,9 @@ LAYER_LEV_NAMES = {
 @csrf_exempt
 def maps(request, mapid=None):
     if request.method == 'GET':
-        return render_to_response('maps.html', RequestContext(request))
+        return render_to_response('maps.html', RequestContext(request, {
+              'object_list': Map.objects.all(),
+         }))
     elif request.method == 'POST':
         if not request.user.is_authenticated():
             return HttpResponse(
@@ -688,7 +689,8 @@ def embed(request, mapid=None):
 
 def data(request):
     return render_to_response('data.html', RequestContext(request, {
-        'GEOSERVER_BASE_URL':settings.GEOSERVER_BASE_URL
+        'GEOSERVER_BASE_URL':settings.GEOSERVER_BASE_URL,
+        'object_list': Layer.objects.all(),
     }))
 
 def view_js(request, mapid):
@@ -841,8 +843,6 @@ def layerController(request, layername):
                 RequestContext(request, {'error_message': 
                     _("You are not permitted to view this layer")})), status=401)
         
-        metadata = layer.metadata_csw()
-
         maplayer = MapLayer(name = layer.typename, ows_url = settings.GEOSERVER_BASE_URL + "wms")
 
         # center/zoom don't matter; the viewer will center on the layer bounds
@@ -850,7 +850,6 @@ def layerController(request, layername):
 
         return render_to_response('maps/layer.html', RequestContext(request, {
             "layer": layer,
-            "metadata": metadata,
             "viewer": json.dumps(map.viewer_json(* (DEFAULT_BASE_LAYERS + [maplayer]))),
             "permissions_json": _perms_info_json(layer, LAYER_LEV_NAMES),
             "GEOSERVER_BASE_URL": settings.GEOSERVER_BASE_URL
@@ -1139,278 +1138,6 @@ def _split_query(query):
     return [kw.strip() for kw in keywords if kw.strip()]
 
 
-
-DEFAULT_SEARCH_BATCH_SIZE = 10
-MAX_SEARCH_BATCH_SIZE = 25
-@csrf_exempt
-def metadata_search(request):
-    """
-    handles a basic search for data using the 
-    GeoNetwork catalog.
-
-    the search accepts: 
-    q - general query for keywords across all fields
-    start - skip to this point in the results
-    limit - max records to return
-
-    for ajax requests, the search returns a json structure 
-    like this: 
-    
-    {
-    'total': <total result count>,
-    'next': <url for next batch if exists>,
-    'prev': <url for previous batch if exists>,
-    'query_info': {
-        'start': <integer indicating where this batch starts>,
-        'limit': <integer indicating the batch size used>,
-        'q': <keywords used to query>,
-    },
-    'rows': [
-      {
-        'name': <typename>,
-        'abstract': '...',
-        'keywords': ['foo', ...],
-        'detail' = <link to geonode detail page>,
-        'attribution': {
-            'title': <language neutral attribution>,
-            'href': <url>
-        },
-        'download_links': [
-            ['pdf', 'PDF', <url>],
-            ['kml', 'KML', <url>],
-            [<format>, <name>, <url>]
-            ...
-        ],
-        'metadata_links': [
-           ['text/xml', 'TC211', <url>],
-           [<mime>, <name>, <url>],
-           ...
-        ]
-      },
-      ...
-    ]}
-    """
-    if request.method == 'GET':
-        params = request.GET
-    elif request.method == 'POST':
-        params = request.POST
-    else:
-        return HttpResponse(status=405)
-
-    # grab params directly to implement defaults as
-    # opposed to panicy django forms behavior.
-    query = params.get('q', '')
-    try:
-        start = int(params.get('start', '0'))
-    except:
-        start = 0
-    try:
-        limit = min(int(params.get('limit', DEFAULT_SEARCH_BATCH_SIZE)),
-                    MAX_SEARCH_BATCH_SIZE)
-    except: 
-        limit = DEFAULT_SEARCH_BATCH_SIZE
-
-    advanced = {}
-    bbox = params.get('bbox', None)
-    if bbox:
-        try:
-            bbox = [float(x) for x in bbox.split(',')]
-            if len(bbox) == 4:
-                advanced['bbox'] =  bbox
-        except:
-            # ignore...
-            pass
-
-    result = _metadata_search(query, start, limit, **advanced)
-
-    # XXX slowdown here to dig out result permissions
-    for doc in result['rows']: 
-        try: 
-            layer = Layer.objects.get(uuid=doc['uuid'])
-            doc['_local'] = True
-            doc['_permissions'] = {
-                'view': request.user.has_perm('maps.view_layer', obj=layer),
-                'change': request.user.has_perm('maps.change_layer', obj=layer),
-                'delete': request.user.has_perm('maps.delete_layer', obj=layer),
-                'change_permissions': request.user.has_perm('maps.change_layer_permissions', obj=layer),
-            }
-        except Layer.DoesNotExist:
-            doc['_local'] = False
-            pass
-
-    result['success'] = True
-    return HttpResponse(json.dumps(result), mimetype="application/json")
-
-def _metadata_search(query, start, limit, **kw):
-    
-    csw = get_csw()
-
-    keywords = _split_query(query)
-    
-    csw.getrecords(keywords=keywords, startposition=start+1, maxrecords=limit, bbox=kw.get('bbox', None))
-    
-    
-    # build results 
-    # XXX this goes directly to the result xml doc to obtain 
-    # correct ordering and a fuller view of the result record
-    # than owslib currently parses.  This could be improved by
-    # improving owslib.
-    results = [_build_search_result(doc) for doc in 
-               csw._exml.findall('//'+nspath('Record', namespaces['csw']))]
-
-    result = {'rows': results, 
-              'total': csw.results['matches']}
-
-    result['query_info'] = {
-        'start': start,
-        'limit': limit,
-        'q': query
-    }
-    if start > 0: 
-        prev = max(start - limit, 0)
-        params = urlencode({'q': query, 'start': prev, 'limit': limit})
-        result['prev'] = reverse('geonode.maps.views.metadata_search') + '?' + params
-
-    next = csw.results.get('nextrecord', 0) 
-    if next > 0:
-        params = urlencode({'q': query, 'start': next - 1, 'limit': limit})
-        result['next'] = reverse('geonode.maps.views.metadata_search') + '?' + params
-    
-    return result
-
-def search_result_detail(request):
-    uuid = request.GET.get("uuid")
-    csw = get_csw()
-    csw.getrecordbyid([uuid], outputschema=namespaces['gmd'])
-    records = csw.records.values()
-
-    context = RequestContext(request)
-
-    if len(records) != 0:
-        context['rec'] = csw.records.values()[0]
-        raw_xml = csw._exml.find(nspath('MD_Metadata', namespaces['gmd']))
-        context['extra_links'] = _extract_links(context['rec'], raw_xml)
-
-    try:
-        layer = get_object_or_404(Layer, uuid=uuid)
-        layer_is_remote = False
-    except Layer.DoesNotExist:
-        layer = None
-        layer_is_remote = True
-
-    context['layer'] = layer
-    context['layer_is_remote'] = layer_is_remote
-
-    return render_to_response('maps/search_result_snippet.html', context)
-
-def _extract_links(rec, xml):
-    download_links = []
-    dl_type_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("protocol", namespaces["gmd"]),
-        nspath("CharacterString", namespaces["gco"])
-        ])
-
-    dl_name_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("name", namespaces["gmd"]),
-        nspath("CharacterString", namespaces["gco"])
-        ])
-
-    dl_description_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("description", namespaces["gmd"]),
-        nspath("CharacterString", namespaces["gco"])
-        ])
-
-    dl_link_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("linkage", namespaces["gmd"]),
-        nspath("URL", namespaces["gmd"])
-        ])
-
-    format_re = re.compile(".*\((.*)(\s*Format*\s*)\).*?")
-
-    for link in xml.findall("*//" + nspath("onLine", namespaces['gmd'])):
-        if link.find(dl_type_path).text == "WWW:DOWNLOAD-1.0-http--download":
-            extension = link.find(dl_name_path).text.split('.')[-1]
-            format = format_re.match(link.find(dl_description_path).text).groups()[0]
-            url = link.find(dl_link_path).text
-            download_links.append((extension, format, url))
-    return dict(
-            download=download_links
-        )
-
-
-def _build_search_result(doc):
-    """
-    accepts a node representing a csw result 
-    record and builds a POD structure representing 
-    the search result.
-    """
-    if doc is None:
-        return None
-    # Let owslib do some parsing for us...
-    rec = CswRecord(doc)
-    result = {}
-    result['title'] = rec.title
-    result['uuid'] = rec.identifier
-    result['abstract'] = rec.abstract
-    result['keywords'] = [x for x in rec.subjects if x]
-    result['detail'] = rec.uri or ''
-
-    # XXX needs indexing ? how
-    result['attribution'] = {'title': '', 'href': ''}
-
-    # XXX !_! pull out geonode 'typename' if there is one
-    # index this directly... 
-    if rec.uri:
-        try:
-            result['name'] = urlparse(rec.uri).path.split('/')[-1]
-        except: 
-            pass
-    # fallback: use geonetwork uuid
-    if not result.get('name', ''):
-        result['name'] = rec.identifier
-
-    # Take BBOX from GeoNetwork Result...
-    # XXX this assumes all our bboxes are in this 
-    # improperly specified SRS.
-    if rec.bbox is not None and rec.bbox.crs == 'urn:ogc:def:crs:::WGS 1984':
-        # slight workaround for ticket 530
-        result['bbox'] = {
-            'minx': min(rec.bbox.minx, rec.bbox.maxx),
-            'maxx': max(rec.bbox.minx, rec.bbox.maxx),
-            'miny': min(rec.bbox.miny, rec.bbox.maxy),
-            'maxy': max(rec.bbox.miny, rec.bbox.maxy)
-        }
-    
-    # XXX these could be exposed in owslib record...
-    # locate all download links
-    format_re = re.compile(".*\((.*)(\s*Format*\s*)\).*?")
-    result['download_links'] = []
-    for link_el in doc.findall(nspath('URI', namespaces['dc'])):
-        if link_el.get('protocol', '') == 'WWW:DOWNLOAD-1.0-http--download':
-            try:
-                extension = link_el.get('name', '').split('.')[-1]
-                format = format_re.match(link_el.get('description')).groups()[0]
-                href = link_el.text
-                result['download_links'].append((extension, format, href))
-            except: 
-                pass
-
-    # construct the link to the geonetwork metadata record (not self-indexed)
-    md_link = settings.GEONETWORK_BASE_URL + "srv/en/csw?" + urlencode({
-            "request": "GetRecordById",
-            "service": "CSW",
-            "version": "2.0.2",
-            "OutputSchema": "http://www.isotc211.org/2005/gmd",
-            "ElementSetName": "full",
-            "id": rec.identifier
-        })
-    result['metadata_links'] = [("text/xml", "TC211", md_link)]
-
-    return result
 
 def browse_data(request):
     return render_to_response('data.html', RequestContext(request, {}))

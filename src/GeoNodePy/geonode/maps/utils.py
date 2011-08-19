@@ -24,7 +24,7 @@ from django.conf import settings
 
 # Geonode functionality
 from geonode.maps.models import Map, Layer, MapLayer
-from geonode.maps.models import Contact, ContactRole, Role, get_csw
+from geonode.maps.models import Contact, ContactRole, Role
 from geonode.maps.gs_helpers import fixup_style, cascading_delete, get_sld_for
 
 # Geoserver functionality
@@ -193,20 +193,6 @@ def cleanup(name, uuid):
            cat.delete(gs_store)
        except:
            logger.exception("Couldn't delete GeoServer store during cleanup()")
-
-   gn = Layer.objects.geonetwork
-   csw_record = gn.get_by_uuid(uuid)
-   if csw_record is not None:
-       logger.warning('Deleting dangling GeoNetwork record for [%s] '
-                      '(no Django record to match)', name)
-       try:
-           # this is a bit hacky, delete_layer expects an instance of the layer
-           # model but it just passes it to a Django template so a dict works
-           # too.
-           gn.delete_layer({ "uuid": uuid })
-       except:
-           logger.exception('Couldn\'t delete GeoNetwork record '
-                            'during cleanup()')
 
    logger.warning('Finished cleanup after failed GeoNetwork/Django '
                   'import for layer: %s', name)
@@ -464,7 +450,6 @@ def save(layer, base_file, user, overwrite = True, title=None,
     saved_layer.poc = poc_contact
     saved_layer.metadata_author = author_contact
 
-    saved_layer.save_to_geonetwork()
 
     # Step 11. Set default permissions on the newly created layer
     # FIXME: Do this as part of the post_save hook
@@ -545,7 +530,7 @@ def get_valid_user(user=None):
 
 
 def check_geonode_is_up():
-    """Verifies all of geonetwork, geoserver and the django server are running,
+    """Verifies all of geoserver and the django server are running,
        this is needed to be able to upload.
     """
     try:
@@ -556,15 +541,6 @@ def check_geonode_is_up():
 
         msg = ('Cannot connect to the GeoServer at %s\nPlease make sure you '
                'have started GeoNode.' % settings.GEOSERVER_BASE_URL)
-        raise GeoNodeException(msg)
-
-    try:
-        Layer.objects.gn_catalog.login()
-    except:
-        from django.conf import settings
-        msg = ('Cannot connect to the GeoNetwork at %s\n'
-               'Please make sure you have started '
-               'GeoNetwork.' % settings.GEONETWORK_BASE_URL)
         raise GeoNodeException(msg)
 
 def file_upload(filename, user=None, title=None, overwrite=True, workspace=None, keywords=[]):
