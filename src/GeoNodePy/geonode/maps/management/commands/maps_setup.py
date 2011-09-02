@@ -13,7 +13,7 @@ def unzip_file(src, dest):
     zip = zipfile.ZipFile(src)
     if not path(dest).exists():
         path(dest).makedirs()
-        
+
     for name in zip.namelist():
         if name.endswith("/"):
             (path(dest) / name).makedirs()
@@ -31,7 +31,7 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         """
-        Downloads geoserver, geonetwork and geonode-client.zip into a folder called 'downloads'
+        Downloads geoserver and geonode-client.zip into a folder called 'downloads'
         in the project root.
 
         It also unzips the geonode-client.zip in the right directory.
@@ -42,15 +42,15 @@ class Command(NoArgsCommand):
         DOWNLOAD_DIR = os.path.join(PROJECT_HOME, 'downloads')
         MAP_STATIC_DIR = os.path.join(settings.PROJECT_ROOT, 'maps', 'static', 'geonode')
 
-        files = ['geoserver-geonode-dev.war', 'geonetwork.war', 'geonode-client.zip', 'tomcat.zip']
+        files = ['geoserver-geonode-dev.war', 'geonode-client.zip', 'tomcat.zip']
         for file in files:
             url = '%s/%s' % (settings.GEONODE_DEPENDENCIES_URL, file)
             grab(url, os.path.join(DOWNLOAD_DIR, file))
-        
+
         unzip_file(os.path.join(DOWNLOAD_DIR, 'geonode-client.zip'), MAP_STATIC_DIR)
         unzip_file(os.path.join(DOWNLOAD_DIR, 'tomcat.zip'), TOMCAT_HOME)
 
-        for file in ['geoserver-geonode-dev.war', 'geonetwork.war']:
+        for file in ['geoserver-geonode-dev.war']:
             src = os.path.join(DOWNLOAD_DIR, file)
             dst = os.path.join(TOMCAT_HOME, 'webapps', file)
             shutil.copyfile(src, dst)

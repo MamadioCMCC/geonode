@@ -142,7 +142,7 @@ ROOT_URLCONF = 'geonode.urls'
 # Note that Django automatically includes the "templates" dir in all the
 # INSTALLED_APPS, se there is no need to add maps/templates or admin/templates
 TEMPLATE_DIRS = (
-    os.path.join(PROJECT_ROOT,"templates"),    
+    os.path.join(PROJECT_ROOT,"templates"),
 )
 
 # The FULLY QUALIFIED url to the GeoServer instance for this GeoNode.
@@ -150,12 +150,6 @@ GEOSERVER_BASE_URL = "http://localhost:8001/geoserver/"
 
 # The username and password for a user that can add and edit layer details on GeoServer
 GEOSERVER_CREDENTIALS = "geoserver_admin", SECRET_KEY
-
-# The FULLY QUALIFIED url to the GeoNetwork instance for this GeoNode
-GEONETWORK_BASE_URL = "http://localhost:8001/geonetwork/"
-
-# The username and password for a user with write access to GeoNetwork
-GEONETWORK_CREDENTIALS = "admin", "admin"
 
 AUTHENTICATION_BACKENDS = ('geonode.core.auth.GranularBackend',)
 

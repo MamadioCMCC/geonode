@@ -12,15 +12,13 @@ class Command(NoArgsCommand):
         from django.conf import settings
         PROJECT_HOME = os.path.join(settings.PROJECT_ROOT, '..', '..')
         geoserver = os.path.join(PROJECT_HOME, 'tomcat', 'webapps', 'geoserver-geonode-dev')
-        geonetwork = os.path.join(PROJECT_HOME, 'tomcat', 'webapps', 'geonetwork')
+
         if settings.DEBUG:
             print "Stopping GeoNode"
             kill_geonode()
-            print "Removing GeoServer and Geonetwork dirs"
+            print "Removing GeoServer dir"
             if os.path.exists(geoserver):
                 shutil.rmtree(geoserver)
-            if os.path.exists(geonetwork):
-                shutil.rmtree(geonetwork)
             print "Removing GeoNode database"
             management.call_command('syncdb', verbosity=0, interactive=False)
             management.call_command('flush', verbosity=0, interactive=False)
