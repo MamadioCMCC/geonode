@@ -1,5 +1,5 @@
-Getting Started with GeoNode Development
-========================================
+Setting up GeoNode for development
+==================================
 
 .. toctree::
    :maxdepth: 1

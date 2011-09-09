@@ -9,18 +9,20 @@ Welcome to GeoNode Developer Documentation!
 GeoNode is a tool to help people collaborate in using geospatial information on
 the web.
 
+If you are just looking for instructions to install it, please proceed directly to :doc:`deployment` and follow the instructions for your operating system. 
+
 Contents:
 
 .. toctree::
    :maxdepth: 1
 
    about-geonode
+   deployment
    getting-started
    django-apps
    geonode-javascript
    geoserver-extensions
    geonetwork-extensions
-   deployment
    logging
 
 Indices and tables

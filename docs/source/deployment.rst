@@ -1,5 +1,5 @@
-Deploying your GeoNode Site
-***************************
+Installing GeoNode
+******************
 
 This page describes a generic installation process for GeoNode systems.
 For some platforms the GeoNode project also provides customized installers which are easier to use and more reliable.
