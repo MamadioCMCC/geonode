@@ -1156,7 +1156,7 @@ class Map(models.Model, PermissionLevelMixin):
     A display name suitable for search results and page headers
     """
 
-    abstract = models.CharField(_('Abstract'),max_length=200)
+    abstract = models.TextField(_('Abstract'))
     """
     A longer description of the themes in the map.
     """
@@ -1278,6 +1278,13 @@ class Map(models.Model, PermissionLevelMixin):
             return results
 
         configs = [l.source_config() for l in layers]
+
+        """
+        Adds WMS servers to fullscreen map server list.
+        """
+        if hasattr(settings, 'DEFAULT_MAP_WMS'):
+            for wms in settings.DEFAULT_MAP_WMS:
+                configs.append(settings.DEFAULT_MAP_WMS[wms])
 
         i = 0
         for source in uniqify(configs):

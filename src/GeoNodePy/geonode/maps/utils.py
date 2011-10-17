@@ -245,9 +245,26 @@ def save(layer, base_file, user, overwrite = True, title=None,
     # Get a short handle to the gsconfig geoserver catalog
     cat = Layer.objects.gs_catalog
 
+    #FIXME: This is the ugliest construct ever to create a workspace
+    # ------------
+    ws = None
+
+    # Even if no workspace was assigned, use the existing one
+    if overwrite == True and isinstance(layer, Layer):
+        workspace = layer.workspace
+
+    if workspace is not None:
+        ws = cat.get_workspace(workspace)
+        if ws is None:
+            ws = cat.create_workspace(workspace, 'http://'+workspace)
+            cat._cache.clear()
+            ws = cat.get_workspace(workspace)
+    # ------------
+
+
     # Check if the store exists in geoserver
     try:
-        store = cat.get_store(name)
+        store = cat.get_store(name, workspace=ws)
     except geoserver.catalog.FailedRequestError, e:
         # There is no store, ergo the road is clear
         pass
@@ -322,18 +339,6 @@ def save(layer, base_file, user, overwrite = True, title=None,
         main_file = files['base']
         data = main_file
     # ------------------
-
-
-    #FIXME: This is the ugliest construct ever to create a workspace
-    # ------------
-    ws = None
-    if workspace is not None:
-        ws = cat.get_workspace(workspace)
-        if ws is None:
-            ws = cat.create_workspace(workspace, 'http://'+workspace)
-            cat._cache.clear()
-            ws = cat.get_workspace(workspace)
-    # ------------
 
     try:
         store, gs_resource = create_store_and_resource(name, data, overwrite=overwrite)
@@ -645,7 +650,7 @@ def upload(incoming, user=None, overwrite=True, keywords = []):
         return results
 
 
-def _create_db_featurestore(name, data, overwrite = False, charset = None):
+def _create_db_featurestore(name, data, overwrite = False, charset = None, workspace=None):
     """Create a database store then use it to import a shapefile.
 
     If the import into the database fails then delete the store

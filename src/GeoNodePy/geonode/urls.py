@@ -1,8 +1,8 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
-from staticfiles.urls import staticfiles_urlpatterns
-from geonode.sitemap import LayerSitemap, MapSitemap
 from geonode.proxy.urls import urlpatterns as proxy_urlpatterns
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from geonode.sitemap import LayerSitemap, MapSitemap
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -21,7 +21,7 @@ sitemaps = {
 urlpatterns = patterns('',
     # Example:
     # (r'^geonode/', include('geonode.foo.urls')),
-    (r'^(?:index/?)?$', 'geonode.views.index'),
+    url(r'^(?:index/?)?$', 'geonode.views.index', name='index'),
     (r'^(?P<page>help)/?$', 'geonode.views.static'),
     (r'^developer/?$', 'geonode.views.developer'),
     url(r'^lang\.js$', 'django.views.generic.simple.direct_to_template',
