@@ -40,7 +40,7 @@ LANGUAGES = (
     ('en', 'English'),
     ('es', 'Español'),
     ('it', 'Italiano'),
-    ('fr', 'François'),
+    ('fr', 'Français'),
 )
 
 SITE_ID = 1
@@ -110,7 +110,8 @@ SECRET_KEY = 'z2v6atuy4bo9vqr1'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
+    #'django.template.loaders.eggs.load_template_source',
+    'django.template.loaders.app_directories.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -170,35 +171,28 @@ DEFAULT_MAP_CENTER = (-84.7, 12.8)
 # maximum zoom is between 12 and 15 (for Google Maps, coverage varies by area)
 DEFAULT_MAP_ZOOM = 7
 
-MAP_BASELAYERSOURCES = {
-    "any": {
-        "ptype":"gx_olsource"
-    },
-    "capra": {
-        "url":"/geoserver/wms"
-    },
-    "google":{
-        "ptype":"gx_googlesource",
-        "apiKey": GOOGLE_API_KEY
-    }
+DEFAULT_LAYER_SOURCE = {
+    "ptype":"gxp_wmscsource",
+    "url":"/geoserver/wms",
+    "restUrl": "/gs/rest"
 }
 
 MAP_BASELAYERS = [{
-    "source":"any",
+    "source": {"ptype": "gx_olsource"},
     "type":"OpenLayers.Layer",
     "args":["No background"],
     "visibility": False,
     "fixed": True,
     "group":"background"
   },{
-    "source":"any",
+    "source": { "ptype":"gx_olsource"},
     "type":"OpenLayers.Layer.OSM",
     "args":["OpenStreetMap"],
     "visibility": True,
     "fixed": True,
     "group":"background"
   },{
-    "source":"any",
+    "source": {"ptype":"gx_olsource"},
     "type":"OpenLayers.Layer.WMS",
     "group":"background",
     "visibility": False,
@@ -214,12 +208,7 @@ MAP_BASELAYERS = [{
       },
       {"buffer":0}
     ]
-  },{
-    "source":"google",
-    "group":"background",
-    "name":"SATELLITE",
-    "visibility": False,
-    "fixed": True,
+
 }]
 
 
@@ -230,6 +219,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'django_extensions',
     'registration',
     'profiles',
@@ -237,6 +227,7 @@ INSTALLED_APPS = (
     'geonode.core',
     'geonode.maps',
     'geonode.proxy',
+    'geonode'
 )
 
 def get_user_url(u):

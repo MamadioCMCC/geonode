@@ -739,7 +739,7 @@ class Layer(models.Model, PermissionLevelMixin):
                         "service": "WCS",
                         "version": "1.0.0",
                         "request": "DescribeCoverage",
-                        "coverages": self.typename
+                        "coverage": self.typename
                     })
                 response, content = client.request(description_url)
                 doc = parse(StringIO(content))
@@ -766,6 +766,7 @@ class Layer(models.Model, PermissionLevelMixin):
             except Exception, e:
                 # if something is wrong with WCS we probably don't want to link
                 # to it anyway
+                # TODO: This is a bad idea to eat errors like this.
                 pass 
 
         def wms_link(mime):
@@ -1061,7 +1062,8 @@ class Layer(models.Model, PermissionLevelMixin):
             gn.logout()
         if self.poc and self.poc.user:
             self.publishing.attribution = str(self.poc.user)
-            self.publishing.attribution_link = self.poc.user.get_absolute_url()
+            profile = Contact.objects.get(user=self.poc.user)
+            self.publishing.attribution_link = settings.SITEURL[:-1] + profile.get_absolute_url()
             Layer.objects.gs_catalog.save(self.publishing)
 
     def  _populate_from_gs(self):
@@ -1111,7 +1113,7 @@ class Layer(models.Model, PermissionLevelMixin):
         self.geographic_bounding_box = bbox_to_wkt(box[0], box[1], box[2], box[3], srid=srid )
 
     def get_absolute_url(self):
-        return "%sdata/%s" % (settings.SITEURL,self.typename)
+        return "/data/%s" % (self.typename)
 
     def __str__(self):
         return "%s Layer" % self.typename
@@ -1260,7 +1262,7 @@ class Map(models.Model, PermissionLevelMixin):
         """
         layers = list(self.layer_set.all()) + list(added_layers) #implicitly sorted by stack_order
         server_lookup = {}
-        sources = dict()
+        sources = {'local': settings.DEFAULT_LAYER_SOURCE }
 
         def uniqify(seq):
             """
@@ -1276,7 +1278,6 @@ class Map(models.Model, PermissionLevelMixin):
             return results
 
         configs = [l.source_config() for l in layers]
-        configs.append({"ptype":"gxp_wmscsource", "url": "/geoserver/wms"})
 
         i = 0
         for source in uniqify(configs):
@@ -1536,7 +1537,7 @@ class MapLayer(models.Model):
         try:
             cfg = simplejson.loads(self.source_params)
         except:
-            cfg = dict(ptype = "gxp_wmscsource")
+            cfg = dict(ptype="gxp_wmscsource", restUrl="/gs/rest")
 
         if self.ows_url: cfg["url"] = self.ows_url
 

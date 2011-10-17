@@ -1,19 +1,24 @@
 Deploying your GeoNode Site
 ***************************
 
-This page provides a high-level description of the software required to set up
-a publicly accessible GeoNode web site.  Since deployment details will vary
-between platforms this information is deliberately vague.  Some
-platform-specific instructions are also available.  The platform-specific
-guides are contributed by the community, so if you deploy on a new platform
-please consider writing or updating a guide.
+This page describes a generic installation process for GeoNode systems.
+For some platforms the GeoNode project also provides customized installers which are easier to use and more reliable.
+Please check the following list before following these general instructions.
 
 .. toctree::
+   :maxdepth: 1
 
    /deploy/centos
    /deploy/ubuntu
+   /deploy/tarball
    /deploy/production
 
+Overview
+========
+
+A GeoNode installation has two webservers running alongside, one for the Java applications and another one for the Python/Django applications and static files.
+
+Included with each release there is an ``install.sh`` script and a ``support`` directory that contains sample config files that will be mentioned later in this guide.
 
 Recommended Minimum System Requirements
 =======================================
@@ -200,3 +205,14 @@ Some other things that require tweaking:
 
 * Configuring GeoNetwork/Django to use a "real" Postgres database instead of
   embedded ones.
+
+* In order to generate the sitemap properly, the sites domain name must be set
+  within the sites framework. This requires that an admin user login to the
+  admin interface and navigate to the sites module and change example.com to the
+  actual domain name (and port if applicable). The admin interface can be accessed
+  at http://<host>:<port>/admin/sites/site/
+
+* It is possible to 'inform' google of changes to your sitemap. This is accomplished
+  using the ping_google management command. More information can be found here
+  http://docs.djangoproject.com/en/dev/ref/contrib/sitemaps/#django.contrib.sitemaps.ping_google
+  It is recommended to put this call into a cron (scheduled) job to update google periodically.

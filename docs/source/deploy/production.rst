@@ -1,26 +1,95 @@
+==================================
 Configuring GeoNode for Production
 ==================================
 
-This page documents recommendations for improving performance of GeoNode in production environments.
+This page documents recommendations for configuring GeoNode in production environments.
 
-Limiting GeoNetwork Sessions
+Required steps
+==============
+
+Create a super user
+---------------------
+
+To create a superuser you can run::
+
+    geonode createsuperuser
+
+or, if you installed by source::
+
+    source path/to/geonode/virtualenv/bin/activate
+    django-admin.py createsuperuser --settings=geonode.settings
+
+
+Configure the correct DNS or IP address
+-----------------------------------------
+
+By default GeoNode runs in ``http://localhost/``, but when running in production in needs to know the public IP address or the DNS entry.
+To configure it, edit the ``SITEURL`` setting in ``local_settings.py`` (which can be found either in your GeoNodePy/src/geonode folder or in ``/etc/geonode/local_settings.py`` if you used an automated installer.
+
+
+Set the correct GeoServer Proxy URL value
+---------------------------------------------
+
+Navigate to ``http://localhost/geoserver``, log in and click on ``Settings/Global`` and look for the ``Proxy Base URL`` text field, put the complete address there::
+
+    http://%SITEURL%/geoserver/
+
+Configure the Printing Module
+-----------------------------
+
+This lives in the GeoServer Data dir ``/var/lib/geoserver/geonode-data/printing/config.yaml``, add your server's IP address or domain name to the list of exceptions::
+
+    hosts:
+      - !dnsMatch
+        host: YOUR_IP_ADDRESS
+        port: 80
+
+
+Recommended Steps (optional)
 ============================
 
-In GeoNode 1.0, there is an issue causing each CSW request that the GeoNode Django application makes to store additional session information in GeoNetwork.
-Since GeoNetwork stores these sessions for 3 hours by default, and GeoNode may make multiple CSW requests to serve a single page view, the accumulation of these sessions can add significant burden to a GeoNode server.
+Adding layers from Google, Bing and other providers
+---------------------------------------------------
 
-This issue will be automatically resolved in the next release of GeoNode, but administrators of GeoNode 1.0 can install a patch to avoid this session proliferation problem. 
-To do so, simply download the replacement geonetwork.py file and replace the existing one::
+Bing
+++++
 
-    $ cd .../wsgi/geonode/ # Use the appropriate path to your geonode deployment.
-    $ wget https://github.com/dwins/geonode/raw/9d652605cf79fe134011344148a3784c6d31a10f/src/GeoNodePy/geonode/geonetwork.py
-    $ mv src/GeoNodePy/geonode/geonetwork.py src/GeoNodePy/geonode/geonetwork.py.bk
-    $ cp geonetwork.py src/GeoNodePy/geonode/geonetwork.py
+Get an API key from Microsoft at http://bingmapsportal.com/ and place it in ``local_settings.py``. Add the following to ``MAP_BASELAYERS``::
 
-The Django site must be restarted in order for this change to be applied.
+    },{
+    "source": {
+               "ptype":"gxp_bingsource", 	
+               "apiKey": "YOUR_BING_API"
+              },
+    "group":"background",
+    "name":"Aerial",
+    "visibility": False,
+    "fixed": True,
+
+
+
+Google
+++++++
+
+Get an API key from Google at http://code.google.com/apis/maps/signup.html and place it in ``local_settings.py``, for example::
+
+    GOOGLE_API_KEY="zxcxzcXAWdqwdQWWQEDzxcxz"
+
+Copy the ``MAP_BASELAYERS`` dictionary from ``settings.py`` into ``local_settings.py`` and add the following snippet::
+
+    },{
+    "source": {
+         "ptype":"gxp_googlesource", 	
+         "apiKey": GOOGLE_API_KEY	
+        },
+    "group":"background",
+    "name":"SATELLITE",
+    "visibility": False,
+    "fixed": True,
+
 
 Robot Exclusion File
-====================
+--------------------
 
 GeoNode has several views that require considerable resources to properly respond - for example, the download links on layer detail pages require GeoServer to dynamically generate output in PDF, PNG, etc. format.
 Crawlers for web search engines such as Google may cause problems by quickly following many such links in succession.
@@ -34,7 +103,7 @@ In order to request that "robots" do not make requests directly to GeoServer, yo
 This will only affect automated web agents; web browsers in particular are unaffected.
 
 Memory Management
-=================
+-----------------
 
 At the time of the GeoNode 1.0 release, the GeoNode manual recommended at least 4GB RAM for servers running GeoNode.
 While 4GB *physical* RAM is sufficient, it is recommended that machines be configured with at least 6GB total *virtual* memory.
@@ -52,7 +121,7 @@ The "total" column lists the available physical memory and swap space in megabyt
 In this example, there is no Swap space so that field is 0 and the available RAM on the system is 6096MB (6 GB). 
 
 Configuring the Servlet Container
-=================================
+---------------------------------
 
 GeoServer is the most resource intensive component of GeoNode.
 There are some general notes on setting up GeoServer for production environments in the `GeoServer manual <http://docs.geoserver.org/stable/en/user/production/index.html>`_ .
@@ -94,18 +163,18 @@ Add a ``maxThreads`` attribute to limit the number of threads (concurrent reques
 .. note:: This configuration is possible in Jetty as well but not yet documented in this manual.
 
 Native JAI and JAI ImageIO
-==========================
+--------------------------
 
 Using the native-code implementation of JAI and JAI ImageIO speeds up GeoServer, thereby requiring less concurrency at the same level of throughput.
 The GeoServer manual contains `platform-specific instructions <http://docs.geoserver.org/stable/en/user/production/java.html#install-native-jai-and-jai-image-i-o-extensions>`_ for configuring JAI and JAI ImageIO.
 
 GeoServer Configuration
-=======================
++++++++++++++++++++++++
 
 There are a few controls to be set in the GeoServer configuration itself as well.
 
 On the JAI Settings page
-------------------------
+++++++++++++++++++++++++
 
 .. figure:: GeoServer-JAI-Settings.png
 
@@ -116,7 +185,7 @@ On the JAI Settings page
       * Disable Tile Recycling as this optimization is less relevant on recent JVM implementations and has some overhead itself.
 
 On the WMS Service page
------------------------
++++++++++++++++++++++++
 
 .. figure:: GeoServer-Web-Map-Service.png
 
@@ -125,3 +194,21 @@ On the WMS Service page
      * Don't set the "Resource Consumption Limits."
        This sounds a bit counterintuitive, but these limits are implemented in an inefficient way such that unless resource-intensive requests are common on your server it is more efficient to avoid the limits.
        A better implementation of this feature is available for GeoServer 2.1 and will be incorporated in GeoNode 1.1.
+
+Sitemaps Configuration
+----------------------
+
+GeoNode can automatically generate a sitemap suitable for submission to search
+engines which can help them to index your GeoNode site more efficiently and 
+effectively.
+
+In order to generate the sitemap properly, the sites domain name must be set
+within the sites framework. This requires that an admin user login to the
+admin interface and navigate to the sites module and change example.com to the
+actual domain name (and port if applicable). The admin interface can be accessed
+at http://<host>:<port>/admin/sites/site/
+
+It is possible to 'inform' google of changes to your sitemap. This is accomplished
+using the ping_google management command. More information can be found here
+http://docs.djangoproject.com/en/dev/ref/contrib/sitemaps/#django.contrib.sitemaps.ping_google
+It is recommended to put this call into a cron (scheduled) job to update google periodically.
