@@ -5,18 +5,13 @@ About GeoNode
 GeoNode is an open source platform that facilitates the creation, sharing, and collaborative use of geospatial data.
 The project aims to surpass existing spatial data infrastructure solutions by integrating robust social and cartographic tools.
 
-At its core, GeoNode has a stack based on GeoServer, Django, and GeoExt that provides a platform for sophisticated web browser spatial visualization and analysis.
-Atop this stack, the project has built a map composer and viewer, tools for analysis, and reporting tools.
+These services are consolidated for the user under consistent interface providing a map viewer, map composer, along with tools for analysis and reporting.
 
 
 Online demo
 ===========
 
 A live demo of the latest stable build is available at `demo.geonode.org`_. 
-
-Anyone may sign up for a user account, upload and style data, create and share maps, and change permissions.
-Since it is a demo site, we don’t make any guarantee that your data and maps will always be there.
-But it should hopefully allow you to easily preview the capabilities of GeoNode.
 
 .. _demo.geonode.org: http://demo.geonode.org
 
