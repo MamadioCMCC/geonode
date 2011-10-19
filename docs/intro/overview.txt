@@ -5,7 +5,8 @@ About GeoNode
 GeoNode is an open source platform that facilitates the creation, sharing, and collaborative use of geospatial data.
 The project aims to surpass existing spatial data infrastructure solutions by integrating robust social and cartographic tools.
 
-These services are consolidated for the user under consistent interface providing a map viewer, map composer, along with tools for analysis and reporting.
+At its core GeoNode incorporates GeoServer, Django, and GeoExt.  These services are consolidated for the user under 
+a consistent interface providing a map viewer, map composer, along with tools for analysis and reporting.
 
 
 Online demo
