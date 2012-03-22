@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os.path
 from django.conf import settings
 from django.db import models
 from owslib.wms import WebMapService
@@ -8,6 +9,7 @@ from geonode.core.models import AUTHENTICATED_USERS, ANONYMOUS_USERS
 from geonode.catalogue.catalogue import Catalogue, gen_iso_xml, gen_anytext
 from django.db.models import signals
 from django.utils.html import escape
+from taggit.managers import TaggableManager
 import httplib2
 import simplejson
 import urllib
@@ -23,6 +25,10 @@ from lxml import etree
 from gs_helpers import cascading_delete
 import logging
 import sys
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+import os
+from django.core.files.storage import FileSystemStorage
 
 logger = logging.getLogger("geonode.maps.models")
 
@@ -1295,6 +1301,8 @@ class Map(models.Model, PermissionLevelMixin):
     """
     The last time the map was modified.
     """
+    
+    keywords = TaggableManager(_('keywords'), help_text=_("A space or comma-separated list of keywords"), blank=True)
 
     def __unicode__(self):
         return '%s by %s' % (self.title, (self.owner.username if self.owner else "<Anonymous>"))
@@ -1314,7 +1322,8 @@ class Map(models.Model, PermissionLevelMixin):
 
     @property
     def local_layers(self): 
-        return True
+        names = [layer.name for layer in self.layers]
+        return Layer.objects.filter(typename__in=names)
 
     def json(self, layer_filter):
         map_layers = MapLayer.objects.filter(map=self.id)
@@ -1745,6 +1754,96 @@ def post_save_layer(instance, sender, **kwargs):
     if kwargs['created']:
 #        instance._populate_from_catalogue()
         instance.save(force_update=True)
+
+
+
+class ThumbnailManager(models.Manager):
+    def __init__(self):
+        models.Manager.__init__(self)
+        self.storage = FileSystemStorage(
+            location = os.path.join(settings.PROJECT_ROOT, "static","thumbs"),
+            base_url = settings.STATIC_URL + "thumbs/"
+        )
+        if not os.path.exists(self.storage.location):
+            os.makedirs(self.storage.location)
+    def get_thumbnail(self,obj,allow_null=True):
+        thumb_type = ContentType.objects.get_for_model(obj)
+        thumbs = list(self.filter(content_type__pk=thumb_type.id,object_id=obj.id))
+        if not allow_null and not thumbs:
+            thumbs.append(Thumbnail(content_object=obj))
+        return thumbs and thumbs[0] or None
+    def get_thumbnails(self,objs):
+        """For the provided objects of the same type, get a dict
+        with object.id as key and thumbnail as value. objs without
+        thumbs will not be present in the dict.
+        """
+        if not objs: return []
+        try:
+            not_null = ( o for o in objs if o is not None ).next()
+        except StopIteration:
+            return []
+        thumb_type = ContentType.objects.get_for_model(not_null)
+        thumbs = self.filter(content_type__pk=thumb_type.id)
+        ids = [ o.id for o in objs]
+        thumbs = thumbs.filter(object_id__in=ids)
+        return dict([ (t.content_object.id,t) for t in thumbs])
+
+class Thumbnail(models.Model):
+    objects = ThumbnailManager()
+
+    thumb_spec = models.TextField()
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey()
+
+    def _path(self):
+        if isinstance(self.content_object,Map):
+            parts = "map",str(self.content_object.id)
+        else:
+            parts = "layer",self.content_object.uuid
+        return "".join(parts) + ".png"
+    def get_thumbnail_url(self):
+        return Thumbnail.objects.storage.url(self._path())
+    def get_thumbnail_path(self):
+        return Thumbnail.objects.storage.path(self._path())
+    def delete(self):
+        path = self.get_thumbnail_path()
+        if os.path.exists(path):
+            os.unlink(path)
+        super(Thumbnail,self).delete()
+    def set_spec(self,spec):
+        self.thumb_spec = spec
+        self.generate_thumbnail()
+        self.save()
+    def generate_thumbnail(self):
+        http = httplib2.Http()
+        url = "%srest/printng/render.png" % settings.GEOSERVER_BASE_URL
+        http.add_credentials(_user, _password)
+        netloc = urlparse(url).netloc
+        http.authorizations.append(
+        httplib2.BasicAuthentication(
+            (_user,_password),
+            netloc,
+            url,
+            {},
+            None,
+            None,
+            http
+        ))
+        resp, content = http.request(url,"POST",str(self.thumb_spec))
+        if resp.status < 200 or resp.status > 299:
+            logging.warning('Error generating thumbnail %s',content)
+            raise Exception('Error generating thumbnail')
+        with open(self.get_thumbnail_path(),"wb") as fp:
+            fp.write(content)
+    
+def _remove_thumb(instance, sender, **kw):
+    for t in Thumbnail.objects.filter(object_id=instance.id):
+        t.delete()
+
+signals.pre_delete.connect(_remove_thumb, sender=Layer)
+signals.pre_delete.connect(_remove_thumb, sender=Map)
+    
 
 signals.pre_delete.connect(delete_layer, sender=Layer)
 signals.post_save.connect(post_save_layer, sender=Layer)

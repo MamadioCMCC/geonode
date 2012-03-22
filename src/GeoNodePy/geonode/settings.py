@@ -237,15 +237,19 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.sitemaps',
+    
     'staticfiles',
     'django_extensions',
     'registration',
     'profiles',
     'avatar',
-    #'south',
+    'south',
+    'haystack',
+    
     'geonode.core',
     'geonode.maps',
     'geonode.proxy',
+    'geonode.search',
     'geonode'
 )
 
@@ -281,6 +285,13 @@ DB_DATASTORE_TYPE=''
 SOUTH_MIGRATION_MODULES = {
     'registration': 'geonode.migrations.registration',
     'avatar': 'geonode.migrations.avatar',
+}
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+    },
 }
 
 try:
