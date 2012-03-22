@@ -1,7 +1,6 @@
 from geonode.core.models import AUTHENTICATED_USERS, ANONYMOUS_USERS
 from geonode.maps.models import Map, Layer, MapLayer, Contact, ContactRole,Role, get_csw
 from geonode.maps.gs_helpers import fixup_style, cascading_delete, delete_from_postgis
-from geonode import geonetwork
 import geoserver
 from geoserver.resource import FeatureType, Coverage
 import base64
@@ -20,7 +19,7 @@ from django.utils.translation import ugettext as _
 import json
 import math
 import httplib2 
-from owslib.csw import CswRecord, namespaces
+from owslib.csw import namespaces
 from owslib.util import nspath
 import re
 from urllib import urlencode
@@ -32,6 +31,7 @@ from django.forms.models import inlineformset_factory
 from django.db.models import Q
 import logging
 from geonode.maps.utils import forward_mercator
+from geonode.catalogue.catalogue import gen_iso_xml, gen_anytext
 
 logger = logging.getLogger("geonode.maps.views")
 
@@ -64,10 +64,9 @@ def default_map_config():
 
     return DEFAULT_MAP_CONFIG, DEFAULT_BASE_LAYERS
 
-
-
 def bbox_to_wkt(x0, x1, y0, y1, srid="4326"):
     return 'SRID='+srid+';POLYGON(('+x0+' '+y0+','+x0+' '+y1+','+x1+' '+y1+','+x1+' '+y0+','+x0+' '+y0+'))'
+
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
@@ -90,17 +89,16 @@ class LayerForm(forms.ModelForm):
 
     class Meta:
         model = Layer
-        exclude = ('contacts','workspace', 'store', 'name', 'uuid', 'storeType', 'typename')
+        exclude = ('contacts','workspace', 'store', 'name', 'uuid', 'storeType', 'typename', 'metadata_uploaded', 'metadata_xml', 'csw_typename', 'csw_schema', 'csw_mdsource', 'csw_anytext')
 
 class RoleForm(forms.ModelForm):
     class Meta:
         model = ContactRole
-        exclude = ('contact', 'layer')
+        exclude = ('contact', 'resource')
 
 class PocForm(forms.Form):
     contact = forms.ModelChoiceField(label = "New point of contact",
                                      queryset = Contact.objects.exclude(user=None))
-
 
 class MapForm(forms.ModelForm):
     class Meta:
@@ -109,8 +107,6 @@ class MapForm(forms.ModelForm):
         widgets = {
             'abstract': forms.Textarea(attrs={'cols': 40, 'rows': 10}),
         }
-
-
 
 MAP_LEV_NAMES = {
     Map.LEVEL_NONE  : _('No Permissions'),
@@ -315,7 +311,6 @@ h.authorizations.append(
     )
 )
 
-
 @login_required
 def map_download(request, mapid):
     """ 
@@ -451,8 +446,6 @@ Contents:
         url = "%srest/process/batchDownload/status/%s" % (settings.GEOSERVER_BASE_URL, download_id)
         resp,content = h.request(url,'GET')
         return HttpResponse(content, status=resp.status)
-
-
 
 def view_map_permissions(request, mapid):
     map = get_object_or_404(Map,pk=mapid) 
@@ -677,7 +670,6 @@ def embed(request, mapid=None):
         'config': json.dumps(config)
     }))
 
-
 def data(request):
     return render_to_response('data.html', RequestContext(request, {
         'GEOSERVER_BASE_URL':settings.GEOSERVER_BASE_URL
@@ -707,11 +699,17 @@ def layer_metadata(request, layername):
             return HttpResponse(loader.render_to_string('401.html', 
                 RequestContext(request, {'error_message': 
                     _("You are not permitted to modify this layer's metadata")})), status=401)
-        
+     
+        if layer.metadata_uploaded and request.method == 'GET':  # show upload just metadata XML page
+            return render_to_response("maps/layer_metadata_uploaded.html", RequestContext(request, {
+                "layer": layer,
+                "CSW_URL": settings.CSW['url']
+        }))
+
         poc = layer.poc
         metadata_author = layer.metadata_author
-        poc_role = ContactRole.objects.get(layer=layer, role=layer.poc_role)
-        metadata_author_role = ContactRole.objects.get(layer=layer, role=layer.metadata_author_role)
+        poc_role = ContactRole.objects.get(resource=layer, role=layer.poc_role)
+        metadata_author_role = ContactRole.objects.get(resource=layer, role=layer.metadata_author_role)
 
         if request.method == "POST":
             layer_form = LayerForm(request.POST, instance=layer, prefix="layer")
@@ -736,6 +734,9 @@ def layer_metadata(request, layername):
                 the_layer = layer_form.save(commit=False)
                 the_layer.poc = new_poc
                 the_layer.metadata_author = new_author
+                xml_doc = gen_iso_xml(the_layer)
+                the_layer.metadata_xml=xml_doc
+                the_layer.csw_anytext = gen_anytext(xml_doc)
                 the_layer.save()
                 return HttpResponseRedirect("/data/" + layer.typename)
 
@@ -826,8 +827,6 @@ def layer_detail(request, layername):
             RequestContext(request, {'error_message': 
                 _("You are not permitted to view this layer")})), status=401)
     
-    metadata = layer.metadata_csw()
-
     maplayer = MapLayer(name = layer.typename, ows_url = settings.GEOSERVER_BASE_URL + "wms")
 
     # center/zoom don't matter; the viewer will center on the layer bounds
@@ -836,12 +835,13 @@ def layer_detail(request, layername):
 
     return render_to_response('maps/layer.html', RequestContext(request, {
         "layer": layer,
-        "metadata": metadata,
+        "uuid": layer.uuid,
         "viewer": json.dumps(map.viewer_json(* (DEFAULT_BASE_LAYERS + [maplayer]))),
         "permissions_json": _perms_info_json(layer, LAYER_LEV_NAMES),
-        "GEOSERVER_BASE_URL": settings.GEOSERVER_BASE_URL
-    }))
-
+        "GEOSERVER_BASE_URL": settings.GEOSERVER_BASE_URL,
+        "CSW_URL": settings.CSW['url'],
+        "CSW_TYPE": settings.CSW['type']
+     }))
 
 GENERIC_UPLOAD_ERROR = _("There was an error while attempting to upload your data. \
 Please try again, or contact and administrator if the problem continues.")
@@ -869,9 +869,14 @@ def upload_layer(request):
                         title = form.cleaned_data["layer_title"],
                         permissions = form.cleaned_data["permissions"]
                         )
-                return HttpResponse(json.dumps({
-                    "success": True,
-                    "redirect_to": reverse('layer_metadata', args=[saved_layer.typename])}))
+                if saved_layer.metadata_uploaded:
+                    return HttpResponse(json.dumps({
+                        "success": True,
+                        "redirect_to": saved_layer.get_absolute_url()}))
+                else:
+                    return HttpResponse(json.dumps({
+                        "success": True,
+                        "redirect_to": saved_layer.get_absolute_url() + "/metadata"}))
             except Exception, e:
                 logger.exception("Unexpected error during upload.")
                 return HttpResponse(json.dumps({
@@ -903,10 +908,44 @@ def layer_replace(request, layername):
                                   RequestContext(request, {'layer': layer,
                                                            'is_featuretype': is_featuretype}))
     elif request.method == 'POST':
-        from geonode.maps.forms import LayerUploadForm
+        from geonode.maps.forms import LayerUploadForm, LayerMetadataUploadForm
         from geonode.maps.utils import save
         from django.template import escape
         import os, shutil
+
+        if layer.metadata_uploaded:  # it's an XML metadata upload update
+            # save the XML file to django and catalogue
+
+            from geonode.maps.utils import update_metadata
+
+            form = LayerMetadataUploadForm(request.POST, request.FILES)
+
+            if form.is_valid():
+                try:
+                    layer_to_update = Layer.objects.get_or_create(typename=layer.typename)[0]
+
+                    md_xml, md_title, md_abstract = update_metadata(layer.uuid, form.cleaned_data['xml_file'].read(), layer_to_update)
+
+                    Layer.objects.filter(typename=layer.typename).update(
+                        metadata_xml=md_xml,
+                        title=md_title,
+                        abstract=md_abstract
+                    )
+
+                    layer_to_update.metadata_xml = md_xml
+                    layer_to_update.title = md_title
+                    layer_to_update.abstract = md_abstract
+                    layer_to_update.save_to_catalogue()
+
+                    return HttpResponse(json.dumps({
+                        "success": True,
+                        "redirect_to": "/data/" + layer.typename}))
+
+                except Exception, e:
+                    logger.exception("Unexpected error during metadata upload.")
+                    return HttpResponse(json.dumps({
+                        "success": False,
+                        "errors": ["Unexpected error during metadata upload: " + escape(str(e))]}))
 
         form = LayerUploadForm(request.POST, request.FILES)
         tempdir = None
@@ -933,7 +972,6 @@ def layer_replace(request, layername):
             for e in form.errors.values():
                 errors.extend([escape(v) for v in e])
             return HttpResponse(json.dumps({ "success": False, "errors": errors}))
-
 
 @login_required
 def view_layer_permissions(request, layername):
@@ -974,7 +1012,6 @@ def _perms_info(obj, level_names):
     if hasattr(obj, 'owner') and obj.owner is not None:
         info['owner'] = obj.owner.username
     return info
-       
 
 def _perms_info_json(obj, level_names):
     return json.dumps(_perms_info(obj, level_names))
@@ -1029,7 +1066,6 @@ def _handle_perms_edit(request, obj):
             obj.set_user_level(user, level)
 
     return errors
-
 
 def _get_basic_auth_info(request):
     """
@@ -1105,7 +1141,6 @@ def layer_acls(request):
 
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
-
 def _split_query(query):
     """
     split and strip keywords, preserve space 
@@ -1130,15 +1165,12 @@ def _split_query(query):
         keywords.append(accum)
     return [kw.strip() for kw in keywords if kw.strip()]
 
-
-
 DEFAULT_SEARCH_BATCH_SIZE = 10
 MAX_SEARCH_BATCH_SIZE = 25
 @csrf_exempt
 def metadata_search(request):
     """
-    handles a basic search for data using the 
-    GeoNetwork catalog.
+    handles a basic search for data using CSW.
 
     the search accepts: 
     q - general query for keywords across all fields
@@ -1238,17 +1270,22 @@ def _metadata_search(query, start, limit, **kw):
     csw = get_csw()
 
     keywords = _split_query(query)
-    
-    csw.getrecords(keywords=keywords, startposition=start+1, maxrecords=limit, bbox=kw.get('bbox', None))
-    
-    
-    # build results 
-    # XXX this goes directly to the result xml doc to obtain 
-    # correct ordering and a fuller view of the result record
-    # than owslib currently parses.  This could be improved by
-    # improving owslib.
-    results = [_build_search_result(doc) for doc in 
-               csw._exml.findall('//'+nspath('Record', namespaces['csw']))]
+   
+    # fix bbox axis order
+    # GeoNetwork accepts x/y
+    # pycsw accepts y/x
+    if kw.has_key('bbox'):
+        if csw.type == 'pycsw':  # swap coords per standard
+            bbox = [kw['bbox'][1], kw['bbox'][0], kw['bbox'][3], kw['bbox'][2]]
+        else:
+            bbox = kw['bbox']
+    else:
+        bbox = None
+
+    csw.getrecords(typenames='gmd:MD_Metadata csw:Record dif:DIF fgdc:metadata',keywords=keywords, startposition=start+1, maxrecords=limit, bbox=bbox, outputschema='http://www.isotc211.org/2005/gmd', esn='full')
+
+    # build results into JSON for API
+    results = [_build_search_result(doc, csw) for v, doc in csw.records.iteritems()]
 
     result = {'rows': results, 
               'total': csw.results['matches']}
@@ -1275,9 +1312,8 @@ def search_result_detail(request):
     csw = get_csw()
     csw.getrecordbyid([uuid], outputschema=namespaces['gmd'])
     rec = csw.records.values()[0]
-    raw_xml = csw._exml.find(nspath('MD_Metadata', namespaces['gmd']))
-    extra_links = _extract_links(rec, raw_xml)
-    
+    extra_links = dict(download=_extract_links(rec))
+
     try:
         layer = Layer.objects.get(uuid=uuid)
         layer_is_remote = False
@@ -1285,120 +1321,77 @@ def search_result_detail(request):
         layer = None
         layer_is_remote = True
 
+    keywords = []
+    for kw in rec.identification.keywords:
+        keywords.extend(kw['keywords'])
+
     return render_to_response('maps/search_result_snippet.html', RequestContext(request, {
         'rec': rec,
         'extra_links': extra_links,
+        'md_link': csw.url_for_uuid(uuid),
+        'keywords': ','.join(keywords),
         'layer': layer,
         'layer_is_remote': layer_is_remote
     }))
 
-def _extract_links(rec, xml):
-    download_links = []
-    dl_type_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("protocol", namespaces["gmd"]),
-        nspath("CharacterString", namespaces["gco"])
-        ])
+def _extract_links(rec):
+    # fetch all distribution links
 
-    dl_name_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("name", namespaces["gmd"]),
-        nspath("CharacterString", namespaces["gco"])
-        ])
-
-    dl_description_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("description", namespaces["gmd"]),
-        nspath("CharacterString", namespaces["gco"])
-        ])
-
-    dl_link_path = "/".join([
-        nspath("CI_OnlineResource", namespaces["gmd"]),
-        nspath("linkage", namespaces["gmd"]),
-        nspath("URL", namespaces["gmd"])
-        ])
-
+    links = []
+    # extract subset of description value for user-friendly display
     format_re = re.compile(".*\((.*)(\s*Format*\s*)\).*?")
 
-    for link in xml.findall("*//" + nspath("onLine", namespaces['gmd'])):
-        dl_type = link.find(dl_type_path)
-        if dl_type is not None and dl_type.text == "WWW:DOWNLOAD-1.0-http--download":
-            extension = link.find(dl_name_path).text.split('.')[-1]
-            format = format_re.match(link.find(dl_description_path).text).groups()[0]
-            url = link.find(dl_link_path).text
-            download_links.append((extension, format, url))
-    return dict(
-            download=download_links
-        )
+    if not all([hasattr(rec, 'distribution'), hasattr(rec.distribution, 'online')]):
+        return None
 
+    for link_el in rec.distribution.online:
+        if link_el.protocol == 'WWW:DOWNLOAD-1.0-http--download':
+            try:
+                extension = link_el.name.split('.')[-1]
+                format = format_re.match(link_el.description).groups()[0]
+                href = link_el.url
+                links.append((extension, format, href))
+            except:
+                pass
+    return links
 
-def _build_search_result(doc):
+def _build_search_result(rec, csw):
     """
     accepts a node representing a csw result 
     record and builds a POD structure representing 
     the search result.
     """
-    if doc is None:
+    if rec is None:
         return None
     # Let owslib do some parsing for us...
-    rec = CswRecord(doc)
     result = {}
-    result['title'] = rec.title
     result['uuid'] = rec.identifier
-    result['abstract'] = rec.abstract
-    result['keywords'] = [x for x in rec.subjects if x]
-    result['detail'] = rec.uri or ''
+    result['title'] = rec.identification.title
+    result['abstract'] = rec.identification.abstract
+
+    keywords = []
+    for kw in rec.identification.keywords:
+        keywords.extend(kw['keywords'])
+
+    result['keywords'] = keywords
 
     # XXX needs indexing ? how
     result['attribution'] = {'title': '', 'href': ''}
 
-    # XXX !_! pull out geonode 'typename' if there is one
-    # index this directly... 
-    if rec.uri:
-        try:
-            result['name'] = urlparse(rec.uri).path.split('/')[-1]
-        except: 
-            pass
-    # fallback: use geonetwork uuid
-    if not result.get('name', ''):
-        result['name'] = rec.identifier
+    result['name'] = result['uuid']
 
-    # Take BBOX from GeoNetwork Result...
-    # XXX this assumes all our bboxes are in this 
-    # improperly specified SRS.
-    if rec.bbox is not None and rec.bbox.crs == 'urn:ogc:def:crs:::WGS 1984':
-        # slight workaround for ticket 530
-        result['bbox'] = {
-            'minx': min(rec.bbox.minx, rec.bbox.maxx),
-            'maxx': max(rec.bbox.minx, rec.bbox.maxx),
-            'miny': min(rec.bbox.miny, rec.bbox.maxy),
-            'maxy': max(rec.bbox.miny, rec.bbox.maxy)
+    result['bbox'] = {
+        'minx': rec.identification.bbox.minx,
+        'maxx': rec.identification.bbox.maxx,
+        'miny': rec.identification.bbox.miny,
+        'maxy': rec.identification.bbox.maxy
         }
     
-    # XXX these could be exposed in owslib record...
-    # locate all download links
-    format_re = re.compile(".*\((.*)(\s*Format*\s*)\).*?")
-    result['download_links'] = []
-    for link_el in doc.findall(nspath('URI', namespaces['dc'])):
-        if link_el.get('protocol', '') == 'WWW:DOWNLOAD-1.0-http--download':
-            try:
-                extension = link_el.get('name', '').split('.')[-1]
-                format = format_re.match(link_el.get('description')).groups()[0]
-                href = link_el.text
-                result['download_links'].append((extension, format, href))
-            except: 
-                pass
+    # locate all distribution links
+    result['download_links'] = _extract_links(rec)
 
-    # construct the link to the geonetwork metadata record (not self-indexed)
-    md_link = settings.GEONETWORK_BASE_URL + "srv/en/csw?" + urlencode({
-            "request": "GetRecordById",
-            "service": "CSW",
-            "version": "2.0.2",
-            "OutputSchema": "http://www.isotc211.org/2005/gmd",
-            "ElementSetName": "full",
-            "id": rec.identifier
-        })
-    result['metadata_links'] = [("text/xml", "TC211", md_link)]
+    # construct the link to the CSW metadata record (not self-indexed)
+    result['metadata_links'] = [("text/xml", "TC211", csw.url_for_uuid(rec.identifier))]
 
     return result
 

@@ -1072,9 +1072,15 @@ msgstr "but"
 msgid "maintenance frequency"
 msgstr "fréquence d'entretien"
 
+<<<<<<< HEAD
+#: maps/models.py:671
+msgid "keywords (comma-separated)"
+msgstr "mots-clés (séparés par des virgules)"
+=======
 #: maps/models.py:691
 msgid "keywords"
 msgstr "mots-clés"
+>>>>>>> 0abde87879dd54cc49fc548d9b04ed114aec5e11
 
 #: maps/models.py:692
 msgid "keywords region"

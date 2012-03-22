@@ -1,9 +1,10 @@
 from setuptools import setup, find_packages
+import geonode
 import pkg_resources
 import sys, os
 
 name='GeoNodePy'
-version = "1.2"
+version = geonode.__version__
 req = pkg_resources.Requirement.parse(name)
 
 setup(name=name,

@@ -19,7 +19,7 @@ import math
 _gs_resource = Mock()
 _gs_resource.native_bbox = [1, 2, 3, 4]
 
-Layer.objects.geonetwork = Mock()
+Layer.objects.catalogue = Mock()
 Layer.objects.gs_catalog = Mock()
 
 Layer.objects.gs_catalog.get_resource.return_value = _gs_resource
@@ -65,7 +65,7 @@ community."
 #    def test_layer_save_to_geoserver(self):
 #        pass
 
-#    def test_layer_save_to_geonetwork(self):
+#    def test_layer_save_to_catalogue(self):
 #        pass
 
 #    def test_post_save_layer(self):
@@ -95,7 +95,7 @@ community."
 #    def test_layer_delete_from_geoserver(self):
 #        pass
 
-#    def test_layer_delete_from_geonetwork(self):
+#    def test_layer_delete_from_catalogue(self):
 #        pass
 
 #    def test_delete_layer(self):
@@ -152,7 +152,7 @@ community."
 #    def test_layer_autopopulate(self):
 #        pass
 
-#    def test_layer_populate_from_gn(self):
+#    def test_layer_populate_from_catalogue(self):
 #        pass
 
 #    def test_layer_keyword_list(self):
@@ -753,9 +753,9 @@ community."
         '''
         layer = Layer.objects.all()[0]
 
-        # save to geonetwork so we know the uuid is consistent between
-        # django db and geonetwork
-        layer.save_to_geonetwork()
+        # save to catalogue so we know the uuid is consistent between
+        # django db and catalogue
+        layer.save_to_catalogue()
 
         c = Client()
         response = c.get('/data/search/detail', {'uuid':layer.uuid})
@@ -791,7 +791,7 @@ community."
 
     def test_layer_save(self):
         lyr = Layer.objects.get(pk=1)
-        lyr.keywords = "saving keywords"
+        lyr.keywords = "saving,keywords"
         lyr.save()
         self.assertEqual(lyr.keyword_list(), ["saving", "keywords"])
         self.assertEqual(lyr.resource.keywords, ["saving", "keywords"])
@@ -1220,7 +1220,7 @@ class UtilsTest(TestCase):
 
         with nested(
                 patch('geonode.maps.models.Layer.objects.gs_catalog'),
-                patch('geonode.maps.models.Layer.objects.geonetwork')
+                patch('geonode.maps.models.Layer.objects.catalogue')
             ) as (mock_gs, mock_gn):
                 mock_gn.login.side_effect = blowup
                 self.assertRaises(GeoNodeException, check_geonode_is_up)
@@ -1228,7 +1228,7 @@ class UtilsTest(TestCase):
 
         with nested(
                 patch('geonode.maps.models.Layer.objects.gs_catalog'),
-                patch('geonode.maps.models.Layer.objects.geonetwork')
+                patch('geonode.maps.models.Layer.objects.catalogue')
             ) as (mock_gs, mock_gn):
                 # no assertion, this should just run without error
                 check_geonode_is_up()
@@ -1260,7 +1260,7 @@ class UtilsTest(TestCase):
             with nested(
                     patch.object(geonode.maps.models, '_wms', new=MockWMS()),
                     patch('geonode.maps.models.Layer.objects.gs_catalog'),
-                    patch('geonode.maps.models.Layer.objects.geonetwork')
+                    patch('geonode.maps.models.Layer.objects.catalogue')
                 ) as (mock_wms, mock_gs, mock_gn):
                     # Setup
                     mock_gs.get_store.return_value.get_resources.return_value = []

@@ -2,11 +2,10 @@
 from django.conf import settings
 from django.db import models
 from owslib.wms import WebMapService
-from owslib.csw import CatalogueServiceWeb
 from geoserver.catalog import Catalog
 from geonode.core.models import PermissionLevelMixin
 from geonode.core.models import AUTHENTICATED_USERS, ANONYMOUS_USERS
-from geonode.geonetwork import Catalog as GeoNetwork
+from geonode.catalogue.catalogue import Catalogue, gen_iso_xml, gen_anytext
 from django.db.models import signals
 from django.utils.html import escape
 import httplib2
@@ -27,13 +26,9 @@ import sys
 
 logger = logging.getLogger("geonode.maps.models")
 
-
 def bbox_to_wkt(x0, x1, y0, y1, srid="4326"):
     return 'SRID=%s;POLYGON((%s %s,%s %s,%s %s,%s %s,%s %s))' % (srid,
                             x0, y0, x0, y1, x1, y1, x1, y0, x0, y0)
-
-
-
 
 ROLE_VALUES = [
     'datasetProvider',
@@ -472,6 +467,25 @@ CONTACT_FIELDS = [
     "role"
 ]
 
+TYPE_VALUES = [
+    "series",
+    "software",
+    "featureType",
+    "model",
+    "collectionHardware",
+    "collectionSession",
+    "nonGeographicDataset",
+    "propertyType",
+    "fieldSession",
+    "dataset",
+    "service",
+    "attribute",
+    "attributeType",
+    "tile",
+    "feature",
+    "dimensionGroup"
+]
+
 DEFAULT_SUPPLEMENTAL_INFORMATION=_(
 'You can customize the template to suit your \
 needs. You can add and remove fields and fill out default \
@@ -481,6 +495,8 @@ more complex) advanced view. You can even use the XML editor to \
 create custom structures, but they have to be validated by the \
 system, so know what you do :-)'
 )
+
+VALID_DATE_TYPES = [(lower(x), _(x)) for x in ['Creation', 'Publication', 'Revision']]
 
 class GeoNodeException(Exception):
     pass
@@ -558,8 +574,7 @@ def get_wms():
 
 def get_csw():
     global _csw
-    csw_url = "%ssrv/en/csw" % settings.GEONETWORK_BASE_URL
-    _csw = CatalogueServiceWeb(csw_url)
+    _csw = Catalogue()
     return _csw
 
 class LayerManager(models.Manager):
@@ -569,31 +584,16 @@ class LayerManager(models.Manager):
         url = "%srest" % settings.GEOSERVER_BASE_URL
         user, password = settings.GEOSERVER_CREDENTIALS
         self.gs_catalog = Catalog(url, _user, _password)
-        self.geonetwork = GeoNetwork(settings.GEONETWORK_BASE_URL, settings.GEONETWORK_CREDENTIALS[0], settings.GEONETWORK_CREDENTIALS[1])
+        self.catalogue = Catalogue()
 
     @property
-    def gn_catalog(self):
-        # check if geonetwork is logged in
-        if not self.geonetwork.connected:
-            self.geonetwork.login()
+    def csw_catalogue(self):
+        # check if CSW is geonetwork and is logged in
+        if (self.catalogue.type == 'geonetwork' and not self.catalogue.connected):
+            self.catalogue.login()
         # Make sure to logout after you have finished using it.
-        return self.geonetwork
+        return self.catalogue
 
-    def admin_contact(self):
-        # this assumes there is at least one superuser
-        superusers = User.objects.filter(is_superuser=True).order_by('id')
-        if superusers.count() == 0:
-            raise RuntimeError('GeoNode needs at least one admin/superuser set')
-        
-        contact, created = Contact.objects.get_or_create(user=superusers[0], 
-                                                defaults={"name": "Geonode Admin"})
-        return contact
-
-    def default_poc(self):
-        return self.admin_contact()
-
-    def default_metadata_author(self):
-        return self.admin_contact()
 
     def slurp(self, ignore_errors=True, verbosity=1, console=sys.stdout):
         """Configure the layers available in GeoServer in GeoNode.
@@ -624,7 +624,9 @@ class LayerManager(models.Manager):
                     "abstract": resource.abstract or 'No abstract provided',
                     "uuid": str(uuid.uuid4())
                 })
-
+                md_doc = gen_iso_xml(layer)
+                layer.metadata_xml = md_doc
+                layer.csw_anytext = gen_anytext(md_doc)
                 layer.save()
             except Exception, e:
                 if ignore_errors:
@@ -654,25 +656,24 @@ class LayerManager(models.Manager):
         return output
 
 
-class Layer(models.Model, PermissionLevelMixin):
+class ResourceBase(models.Model, PermissionLevelMixin):
     """
-    Layer Object loosely based on ISO 19115:2003
+    Base Class for Resources
+    Loosely based on ISO 19115:2003
     """
-
-    VALID_DATE_TYPES = [(lower(x), _(x)) for x in ['Creation', 'Publication', 'Revision']]
-
-    # internal fields
-    objects = LayerManager()
-    workspace = models.CharField(max_length=128)
-    store = models.CharField(max_length=128)
-    storeType = models.CharField(max_length=128)
-    name = models.CharField(max_length=128)
     uuid = models.CharField(max_length=36)
-    typename = models.CharField(max_length=128, unique=True)
     owner = models.ForeignKey(User, blank=True, null=True)
+    last_modified = models.DateTimeField(auto_now_add=True)
+    contacts = models.ManyToManyField(Contact, through='ContactRole', null=True, blank=True)
 
-    contacts = models.ManyToManyField(Contact, through='ContactRole')
+    metadata_uploaded = models.BooleanField(default=False)
+    metadata_xml = models.TextField(null=True, default=None, blank=True)
 
+    csw_typename = models.CharField(_('CSW typename'), max_length=32, default='gmd:MD_Metadata', null=False)
+    csw_schema = models.CharField(_('CSW schema'), max_length=32, default='http://www.isotc211.org/2005/gmd', null=False)
+    csw_mdsource = models.CharField(_('CSW source'), max_length=256, default='local', null=False)
+    csw_insert_date = models.DateTimeField(_('CSW insert date'), auto_now_add=True)
+    
     # section 1
     title = models.CharField(_('title'), max_length=255)
     date = models.DateTimeField(_('date'), default = datetime.now) # passing the method itself, not the result
@@ -682,16 +683,17 @@ class Layer(models.Model, PermissionLevelMixin):
     edition = models.CharField(_('edition'), max_length=255, blank=True, null=True)
     abstract = models.TextField(_('abstract'), blank=True)
     purpose = models.TextField(_('purpose'), null=True, blank=True)
-    maintenance_frequency = models.CharField(_('maintenance frequency'), max_length=255, choices = [(x, x) for x in UPDATE_FREQUENCIES], blank=True, null=True)
+    maintenance_frequency = models.CharField(_('maintenance frequency'), max_length=255, choices=[(x, x) for x in UPDATE_FREQUENCIES], blank=True, null=True)
 
     # section 2
     # see poc property definition below
 
     # section 3
-    keywords = models.TextField(_('keywords'), blank=True, null=True)
-    keywords_region = models.CharField(_('keywords region'), max_length=3, choices= COUNTRIES, default = 'USA')
-    constraints_use = models.CharField(_('constraints use'), max_length=255, choices = [(x, x) for x in CONSTRAINT_OPTIONS], default='copyright')
+    keywords = models.TextField(_('keywords (comma-separated)'), blank=True, null=True)
+    keywords_region = models.CharField(_('keywords region'), max_length=3, choices= COUNTRIES, default='USA')
+    constraints_use = models.CharField(_('constraints use'), max_length=255, choices=[(x, x) for x in CONSTRAINT_OPTIONS], default='copyright')
     constraints_other = models.TextField(_('constraints other'), blank=True, null=True)
+    constraints_access = models.TextField(_('constraints access'), blank=True, null=True)
     spatial_representation_type = models.CharField(_('spatial representation type'), max_length=255, choices=[(x,x) for x in SPATIAL_REPRESENTATION_TYPES], blank=True, null=True)
 
     # Section 4
@@ -713,6 +715,144 @@ class Layer(models.Model, PermissionLevelMixin):
 
     # Section 9
     # see metadata_author property definition below
+
+    # extra fields
+    publisher = models.CharField(_('publisher'), max_length=128, blank=True, null=True)
+    creator = models.CharField(_('creator'), max_length=128, blank=True, null=True)
+    csw_type = models.CharField(_('type'), max_length=32, default='dataset', null=False, choices=[(x, x) for x in TYPE_VALUES])
+    csw_anytext = models.TextField(_('anytext'), null=False)
+    
+
+
+
+
+    def datetime2iso(self):
+        self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    def eval_keywords_region(self):
+        """Returns expanded keywords_region tuple'd value"""
+        index = next((i for i,(k,v) in enumerate(COUNTRIES) if k==self.keywords_region),None)
+        if index is not None:
+            return COUNTRIES[index][1]
+        else:
+            return self.keywords_region
+
+    def thumbnail(self):
+        """ Generate a URL representing thumbnail of the resource """
+
+        width = 20
+        height = 20
+
+        bbox = self.resource.latlon_bbox
+        bbox_string = ",".join([bbox[0], bbox[2], bbox[1], bbox[3]])
+
+        return settings.GEOSERVER_BASE_URL + "wms?" + urllib.urlencode({
+            'service': 'WMS',
+            'version': '1.1.1',
+            'request': 'GetMap',
+            'layers': self.typename,
+            'format': 'image/png',
+            'height': height,
+            'width': width,
+            'srs': 'EPSG:4326',
+            'bbox': bbox_string})
+
+    def set_default_permissions(self):
+        self.set_gen_level(ANONYMOUS_USERS, self.LEVEL_READ)
+        self.set_gen_level(AUTHENTICATED_USERS, self.LEVEL_READ) 
+
+        # remove specific user permissions
+        current_perms =  self.get_all_level_info()
+        for username in current_perms['users'].keys():
+            user = User.objects.get(username=username)
+            self.set_user_level(user, self.LEVEL_NONE)
+
+        # assign owner admin privs
+        if self.owner:
+            self.set_user_level(self.owner, self.LEVEL_ADMIN)
+
+    def default_poc(self):
+        return self.admin_contact()
+
+    def default_metadata_author(self):
+        return self.admin_contact()
+
+    @property
+    def poc_role(self):
+        role = Role.objects.get(value='pointOfContact')
+        return role
+
+    @property
+    def metadata_author_role(self):
+        role = Role.objects.get(value='author')
+        return role
+
+    def _set_poc(self, poc):
+        # reset any poc asignation to this resource 
+        ContactRole.objects.filter(role=self.poc_role, resource=self).delete()
+        #create the new assignation
+        contact_role = ContactRole.objects.create(role=self.poc_role, resource=self, contact=poc)
+
+    def _get_poc(self):
+        try:
+            the_poc = ContactRole.objects.get(role=self.poc_role, resource=self).contact
+        except ContactRole.DoesNotExist:
+            the_poc = None
+        return the_poc
+
+    poc = property(_get_poc, _set_poc)
+
+    def _set_metadata_author(self, metadata_author):
+        # reset any metadata_author asignation to this resource
+        ContactRole.objects.filter(role=self.metadata_author_role, resource=self).delete()
+        #create the new assignation
+        contact_role = ContactRole.objects.create(role=self.metadata_author_role,
+                                                  resource=self, contact=metadata_author)
+
+    def _get_metadata_author(self):
+        try:
+            the_ma = ContactRole.objects.get(role=self.metadata_author_role, resource=self).contact
+        except  ContactRole.DoesNotExist:
+            the_ma = None
+        return the_ma
+
+    metadata_author = property(_get_metadata_author, _set_metadata_author)
+
+    def admin_contact(self):
+        # this assumes there is at least one superuser
+        superusers = User.objects.filter(is_superuser=True).order_by('id')
+        if superusers.count() == 0:
+            raise RuntimeError('GeoNode needs at least one admin/superuser set')
+        
+        contact, created = Contact.objects.get_or_create(user=superusers[0], 
+                                                defaults={"name": "Geonode Admin"})
+        return contact
+
+    def _autopopulate(self):
+        """
+        if self.poc is None:
+            self.poc = self.default_poc()
+        if self.metadata_author is None:
+            self.metadata_author = self.default_metadata_author()
+        if self.abstract == '' or self.abstract is None:
+            self.abstract = 'No abstract provided'
+        if self.title == '' or self.title is None:
+            self.title = self.name
+        """
+        pass
+
+class Layer(ResourceBase):
+    """
+    Layer Class inheriting Resource fields
+    """
+
+    # internal fields
+    objects = LayerManager()
+    workspace = models.CharField(max_length=128)
+    store = models.CharField(max_length=128)
+    storeType = models.CharField(max_length=128)
+    name = models.CharField(max_length=128)
+    typename = models.CharField(max_length=128, unique=True)
 
     def download_links(self):
         """Returns a list of (mimetype, URL) tuples for downloads of this data
@@ -755,7 +895,7 @@ class Layer(models.Model, PermissionLevelMixin):
                 ("excel", _("Excel"), "excel", {}),
                 ("json", _("GeoJSON"), "json", {})
             ]
-            links.extend((ext, name, wfs_link(mime, extra_params)) for ext, name, mime, extra_params in types)
+            links.extend((ext, name, 'WWW:DOWNLOAD-1.0-http--download', wfs_link(mime, extra_params)) for ext, name, mime, extra_params in types)
         elif self.resource.resource_type == "coverage":
             try:
                 client = httplib2.Http()
@@ -786,7 +926,7 @@ class Layer(models.Model, PermissionLevelMixin):
                     })
 
                 types = [("tiff", "GeoTIFF", "geotiff")]
-                links.extend([(ext, name, wcs_link(mime)) for (ext, name, mime) in types])
+                links.extend([(ext, name, 'WWW:DOWNLOAD-1.0-http--download', wcs_link(mime)) for (ext, name, mime) in types])
             except Exception, e:
                 # if something is wrong with WCS we probably don't want to link
                 # to it anyway
@@ -811,7 +951,7 @@ class Layer(models.Model, PermissionLevelMixin):
             ("png", _("PNG"), "image/png")
         ]
 
-        links.extend((ext, name, wms_link(mime)) for ext, name, mime in types)
+        links.extend((ext, name, 'WWW:DOWNLOAD-1.0-http--download', wms_link(mime)) for ext, name, mime in types)
 
         kml_reflector_link_download = settings.GEOSERVER_BASE_URL + "wms/kml?" + urllib.urlencode({
             'layers': self.typename,
@@ -823,8 +963,8 @@ class Layer(models.Model, PermissionLevelMixin):
             'mode': "refresh"
         })
 
-        links.append(("KML", _("KML"), kml_reflector_link_download))
-        links.append(("KML", _("View in Google Earth"), kml_reflector_link_view))
+        links.append(("KML", _("KML"), 'WWW:DOWNLOAD-1.0-http--download', kml_reflector_link_download))
+        links.append(("KML", _("View in Google Earth"), 'WWW:DOWNLOAD-1.0-http--download', kml_reflector_link_view))
 
         return links
 
@@ -857,18 +997,23 @@ class Layer(models.Model, PermissionLevelMixin):
         #    msg = "API Record missing for layer [%s]" % self.typename
         #    raise GeoNodeException(msg)
  
-        # Check the layer is in the GeoNetwork catalog and points back to get_absolute_url
-        if(_csw is None): # Might need to re-cache, nothing equivalent to _wms.contents?
-            get_csw()
-        try:
-            _csw.getrecordbyid([self.uuid])
-            csw_layer = _csw.records.get(self.uuid)
-        except:
-            msg = "CSW Record Missing for layer [%s]" % self.typename
-            raise GeoNodeException(msg)
+        # Check the layer is in the catalogue and points back to get_absolute_url
+#        if(_csw is None): # Might need to re-cache, nothing equivalent to _wms.contents?
+#            get_csw()
+#        try:
+#            _csw.getrecordbyid([self.uuid], esn='summary', outputschema='http://www.isotc211.org/2005/gmd')
+#            csw_layer = _csw.records.get(self.uuid)
+#        except:
+#            msg = "CSW Record Missing for layer [%s]" % self.typename
+#            raise GeoNodeException(msg)
 
-        if(csw_layer.uri != self.get_absolute_url()):
-            msg = "CSW Layer URL does not match layer URL for layer [%s]" % self.typename
+#        if hasattr(csw_layer, 'distribution') and hasattr(csw_layer.distribution, 'online'):
+#            for link in csw_layer.distribution.online:
+#                if link.protocol == 'WWW:LINK-1.0-http--link':
+#                    if(link.url != self.get_absolute_url()):
+#                        msg = "CSW Layer URL does not match layer URL for layer [%s]" % self.typename
+#        else:        
+#            msg = "CSW Layer URL not found layer [%s]" % self.typename
             
         # Visit get_absolute_url and make sure it does not give a 404
         #logger.info(self.get_absolute_url())
@@ -889,32 +1034,13 @@ class Layer(models.Model, PermissionLevelMixin):
         global _wms
         if (_wms is None) or (self.typename not in _wms.contents):
             get_wms()
-            """
-            wms_url = "%swms?request=GetCapabilities" % settings.GEOSERVER_BASE_URL
-            netloc = urlparse(wms_url).netloc
-            http = httplib2.Http()
-            http.add_credentials(_user, _password)
-            http.authorizations.append(
-                httplib2.BasicAuthentication(
-                    (_user, _password), 
-                    netloc,
-                    wms_url,
-                    {},
-                    None,
-                    None, 
-                    http
-                )
-            )
-            response, body = http.request(wms_url)
-            _wms = WebMapService(wms_url, xml=body)
-            """
         return _wms[self.typename]
 
     def metadata_csw(self):
         global _csw
         if(_csw is None):
             _csw = get_csw()
-        _csw.getrecordbyid([self.uuid], outputschema = 'http://www.isotc211.org/2005/gmd')
+        _csw.getrecordbyid([self.uuid], outputschema='http://www.isotc211.org/2005/gmd')
         return _csw.records.get(self.uuid)
 
     @property
@@ -964,20 +1090,20 @@ class Layer(models.Model, PermissionLevelMixin):
     def delete_from_geoserver(self):
         cascading_delete(Layer.objects.gs_catalog, self.resource)
 
-    def delete_from_geonetwork(self):
-        gn = Layer.objects.gn_catalog
-        gn.delete_layer(self)
-        gn.logout()
+    def delete_from_catalogue(self):
+        cat = Layer.objects.csw_catalogue
+        cat.delete_layer(self)
+        cat.logout()
 
-    def save_to_geonetwork(self):
-        gn = Layer.objects.gn_catalog
-        record = gn.get_by_uuid(self.uuid)
+    def save_to_catalogue(self):
+        cat = Layer.objects.csw_catalogue
+        record = cat.get_by_uuid(self.uuid)
         if record is None:
-            md_link = gn.create_from_layer(self)
+            md_link = cat.create_from_layer(self)
             self.metadata_links = [("text/xml", "TC211", md_link)]
         else:
-            gn.update_layer(self)
-        gn.logout()
+            cat.update_layer(self)
+        cat.logout()
 
     @property
     def resource(self):
@@ -1031,66 +1157,25 @@ class Layer(models.Model, PermissionLevelMixin):
             self._publishing_cache = cat.get_layer(self.name)
         return self._publishing_cache
 
-    @property
-    def poc_role(self):
-        role = Role.objects.get(value='pointOfContact')
-        return role
-
-    @property
-    def metadata_author_role(self):
-        role = Role.objects.get(value='author')
-        return role
-
-    def _set_poc(self, poc):
-        # reset any poc asignation to this layer
-        ContactRole.objects.filter(role=self.poc_role, layer=self).delete()
-        #create the new assignation
-        contact_role = ContactRole.objects.create(role=self.poc_role, layer=self, contact=poc)
-
-    def _get_poc(self):
-        try:
-            the_poc = ContactRole.objects.get(role=self.poc_role, layer=self).contact
-        except ContactRole.DoesNotExist:
-            the_poc = None
-        return the_poc
-
-    poc = property(_get_poc, _set_poc)
-
-    def _set_metadata_author(self, metadata_author):
-        # reset any metadata_author asignation to this layer
-        ContactRole.objects.filter(role=self.metadata_author_role, layer=self).delete()
-        #create the new assignation
-        contact_role = ContactRole.objects.create(role=self.metadata_author_role,
-                                                  layer=self, contact=metadata_author)
-
-    def _get_metadata_author(self):
-        try:
-            the_ma = ContactRole.objects.get(role=self.metadata_author_role, layer=self).contact
-        except  ContactRole.DoesNotExist:
-            the_ma = None
-        return the_ma
-
-    metadata_author = property(_get_metadata_author, _set_metadata_author)
-
     def save_to_geoserver(self):
         if self.resource is None:
             return
         if hasattr(self, "_resource_cache"):
-            gn = Layer.objects.gn_catalog
+            cat = Layer.objects.csw_catalogue
             self.resource.title = self.title
             self.resource.abstract = self.abstract
             self.resource.name= self.name
-            self.resource.metadata_links = [('text/xml', 'TC211', gn.url_for_uuid(self.uuid))]
+            self.resource.metadata_links = [('text/xml', 'TC211', cat.url_for_uuid(self.uuid))]
             self.resource.keywords = self.keyword_list()
             Layer.objects.gs_catalog.save(self._resource_cache)
-            gn.logout()
+            cat.logout()
         if self.poc and self.poc.user:
             self.publishing.attribution = str(self.poc.user)
             profile = Contact.objects.get(user=self.poc.user)
             self.publishing.attribution_link = settings.SITEURL[:-1] + profile.get_absolute_url()
             Layer.objects.gs_catalog.save(self.publishing)
 
-    def  _populate_from_gs(self):
+    def _populate_from_gs(self):
         gs_resource = Layer.objects.gs_catalog.get_resource(self.name)
         if gs_resource is None:
             return
@@ -1098,17 +1183,17 @@ class Layer(models.Model, PermissionLevelMixin):
         if self.geographic_bounding_box is '' or self.geographic_bounding_box is None:
             self.set_bbox(gs_resource.native_bbox, srs=srs)
 
-    def _autopopulate(self):
-        if self.poc is None:
-            self.poc = Layer.objects.default_poc()
-        if self.metadata_author is None:
-            self.metadata_author = Layer.objects.default_metadata_author()
-        if self.abstract == '' or self.abstract is None:
-            self.abstract = 'No abstract provided'
-        if self.title == '' or self.title is None:
-            self.title = self.name
+#    def _autopopulate(self):
+#        if self.poc is None:
+#            self.poc = Layer.objects.default_poc()
+#        if self.metadata_author is None:
+#            self.metadata_author = Layer.objects.default_metadata_author()
+#        if self.abstract == '' or self.abstract is None:
+#            self.abstract = 'No abstract provided'
+#        if self.title == '' or self.title is None:
+#            self.title = self.name
 
-    def _populate_from_gn(self):
+    def _populate_from_catalogue(self):
         meta = self.metadata_csw()
         if meta is None:
             return
@@ -1117,7 +1202,7 @@ class Layer(models.Model, PermissionLevelMixin):
                 meta.identification.keywords,
                 [])
         kw_list = filter(lambda x: x is not None, kw_list)
-        self.keywords = ' '.join(kw_list)
+        self.keywords = ','.join(kw_list)
         if hasattr(meta.distribution, 'online'):
             onlineresources = [r for r in meta.distribution.online if r.protocol == "WWW:LINK-1.0-http--link"]
             if len(onlineresources) == 1:
@@ -1129,7 +1214,7 @@ class Layer(models.Model, PermissionLevelMixin):
         if self.keywords is None or len(self.keywords) == 0:
             return []
         else:
-            return self.keywords.split()
+            return self.keywords.split(',')
 
     def set_bbox(self, box, srs=None):
         """
@@ -1159,20 +1244,6 @@ class Layer(models.Model, PermissionLevelMixin):
     LEVEL_WRITE = 'layer_readwrite'
     LEVEL_ADMIN = 'layer_admin'
                  
-    def set_default_permissions(self):
-        self.set_gen_level(ANONYMOUS_USERS, self.LEVEL_READ)
-        self.set_gen_level(AUTHENTICATED_USERS, self.LEVEL_READ) 
-
-        # remove specific user permissions
-        current_perms =  self.get_all_level_info()
-        for username in current_perms['users'].keys():
-            user = User.objects.get(username=username)
-            self.set_user_level(user, self.LEVEL_NONE)
-
-        # assign owner admin privs
-        if self.owner:
-            self.set_user_level(self.owner, self.LEVEL_ADMIN)
-
 
 class Map(models.Model, PermissionLevelMixin):
     """
@@ -1414,9 +1485,7 @@ class Map(models.Model, PermissionLevelMixin):
 
         # assign owner admin privs
         if self.owner:
-            self.set_user_level(self.owner, self.LEVEL_ADMIN)    
-
-
+            self.set_user_level(self.owner, self.LEVEL_ADMIN)  
 
 class MapLayerManager(models.Manager):
     def from_viewer_config(self, map, layer, source, ordering):
@@ -1631,38 +1700,38 @@ class ContactRole(models.Model):
     ContactRole is an intermediate model to bind Contacts and Layers and apply roles.
     """
     contact = models.ForeignKey(Contact)
-    layer = models.ForeignKey(Layer)
+    resource = models.ForeignKey(ResourceBase)
     role = models.ForeignKey(Role)
 
     def clean(self):
         """
-        Make sure there is only one poc and author per layer
+        Make sure there is only one poc and author per resource 
         """
-        if (self.role == self.layer.poc_role) or (self.role == self.layer.metadata_author_role):
-            contacts = self.layer.contacts.filter(contactrole__role=self.role)
+        if (self.role == self.resource.poc_role) or (self.role == self.resource.metadata_author_role):
+            contacts = self.resource.contacts.filter(contactrole__role=self.role)
             if contacts.count() == 1:
                  # only allow this if we are updating the same contact
                  if self.contact != contacts.get():
-                     raise ValidationError('There can be only one %s for a given layer' % self.role)
+                     raise ValidationError('There can be only one %s for a given resource' % self.role)
         if self.contact.user is None:
-            # verify that any unbound contact is only associated to one layer
+            # verify that any unbound contact is only associated to one resource 
             bounds = ContactRole.objects.filter(contact=self.contact).count()
             if bounds > 1:
-                raise ValidationError('There can be one and only one layer linked to an unbound contact' % self.role)
+                raise ValidationError('There can be one and only one resource linked to an unbound contact' % self.role)
             elif bounds == 1:
                 # verify that if there was one already, it corresponds to this instace
                 if ContactRole.objects.filter(contact=self.contact).get().id != self.id:
-                    raise ValidationError('There can be one and only one layer linked to an unbound contact' % self.role)
+                    raise ValidationError('There can be one and only one resource linked to an unbound contact' % self.role)
 
     class Meta:
-        unique_together = (("contact", "layer", "role"),)
+        unique_together = (("contact", "resource", "role"),)
 
 def delete_layer(instance, sender, **kwargs): 
     """
     Removes the layer from GeoServer and GeoNetwork
     """
     instance.delete_from_geoserver()
-    instance.delete_from_geonetwork()
+    instance.delete_from_catalogue()
 
 def post_save_layer(instance, sender, **kwargs):
     instance._autopopulate()
@@ -1671,10 +1740,10 @@ def post_save_layer(instance, sender, **kwargs):
     if kwargs['created']:
         instance._populate_from_gs()
 
-    instance.save_to_geonetwork()
+#    instance.save_to_catalogue()
 
     if kwargs['created']:
-        instance._populate_from_gn()
+#        instance._populate_from_catalogue()
         instance.save(force_update=True)
 
 signals.pre_delete.connect(delete_layer, sender=Layer)

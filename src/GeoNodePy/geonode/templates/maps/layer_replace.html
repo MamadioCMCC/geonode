@@ -85,7 +85,17 @@ Ext.onReady(function(){
         listeners: listeners
 
     });
-    form_fields = [layer_name, base_file, dbf_file, shx_file, prj_file];
+
+    var xml_file = new Ext.ux.form.FileUploadField({
+        id: 'xml_file',
+        emptyText: gettext('Select a .xml metadata file (ISO, Dublin Core, FGDC [optional])'),
+        fieldLabel: gettext('XML'),
+        name: 'xml_file',
+        allowBlank: true,
+        listeners: listeners
+    });
+
+    form_fields = [layer_name, base_file, dbf_file, shx_file, prj_file, xml_file];
   }
   else {
     var base_file = new Ext.ux.form.FileUploadField({
@@ -153,7 +163,7 @@ Ext.onReady(function(){
 
 
 {% block sidebar %}
-<h3>{%trans "Update Layer"  %} "{{layer.name}}"</h3>
+<h3>{%trans "Update Layer"  %} "{{ layer.resource.title|default:layer.typename }}"</h3>
 <p>{% trans "This form allows you to update the data for this layer."  %}</p>
 <p>{% blocktrans %}
 If the new dataset omits attributes that were included in the previous version,

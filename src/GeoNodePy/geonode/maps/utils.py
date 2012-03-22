@@ -12,6 +12,7 @@ import traceback
 import inspect
 import string
 import urllib2
+from lxml import etree
 import glob
 from itertools import cycle, izip
 
@@ -32,11 +33,12 @@ import geoserver
 from geoserver.catalog import FailedRequestError
 from geoserver.resource import FeatureType, Coverage
 
+# CSW functionality
+from geonode.catalogue.catalogue import gen_iso_xml, gen_anytext
 
 logger = logging.getLogger('geonode.maps.utils')
 _separator = '\n' + ('-' * 100) + '\n'
 import math
-
 
 class GeoNodeException(Exception):
     """Base class for exceptions in this module."""
@@ -97,6 +99,15 @@ def get_files(filename):
         files['sld'] = matches[0]
     elif len(matches) > 1:
         msg = ('Multiple style files for %s exist; they need to be '
+               'distinct by spelling and not just case.') % filename
+        raise GeoNodeException(msg)
+
+    matches = glob.glob(base_name + ".[xX][mM][lL]")
+
+    if len(matches) == 1:
+        files['xml'] = matches[0]
+    elif len(matches) > 1:
+        msg = ('Multiple XML files for %s exist; they need to be '
                'distinct by spelling and not just case.') % filename
         raise GeoNodeException(msg)
 
@@ -195,8 +206,8 @@ def cleanup(name, uuid):
        except:
            logger.exception("Couldn't delete GeoServer store during cleanup()")
 
-   gn = Layer.objects.geonetwork
-   csw_record = gn.get_by_uuid(uuid)
+   cat = Layer.objects.catalogue
+   csw_record = cat.get_by_uuid(uuid)
    if csw_record is not None:
        logger.warning('Deleting dangling GeoNetwork record for [%s] '
                       '(no Django record to match)', name)
@@ -204,7 +215,7 @@ def cleanup(name, uuid):
            # this is a bit hacky, delete_layer expects an instance of the layer
            # model but it just passes it to a Django template so a dict works
            # too.
-           gn.delete_layer({ "uuid": uuid })
+           cat.delete_layer({ "uuid": uuid }) 
        except:
            logger.exception('Couldn\'t delete GeoNetwork record '
                             'during cleanup()')
@@ -414,17 +425,19 @@ def save(layer, base_file, user, overwrite = True, title=None,
     # FIXME: Do this inside the layer object
     typename = gs_resource.store.workspace.name + ':' + gs_resource.name
     layer_uuid = str(uuid.uuid1())
-    defaults = dict(store=gs_resource.store.name,
-                    storeType=gs_resource.store.resource_type,
-                    typename=typename,
-                    title=title or gs_resource.title,
-                    uuid=layer_uuid,
-                    keywords=' '.join(keywords),
-                    abstract=abstract or gs_resource.abstract or '',
-                    owner=user)
-    saved_layer, created = Layer.objects.get_or_create(name=gs_resource.name,
-                                                       workspace=gs_resource.store.workspace.name,
-                                                       defaults=defaults)
+
+    saved_layer, created = Layer.objects.get_or_create(name=gs_resource.name, defaults=dict(
+                                 store=gs_resource.store.name,
+                                 storeType=gs_resource.store.resource_type,
+                                 typename=typename,
+                                 workspace=gs_resource.store.workspace.name,
+                                 title=title or gs_resource.title,
+                                 uuid=layer_uuid,
+                                 keywords=','.join(keywords),
+                                 abstract=abstract or gs_resource.abstract or '',
+                                 owner=user,
+                                 )
+    )
 
     if created:
         saved_layer.set_default_permissions()
@@ -443,7 +456,33 @@ def save(layer, base_file, user, overwrite = True, title=None,
     saved_layer.poc = poc_contact
     saved_layer.metadata_author = author_contact
 
-    saved_layer.save_to_geonetwork()
+    logger.info('>>> Step XML. If an XML metadata document was passed, process it')
+    # Step XML.  If an XML metadata document is uploaded,
+    # parse the XML metadata and update uuid and URLs as per the content model
+
+    if 'xml' in files:
+        md_xml, md_title, md_abstract = update_metadata(layer_uuid, open(files['xml']).read(), saved_layer)
+        Layer.objects.filter(uuid=layer_uuid).update(
+            metadata_xml=md_xml,
+            metadata_uploaded=True,
+            title=md_title,
+            abstract=md_abstract,
+        )
+        saved_layer.metadata_xml = md_xml
+        saved_layer.title = md_title
+        saved_layer.abstract = md_abstract
+        saved_layer.metadata_uploaded = True
+
+#    # add to CSW catalogue
+#    saved_layer.save_to_catalogue()
+
+    # save XML doc
+    xml_doc = gen_iso_xml(saved_layer)
+    Layer.objects.filter(uuid=layer_uuid).update(metadata_xml=xml_doc)
+
+    # grab anytext
+    Layer.objects.filter(uuid=layer_uuid).update(csw_anytext=gen_anytext(xml_doc))
+    #saved_layer.anytext = gen_anytext(xml_doc)
 
     # Step 11. Set default permissions on the newly created layer
     # FIXME: Do this as part of the post_save hook
@@ -460,8 +499,7 @@ def save(layer, base_file, user, overwrite = True, title=None,
     try:
         Layer.objects.get(name=name)
     except Layer.DoesNotExist, e:
-        msg = ('There was a problem saving the layer %s to GeoNetwork/Django. '
-               'Error is: %s' % (layer, str(e)))
+        msg = ('There was a problem saving the layer %s to %s/Django. Error is: %s' % (settings.CSW['type'], layer, str(e)))
         logger.exception(msg)
         logger.debug('Attempting to clean up after failed save for layer '
                      '[%s]', name)
@@ -469,18 +507,16 @@ def save(layer, base_file, user, overwrite = True, title=None,
         cleanup(name, layer_uuid)
         raise GeoNodeException(msg)
 
-    # Verify it is correctly linked to GeoServer and GeoNetwork
+    # Verify it is correctly linked to GeoServer and the catalogue
     try:
-        # FIXME: Implement a verify method that makes sure it was
-        # saved in both GeoNetwork and GeoServer
+        #FIXME: Implement a verify method that makes sure it was saved in both the catalogue and GeoServer
         saved_layer.verify()
     except NotImplementedError, e:
         logger.exception('>>> FIXME: Please, if you can write python code, '
                          'implement "verify()" '
                          'method in geonode.maps.models.Layer')
     except GeoNodeException, e:
-        msg = ('The layer [%s] was not correctly saved to '
-               'GeoNetwork/GeoServer. Error is: %s' % (layer, str(e)))
+        msg = ('The layer [%s] was not correctly saved to %s/GeoServer. Error is: %s' % (settings.CSW['type'], layer, str(e)))
         logger.exception(msg)
         e.args = (msg,)
         # Deleting the layer
@@ -538,12 +574,11 @@ def check_geonode_is_up():
         raise GeoNodeException(msg)
 
     try:
-        Layer.objects.gn_catalog.login()
+        Layer.objects.csw_catalogue.login()
     except:
         from django.conf import settings
-        msg = ('Cannot connect to the GeoNetwork at %s\n'
-               'Please make sure you have started '
-               'GeoNetwork.' % settings.GEONETWORK_BASE_URL)
+        msg = ("Cannot connect to the Catalogue at %s\n"
+                "Please make sure you have started the CSW." % settings.CSW['url'])
         raise GeoNodeException(msg)
 
 def file_upload(filename, user=None, title=None, overwrite=True, keywords=[]):
@@ -627,6 +662,179 @@ def upload(incoming, user=None, overwrite=True, keywords = []):
                         results.append({'file': filename, 'name': layer.name})
         return results
 
+def update_metadata(layer_uuid, xml, saved_layer):
+    logger.info('>>> Step XML. If an XML metadata document was passed, process it')
+    # Step XML.  If an XML metadata document is uploaded,
+    # parse the XML metadata and update uuid and URLs as per the content model
+
+    # check if document is XML
+    try:
+        exml = etree.fromstring(xml)
+    except Exception, err:
+        raise GeoNodeException('Uploaded XML document is not XML: %s' % str(err))
+
+    # check if document is an accepted XML metadata format
+    try:
+        tagname = exml.tag.split('}')[1]
+    except:
+        tagname = exml.tag
+
+    # update relevant XML
+    layer_updated = saved_layer.date.strftime('%Y-%m-%dT%H:%M:%SZ') 
+
+    if tagname != 'MD_Metadata' and settings.CSW['type'] != 'pycsw':
+        raise GeoNodeException('Only ISO XML is supported')
+
+    if tagname == 'Record':  # Dublin Core
+        dc_ns = '{http://purl.org/dc/elements/1.1/}'
+        dct_ns ='{http://purl.org/dc/terms/}'
+
+        children = exml.getchildren()
+
+        # set/update identifier
+        xname = exml.find('%sidentifier' % dc_ns)
+        if xname is None:  # doesn't exist, insert it
+            value = etree.Element('%sidentifier' % dc_ns)
+            value.text = layer_uuid
+            children.insert(0, value)
+        else:  # exists, update it
+            xname.text = layer_uuid
+
+        xname = exml.find('%smodified' % dct_ns)
+        if xname is None:  # doesn't exist, insert it
+            value = etree.Element('%smodified' % dct_ns)
+            value.text = layer_updated
+            children.insert(3, value)
+        else:  # exists, update it
+            xname.text = layer_updated
+
+        # set/update URLs
+        http_link = etree.Element('%sreferences' % dct_ns, scheme='WWW:LINK-1.0-http--link')
+        http_link.text = '%s%s' % (settings.SITEURL, saved_layer.get_absolute_url())
+        children.insert(-2, http_link)
+
+        for extension, dformat, link in saved_layer.download_links():
+            http_link = etree.Element('%sreferences' % dct_ns, scheme='WWW:DOWNLOAD-1.0-http--download')
+            http_link.text = link
+            children.insert(-2, http_link)
+
+        from owslib.csw import CswRecord
+        # set django properties
+        csw_exml = CswRecord(exml)
+        md_title = csw_exml.title
+        md_abstract = csw_exml.abstract
+
+    elif tagname == 'MD_Metadata':
+        gmd_ns = 'http://www.isotc211.org/2005/gmd'
+        gco_ns = 'http://www.isotc211.org/2005/gco'
+
+        # set/update gmd:fileIdentifier
+        xname = exml.find('{%s}fileIdentifier' % gmd_ns)
+        if xname is None:  # doesn't exist, insert it
+            children = exml.getchildren()
+            fileid = etree.Element('{%s}fileIdentifier' % gmd_ns)
+            etree.SubElement(fileid, '{%s}CharacterString' % gco_ns).text = layer_uuid
+            children.insert(0, fileid)
+        else:  # gmd:fileIdentifier exists, check for gco:CharacterString
+            value = xname.find('{%s}CharacterString' % gco_ns)
+            if value is None:
+                etree.SubElement(xname, '{%s}CharacterString' % gco_ns).text = layer_uuid
+            else:
+                value.text = layer_uuid
+
+        # set/update gmd:dateStamp
+        xname = exml.find('{%s}dateStamp' % gmd_ns)
+        if xname is None:  # doesn't exist, insert it
+            children = exml.getchildren()
+            datestamp = etree.Element('{%s}dateStamp' % gmd_ns)
+            etree.SubElement(datestamp, '{%s}DateTime' % gco_ns).text = layer_updated
+            children.insert(4, datestamp)
+        else:  # gmd:dateStamp exists, check for gco:Date or gco:DateTime
+            value = xname.find('{%s}Date' % gco_ns)
+            value2 = xname.find('{%s}DateTime' % gco_ns)
+
+            if value is None and value2 is not None:  # set gco:DateTime
+                value2.text = layer_updated
+            elif value is not None and value2 is None:  # set gco:Date
+                value.text = saved_layer.date.strftime('%Y-%m-%d')
+            elif value is None and value2 is None:
+                etree.SubElement(xname, '{%s}DateTime' % gco_ns).text = layer_updated
+
+        # set/update URLs
+        children = exml.getchildren()
+        distinfo = etree.Element('{%s}distributionInfo' % gmd_ns)
+        distinfo2 = etree.SubElement(distinfo, '{%s}MD_Distribution' % gmd_ns)
+        transopts = etree.SubElement(distinfo2, '{%s}transferOptions' % gmd_ns)
+        transopts2 = etree.SubElement(transopts, '{%s}MD_DigitalTransferOptions' % gmd_ns)
+
+        online = etree.SubElement(transopts2, '{%s}onLine' % gmd_ns)
+        online2 = etree.SubElement(online, '{%s}CI_OnlineResource' % gmd_ns)
+        linkage = etree.SubElement(online2, '{%s}linkage' % gmd_ns)
+        etree.SubElement(linkage, '{%s}URL' % gmd_ns).text = '%s%s' % (settings.SITEURL, saved_layer.get_absolute_url())
+        protocol = etree.SubElement(online2, '{%s}protocol' % gmd_ns)
+        etree.SubElement(protocol, '{%s}CharacterString' % gco_ns).text = 'WWW:LINK-1.0-http--link'
+
+        for extension, dformat, link in saved_layer.download_links():
+            online = etree.SubElement(transopts2, '{%s}onLine' % gmd_ns)
+            online2 = etree.SubElement(online, '{%s}CI_OnlineResource' % gmd_ns)
+            linkage = etree.SubElement(online2, '{%s}linkage' % gmd_ns)
+
+            etree.SubElement(linkage, '{%s}URL' % gmd_ns).text = link or ''
+            protocol = etree.SubElement(online2, '{%s}protocol' % gmd_ns)
+            etree.SubElement(protocol, '{%s}CharacterString' % gco_ns).text = 'WWW:DOWNLOAD-1.0-http--download'
+            lname = etree.SubElement(online2, '{%s}name' % gmd_ns)
+            etree.SubElement(lname, '{%s}CharacterString' % gco_ns).text = extension or ''
+            ldesc = etree.SubElement(online2, '{%s}description' % gmd_ns)
+            etree.SubElement(ldesc, '{%s}CharacterString' % gco_ns).text = dformat or ''
+
+        children.insert(-2, distinfo)
+
+        from owslib.iso import MD_Metadata
+        iso_exml = MD_Metadata(exml)
+        md_title = iso_exml.identification.title
+        md_abstract = iso_exml.identification.abstract
+
+    elif tagname == 'metadata':  # FGDC
+        # set/update identifier
+        xname = exml.find('idinfo/datasetid')
+        if xname is None:  # doesn't exist, insert it
+            children = exml.find('idinfo').getchildren()
+            value = etree.Element('datasetid')
+            value.text = layer_uuid
+            children.insert(0, value)
+        else:  # exists, update it
+            xname.text = layer_uuid
+
+        xname = exml.find('metainfo/metd')
+        if xname is None:  # doesn't exist, insert it
+            value = etree.Element('metd')
+            value.text = layer_updated
+            exml.find('metainfo').append(value)
+        else:  # exists, update it
+            xname.text = layer_updated
+
+        # set/update URLs
+        citeinfo = exml.find('idinfo/citation/citeinfo')
+        http_link = etree.Element('onlink')
+        http_link.attrib['type'] = 'WWW:LINK-1.0-http--link'
+        http_link.text = '%s%s' % (settings.SITEURL, saved_layer.get_absolute_url())
+        citeinfo.append(http_link)
+
+        for extension, dformat, dtype, link in saved_layer.download_links():
+            http_link = etree.Element('onlink')
+            http_link.attrib['type'] = dtype
+            http_link.text = link
+            citeinfo.append(http_link)
+
+        from owslib.fgdc import Metadata as FGDC_Metadata
+        fgdc_exml = FGDC_Metadata(exml)
+        md_title = fgdc_exml.idinfo.citation.citeinfo['title'] 
+        md_abstract = fgdc_exml.idinfo.descript.abstract
+
+    else:
+        raise GeoNodeException('Unsupported metadata format')
+
+    return [etree.tostring(exml), md_title, md_abstract]
 
 def _create_db_featurestore(name, data, overwrite = False, charset = None):
     """Create a database store then use it to import a shapefile.
