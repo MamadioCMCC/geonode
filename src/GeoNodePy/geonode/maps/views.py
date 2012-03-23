@@ -30,6 +30,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_response_exempt
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
 import logging
+import taggit
 from geonode.maps.utils import forward_mercator
 from geonode.catalogue.catalogue import gen_iso_xml, gen_anytext
 
@@ -68,6 +69,7 @@ def bbox_to_wkt(x0, x1, y0, y1, srid="4326"):
     return 'SRID='+srid+';POLYGON(('+x0+' '+y0+','+x0+' '+y1+','+x1+' '+y1+','+x1+' '+y0+','+x0+' '+y0+'))'
 
 class ContactForm(forms.ModelForm):
+    keywords = taggit.forms.TagField()
     class Meta:
         model = Contact
         exclude = ('user',)
@@ -86,7 +88,7 @@ class LayerForm(forms.ModelForm):
     metadata_author = forms.ModelChoiceField(empty_label = "Person outside GeoNode (fill form)",
                                              label = "Metadata Author", required=False,
                                              queryset = Contact.objects.exclude(user=None))
-
+    keywords = taggit.forms.TagField()
     class Meta:
         model = Layer
         exclude = ('contacts','workspace', 'store', 'name', 'uuid', 'storeType', 'typename', 'metadata_uploaded', 'metadata_xml', 'csw_typename', 'csw_schema', 'csw_mdsource', 'csw_anytext')
@@ -101,6 +103,7 @@ class PocForm(forms.Form):
                                      queryset = Contact.objects.exclude(user=None))
 
 class MapForm(forms.ModelForm):
+    keywords = taggit.forms.TagField()
     class Meta:
         model = Map
         exclude = ('contact', 'zoom', 'projection', 'center_x', 'center_y', 'owner')
@@ -613,7 +616,12 @@ def describemap(request, mapid):
         # Change metadata, return to map info page
         map_form = MapForm(request.POST, instance=map, prefix="map")
         if map_form.is_valid():
-            map_form.save()
+            map = map_form.save(commit=False)
+            if map_form.cleaned_data["keywords"]:
+                map.keywords.add(*map_form.cleaned_data["keywords"])
+            else:
+                map.keywords.clear()
+            map.save()
 
             return HttpResponseRedirect(reverse('geonode.maps.views.map_controller', args=(map.id,)))
     else:
@@ -721,6 +729,7 @@ def layer_metadata(request, layername):
         if request.method == "POST" and layer_form.is_valid():
             new_poc = layer_form.cleaned_data['poc']
             new_author = layer_form.cleaned_data['metadata_author']
+            new_keywords = layer_form.cleaned_data['keywords']
 
             if new_poc is None:
                 poc_form = ContactForm(request.POST, prefix="poc")
@@ -739,6 +748,7 @@ def layer_metadata(request, layername):
                 xml_doc = gen_iso_xml(the_layer)
                 the_layer.metadata_xml=xml_doc
                 the_layer.csw_anytext = gen_anytext(xml_doc)
+                the_layer.keywords.add(*new_keywords)
                 the_layer.save()
                 return HttpResponseRedirect("/data/" + layer.typename)
 

@@ -243,6 +243,7 @@ INSTALLED_APPS = (
     'registration',
     'profiles',
     'avatar',
+    'taggit',
     'south',
     'haystack',
     
