@@ -1433,6 +1433,164 @@ def _build_search_result(rec, csw):
 def browse_data(request):
     return render_to_response('data.html', RequestContext(request, {}))
 
+def search_page(request):
+    DEFAULT_MAP_CONFIG, DEFAULT_BASE_LAYERS = default_map_config()
+    # for non-ajax requests, render a generic search page
+
+    if request.method == 'GET':
+        params = request.GET
+    elif request.method == 'POST':
+        params = request.POST
+    else:
+        return HttpResponse(status=405)
+
+    map = Map(projection="EPSG:900913", zoom = 1, center_x = 0, center_y = 0)
+
+    return render_to_response('search.html', RequestContext(request, {
+        'init_search': json.dumps(params or {}),
+        'viewer_config': json.dumps(map.viewer_json(*DEFAULT_BASE_LAYERS)),
+        'GOOGLE_API_KEY' : settings.GOOGLE_API_KEY,
+        "site" : settings.SITEURL
+    }))
+
+#### MAPS SEARCHING ####
+
+DEFAULT_MAPS_SEARCH_BATCH_SIZE = 10
+MAX_MAPS_SEARCH_BATCH_SIZE = 25
+@csrf_exempt
+def maps_search(request):
+    """
+    handles a basic search for maps using the
+    GeoNetwork catalog.
+
+    the search accepts:
+    q - general query for keywords across all fields
+    start - skip to this point in the results
+    limit - max records to return
+    sort - field to sort results on
+    dir - ASC or DESC, for ascending or descending order
+
+    for ajax requests, the search returns a json structure
+    like this:
+
+    {
+    'total': <total result count>,
+    'next': <url for next batch if exists>,
+    'prev': <url for previous batch if exists>,
+    'query_info': {
+        'start': <integer indicating where this batch starts>,
+        'limit': <integer indicating the batch size used>,
+        'q': <keywords used to query>,
+    },
+    'rows': [
+      {
+        'title': <map title,
+        'abstract': '...',
+        'detail' : <url geonode detail page>,
+        'owner': <name of the map's owner>,
+        'owner_detail': <url of owner's profile page>,
+        'last_modified': <date and time of last modification>
+      },
+      ...
+    ]}
+    """
+    if request.method == 'GET':
+        params = request.GET
+    elif request.method == 'POST':
+        params = request.POST
+    else:
+        return HttpResponse(status=405)
+
+    # grab params directly to implement defaults as
+    # opposed to panicy django forms behavior.
+    query = params.get('q', '')
+    try:
+        start = int(params.get('start', '0'))
+    except:
+        start = 0
+    try:
+        limit = min(int(params.get('limit', DEFAULT_MAPS_SEARCH_BATCH_SIZE)),
+                    MAX_MAPS_SEARCH_BATCH_SIZE)
+    except:
+        limit = DEFAULT_MAPS_SEARCH_BATCH_SIZE
+
+
+    sort_field = params.get('sort', u'')
+    sort_field = unicodedata.normalize('NFKD', sort_field).encode('ascii','ignore')
+    sort_dir = params.get('dir', 'ASC')
+    result = _maps_search(query, start, limit, sort_field, sort_dir)
+
+    result['success'] = True
+    return HttpResponse(json.dumps(result), mimetype="application/json")
+
+def _maps_search(query, start, limit, sort_field, sort_dir):
+
+    keywords = _split_query(query)
+
+    maps = Map.objects
+    for keyword in keywords:
+        maps = maps.filter(
+              Q(title__icontains=keyword)
+            | Q(abstract__icontains=keyword))
+
+    if sort_field:
+        order_by = ("" if sort_dir == "ASC" else "-") + sort_field
+        maps = maps.order_by(order_by)
+
+    maps_list = []
+
+    for map in maps.all()[start:start+limit]:
+        try:
+            owner_name = Contact.objects.get(user=map.owner).name
+        except:
+            owner_name = map.owner.first_name + " " + map.owner.last_name
+
+        mapdict = {
+            'id' : map.id,
+            'title' : map.title,
+            'abstract' : map.abstract,
+            'detail' : reverse('geonode.maps.views.map_controller', args=(map.id,)),
+            'owner' : owner_name,
+            #'owner_detail' : reverse('profile_detail', kwargs=({'username': map.owner.username})), 
+            'last_modified' : map.last_modified.isoformat()
+            }
+        maps_list.append(mapdict)
+
+    result = {'rows': maps_list,
+              'total': maps.count()}
+
+    result['query_info'] = {
+        'start': start,
+        'limit': limit,
+        'q': query
+    }
+    if start > 0:
+        prev = max(start - limit, 0)
+        params = urlencode({'q': query, 'start': prev, 'limit': limit})
+        result['prev'] = reverse('geonode.maps.views.maps_search') + '?' + params
+
+    next = start + limit + 1
+    if next < maps.count():
+         params = urlencode({'q': query, 'start': next - 1, 'limit': limit})
+         result['next'] = reverse('geonode.maps.views.maps_search') + '?' + params
+
+    return result
+
+@csrf_exempt
+def maps_search_page(request):
+    # for non-ajax requests, render a generic search page
+
+    if request.method == 'GET':
+        params = request.GET
+    elif request.method == 'POST':
+        params = request.POST
+    else:
+        return HttpResponse(status=405)
+
+    return render_to_response('maps_search.html', RequestContext(request, {
+        'init_search': json.dumps(params or {}),
+         "site" : settings.SITEURL
+    }))
 
 def change_poc(request, ids, template='maps/change_poc.html'):
     layers = Layer.objects.filter(id__in=ids.split('_'))
