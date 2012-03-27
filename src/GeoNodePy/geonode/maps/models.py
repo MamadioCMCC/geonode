@@ -730,8 +730,13 @@ class ResourceBase(models.Model, PermissionLevelMixin):
     csw_type = models.CharField(_('type'), max_length=32, default='dataset', null=False, choices=[(x, x) for x in TYPE_VALUES])
     csw_anytext = models.TextField(_('anytext'), null=False)
     
-
-
+    @property
+    def keywords_str(self):
+        keywords_qs = self.keywords.all()
+        if keywords_qs:
+            return ",".join([kw.name for kw in keywords_qs]) 
+        else:
+            return "" 
 
 
     def datetime2iso(self):
