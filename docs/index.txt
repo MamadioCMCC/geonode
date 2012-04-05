@@ -56,7 +56,8 @@ Administrators are expected to have some experience with Linux systems but they 
  * :doc:`Customizing the Look and Feel of GeoNode <deploy/customize>`
  * :doc:`Debugging GeoNode Installations <deploy/debug>`
  * :doc:`Configuring Alternate CSW Backends <deploy/csw>`
-
+ * :doc:`Running GeoNode under SSL <deploy/ssl>`
+ * :doc:`Changing the Default Language <deploy/language>`
 
 .. toctree::
     :hidden:
@@ -66,6 +67,8 @@ Administrators are expected to have some experience with Linux systems but they 
     deploy/production
     deploy/customize
     deploy/debug
+    deploy/ssl
+    deploy/language
 
 For Developers
 ==============

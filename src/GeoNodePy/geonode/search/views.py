@@ -30,7 +30,8 @@ def search(request):
         "GOOGLE_API_KEY": settings.GOOGLE_API_KEY,
         "site": settings.SITEURL,
         "counts": counts,
-        "keywords": Layer.objects.gn_catalog.get_all_keywords()
+        #"keywords": Layer.objects.gn_catalog.get_all_keywords()
+        "keywords": ""
     }))
 
 
