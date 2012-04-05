@@ -91,7 +91,7 @@ class LayerForm(forms.ModelForm):
     keywords = taggit.forms.TagField()
     class Meta:
         model = Layer
-        exclude = ('contacts','workspace', 'store', 'name', 'uuid', 'storeType', 'typename', 'metadata_uploaded', 'metadata_xml', 'csw_typename', 'csw_schema', 'csw_mdsource', 'csw_anytext')
+        exclude = ('contacts','workspace', 'store', 'name', 'uuid', 'storeType', 'typename', 'metadata_uploaded', 'metadata_xml', 'csw_typename', 'csw_schema', 'csw_mdsource', 'csw_anytext', 'publisher', 'creator')
 
 class RoleForm(forms.ModelForm):
     class Meta:
@@ -749,6 +749,14 @@ def layer_metadata(request, layername):
                 the_layer.metadata_xml=xml_doc
                 the_layer.csw_anytext = gen_anytext(xml_doc)
                 the_layer.keywords.add(*new_keywords)
+                the_layer.spatial_representation_type = layer_form.cleaned_data['spatial_representation_type']
+                the_layer.edition = layer_form.cleaned_data['edition']
+                the_layer.purpose = layer_form.cleaned_data['purpose']
+                the_layer.maintenance_frequency = layer_form.cleaned_data['maintenance_frequency']
+                the_layer.constraints_access = layer_form.cleaned_data['constraints_access']
+                the_layer.constraints_other = layer_form.cleaned_data['constraints_other']
+                the_layer.data_quality_statement = layer_form.cleaned_data['data_quality_statement']
+                the_layer.supplemental_information = layer_form.cleaned_data['supplemental_information']
                 the_layer.save()
                 return HttpResponseRedirect("/data/" + layer.typename)
 
@@ -947,7 +955,7 @@ def layer_replace(request, layername):
         if layer.metadata_uploaded:  # it's an XML metadata upload update
             # save the XML file to django and catalogue
 
-            from geonode.maps.utils import update_metadata
+            from geonode.maps.utils import update_metadata, set_metadata
 
             form = LayerMetadataUploadForm(request.POST, request.FILES)
 
@@ -955,7 +963,8 @@ def layer_replace(request, layername):
                 try:
                     layer_to_update = Layer.objects.get_or_create(typename=layer.typename)[0]
 
-                    md_xml, md_title, md_abstract = update_metadata(layer.uuid, form.cleaned_data['xml_file'].read(), layer_to_update)
+                    xml_file = form.cleaned_data['xml_file'].read()
+                    md_xml, md_title, md_abstract = update_metadata(layer.uuid, xml_file, layer_to_update)
 
                     Layer.objects.filter(typename=layer.typename).update(
                         metadata_xml=md_xml,
@@ -967,6 +976,10 @@ def layer_replace(request, layername):
                     layer_to_update.title = md_title
                     layer_to_update.abstract = md_abstract
                     layer_to_update.save_to_catalogue()
+
+                    vals = set_metadata(xml_file, layer_to_update)
+                    Layer.objects.filter(typename=layer.typename).update(**vals)
+                    Layer.objects.filter(typename=layer.typename).update(csw_anytext=gen_anytext(md_xml))
 
                     return HttpResponse(json.dumps({
                         "success": True,

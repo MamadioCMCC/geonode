@@ -492,16 +492,6 @@ TYPE_VALUES = [
     "dimensionGroup"
 ]
 
-DEFAULT_SUPPLEMENTAL_INFORMATION=_(
-'You can customize the template to suit your \
-needs. You can add and remove fields and fill out default \
-information (e.g. contact details). Fields you can not change in \
-the default view may be accessible in the more comprehensive (and \
-more complex) advanced view. You can even use the XML editor to \
-create custom structures, but they have to be validated by the \
-system, so know what you do :-)'
-)
-
 VALID_DATE_TYPES = [(lower(x), _(x)) for x in ['Creation', 'Publication', 'Revision']]
 
 class GeoNodeException(Exception):
@@ -712,7 +702,7 @@ class ResourceBase(models.Model, PermissionLevelMixin):
     temporal_extent_start = models.DateField(_('temporal extent start'), blank=True, null=True)
     temporal_extent_end = models.DateField(_('temporal extent end'), blank=True, null=True)
     geographic_bounding_box = models.TextField(_('geographic bounding box'))
-    supplemental_information = models.TextField(_('supplemental information'), default=DEFAULT_SUPPLEMENTAL_INFORMATION)
+    supplemental_information = models.TextField(_('supplemental information'), blank=True, null=True)
 
     # Section 6
     distribution_url = models.TextField(_('distribution URL'), blank=True, null=True)
@@ -1104,19 +1094,21 @@ class Layer(ResourceBase):
         cascading_delete(Layer.objects.gs_catalog, self.resource)
 
     def delete_from_catalogue(self):
-        cat = Layer.objects.csw_catalogue
-        cat.delete_layer(self)
-        cat.logout()
+        if not settings.CSW['localdb']:
+            cat = Layer.objects.csw_catalogue
+            cat.delete_layer(self)
+            cat.logout()
 
     def save_to_catalogue(self):
-        cat = Layer.objects.csw_catalogue
-        record = cat.get_by_uuid(self.uuid)
-        if record is None:
-            md_link = cat.create_from_layer(self)
-            self.metadata_links = [("text/xml", "TC211", md_link)]
-        else:
-            cat.update_layer(self)
-        cat.logout()
+        if not settings.CSW['localdb']:
+            cat = Layer.objects.csw_catalogue
+            record = cat.get_by_uuid(self.uuid)
+            if record is None:
+                md_link = cat.create_from_layer(self)
+                self.metadata_links = [("text/xml", "TC211", md_link)]
+            else:
+                cat.update_layer(self)
+            cat.logout()
 
     @property
     def resource(self):
@@ -1757,7 +1749,8 @@ def delete_layer(instance, sender, **kwargs):
     Removes the layer from GeoServer and GeoNetwork
     """
     instance.delete_from_geoserver()
-    instance.delete_from_catalogue()
+    if not settings.CSW['localdb']:
+        instance.delete_from_catalogue()
 
 def post_save_layer(instance, sender, **kwargs):
     instance._autopopulate()
@@ -1766,10 +1759,12 @@ def post_save_layer(instance, sender, **kwargs):
     if kwargs['created']:
         instance._populate_from_gs()
 
-#    instance.save_to_catalogue()
+    if not settings.CSW['localdb']:
+        instance.save_to_catalogue()
 
     if kwargs['created']:
-#        instance._populate_from_catalogue()
+        if not settings.CSW['localdb']:
+            instance._populate_from_catalogue()
         instance.save(force_update=True)
 
 
