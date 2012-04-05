@@ -27,6 +27,7 @@ target
 /src/avatar/
 /src/django-haystack/
 /src/nosexcover/
+/src/pyelasticsearch/
 /webapps/
 /src/GeoNodePy/capra/development.db
 /man
