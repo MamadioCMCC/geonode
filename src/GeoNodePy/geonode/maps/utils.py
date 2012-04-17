@@ -15,6 +15,7 @@ import urllib2
 from lxml import etree
 import glob
 from itertools import cycle, izip
+#from xml.etree import ElementTree as etree
 
 # Django functionality
 from django.db import transaction
@@ -828,6 +829,13 @@ def update_metadata(layer_uuid, xml, saved_layer):
             citeinfo.append(http_link)
 
         fgdc_exml = Metadata(exml)
+        from owslib.fgdc import Metadata as FGDC_Metadata
+
+
+        with open('/tmp/fff.txt','w') as ff:
+            ff.write(str(etree.tostring(exml)))
+
+        fgdc_exml = FGDC_Metadata(exml)
         md_title = fgdc_exml.idinfo.citation.citeinfo['title'] 
         md_abstract = fgdc_exml.idinfo.descript.abstract
 
