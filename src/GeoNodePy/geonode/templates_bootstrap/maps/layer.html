@@ -135,7 +135,7 @@
   <div id="preview_map"></div>
 
   {% if layer.display_type %}<p> <strong>{% trans "Type" %}:</strong> {{ layer.display_type }} </p>{% endif %}
-  {% if layer.keywords %}<p> <strong>{% trans "Keywords" %}:</strong> {{ layer.keywords }}</p>{% endif %}
+  {% if layer.keywords %}<p> <strong>{% trans "Keywords" %}:</strong> {{ layer.keywords.all }}</p>{% endif %}
   {% if layer.edition %}<p> <strong>{% trans "Edition" %}:</strong> {{ layer.edition }}</p>{% endif %}
   {% if layer.topic_category %}<p> <strong>{% trans "Topic Category" %}:</strong> {{ layer.topic_category }}</p>{% endif %}
 
@@ -204,11 +204,17 @@
     {% endfor %}
 
     <li class="nav-header">{% trans "Download Metadata" %}</li>
-    {% for mimetype, mdtype, link in layer.metadata_links %}
-        <li><a href="{{ link }}">{{ mdtype }}</a></li>
-    {% empty %}
-        <li>{% trans "No metadata links provided for this data." %}</li>
-    {% endfor %}
+    <p> <strong>{% trans "Metadata" %}: </strong>
+            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://www.isotc211.org/2005/gmd&elementsetname=full">TC211</a></li>
+        {% if CSW_TYPE == 'pycsw' %}
+            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://www.opengis.net/cat/csw/2.0.2">Dublin Core</a></li>
+            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://www.opengis.net/cat/csw/csdgm">FGDC</a></li>
+            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://gcmd.gsfc.nasa.gov/Aboutus/xml/dif/">DIF</a></li>
+            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0">ebRIM</a></li>
+            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRepositoryItem&id={{uuid}}">Original Metadata</a></li>
+            <!--<li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=urn:us:mil:ces:metadata:ddms:4">DDMS</a></li>-->
+        {% endif %}
+    </p>
 
     <li class="nav-header">{% trans "The following maps use this data set" %}</li>
     {% for map in layer.maps %} 
