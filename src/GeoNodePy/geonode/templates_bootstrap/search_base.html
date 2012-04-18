@@ -22,7 +22,7 @@ Ext.onReady(function(){
         renderTo: 'search_results',
         trackSelection: true,
         permalinkURL: '{% url search %}',
-        searchURL: '{% url search_api %}',
+        searchURL: '{% url old_search_api %}',
         layerDetailURL: '{% url search_result_detail %}',
         constraints: [bbox],
         searchParams: {{init_search}}
