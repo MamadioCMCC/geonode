@@ -50,3 +50,7 @@ urlpatterns += geonode.proxy.urls.urlpatterns
 # Extra static file endpoint for development use
 if settings.SERVE_MEDIA:
     urlpatterns += staticfiles_urlpatterns()
+    urlpatterns += patterns("",
+        (r'^site_media/media/(?P<path>.*)$', 'django.views.static.serve',
+        {'document_root': settings.MEDIA_ROOT}),
+    )
