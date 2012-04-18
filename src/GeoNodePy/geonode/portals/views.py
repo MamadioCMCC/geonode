@@ -136,7 +136,6 @@ def portal_add_map(request, **kwargs):
 
     else:
         form = PortalMapForm(portal=portal)
-        print form.fields["portal"]
 
     return render_to_response("portals/map_add.html",
         {
