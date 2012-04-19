@@ -295,6 +295,7 @@ DB_DATASTORE_HOST = ''
 DB_DATASTORE_PORT = ''
 DB_DATASTORE_TYPE=''
 
+<<<<<<< HEAD
 # Agon Ratings
 AGON_RATINGS_CATEGORY_CHOICES = {
     "maps.Map": {
@@ -312,9 +313,15 @@ SOUTH_MIGRATION_MODULES = {
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
     },
+}
+
+SOUTH_MIGRATION_MODULES = {
+    'registration': 'geonode.migrations.registration',
+    'avatar': 'geonode.migrations.avatar',
 }
 
 try:
