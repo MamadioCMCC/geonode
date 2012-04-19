@@ -476,6 +476,7 @@ def save(layer, base_file, user, overwrite = True, title=None,
         saved_layer.metadata_uploaded = True
 
         vals = set_metadata(md_xml, saved_layer)
+
         Layer.objects.filter(uuid=layer_uuid).update(**vals)
 
     # add to CSW catalogue
@@ -831,10 +832,6 @@ def update_metadata(layer_uuid, xml, saved_layer):
         fgdc_exml = Metadata(exml)
         from owslib.fgdc import Metadata as FGDC_Metadata
 
-
-        with open('/tmp/fff.txt','w') as ff:
-            ff.write(str(etree.tostring(exml)))
-
         fgdc_exml = FGDC_Metadata(exml)
         md_title = fgdc_exml.idinfo.citation.citeinfo['title'] 
         md_abstract = fgdc_exml.idinfo.descript.abstract
@@ -878,10 +875,10 @@ def set_metadata(xml, saved_layer):
             if len(md.identification.topiccategory) > 0:
                 vals['topic_category'] = md.identification.topiccategory[0]
 
-            if (hasattr(md.identification, 'keywords') and
-            len(md.identification.keywords) > 0):
-                if None not in md.identification.keywords[0]['keywords']:
-                    vals['keywords'] = ','.join(md.identification.keywords[0]['keywords'])
+            #if (hasattr(md.identification, 'keywords') and
+            #len(md.identification.keywords) > 0):
+            #    if None not in md.identification.keywords[0]['keywords']:
+            #        vals['keywords'] = ','.join(md.identification.keywords[0]['keywords'])
 
             if hasattr(md.identification, 'creator'):
                 vals['creator'] = md.identification.creator
@@ -907,9 +904,9 @@ def set_metadata(xml, saved_layer):
         vals['csw_schema'] = 'http://www.opengis.net/cat/csw/csdgm'
         vals['spatial_representation_type'] = md.idinfo.citation.citeinfo['geoform']
 
-        if hasattr(md.idinfo, 'keywords'):
-            if md.idinfo.keywords.theme:
-                vals['keywords'] = ','.join(md.idinfo.keywords.theme[0]['themekey'])
+        #if hasattr(md.idinfo, 'keywords'):
+        #    if md.idinfo.keywords.theme:
+        #        vals['keywords'] = ','.join(md.idinfo.keywords.theme[0]['themekey'])
 
         if hasattr(md.idinfo.timeperd, 'timeinfo'):
             if hasattr(md.idinfo.timeperd.timeinfo, 'rngdates'):
@@ -932,7 +929,7 @@ def set_metadata(xml, saved_layer):
 	vals['csw_schema'] = 'http://www.opengis.net/cat/csw/2.0.2'
 	vals['language'] = md.language
 	vals['spatial_representation_type'] = md.type
-	vals['keywords'] = ','.join(md.subjects)
+	#vals['keywords'] = ','.join(md.subjects)
 	vals['temporal_extent_start'] = md.temporal
 	vals['temporal_extent_end'] = md.temporal
 	vals['creator'] = md.creator
