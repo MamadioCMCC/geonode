@@ -32,7 +32,7 @@ from django.db.models import Q
 import logging
 import taggit
 from geonode.maps.utils import forward_mercator
-from geonode.catalogue.catalogue import gen_iso_xml, gen_anytext
+from geonode.catalogue.catalogue import gen_iso_xml, gen_anytext, gen_metadata_urls
 
 logger = logging.getLogger("geonode.maps.views")
 
@@ -1438,7 +1438,7 @@ def _build_search_result(rec, csw):
     result['download_links'] = _extract_links(rec)
 
     # construct the link to the CSW metadata record (not self-indexed)
-    result['metadata_links'] = [("text/xml", "TC211", csw.url_for_uuid(rec.identifier))]
+    result['metadata_links'] = gen_metadata_urls(rec.identifier)
 
     return result
 
