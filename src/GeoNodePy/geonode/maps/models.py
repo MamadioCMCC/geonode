@@ -6,7 +6,7 @@ from owslib.wms import WebMapService
 from geoserver.catalog import Catalog
 from geonode.core.models import PermissionLevelMixin
 from geonode.core.models import AUTHENTICATED_USERS, ANONYMOUS_USERS
-from geonode.catalogue.catalogue import Catalogue, gen_iso_xml, gen_anytext
+from geonode.catalogue.catalogue import Catalogue, gen_iso_xml, gen_anytext, gen_metadata_urls
 from django.db.models import signals
 from django.utils.html import escape
 from taggit.managers import TaggableManager
@@ -668,7 +668,7 @@ class ResourceBase(models.Model, PermissionLevelMixin):
     metadata_xml = models.TextField(null=True, default=None, blank=True)
 
     csw_typename = models.CharField(_('CSW typename'), max_length=32, default='gmd:MD_Metadata', null=False)
-    csw_schema = models.CharField(_('CSW schema'), max_length=32, default='http://www.isotc211.org/2005/gmd', null=False)
+    csw_schema = models.CharField(_('CSW schema'), max_length=64, default='http://www.isotc211.org/2005/gmd', null=False)
     csw_mdsource = models.CharField(_('CSW source'), max_length=256, default='local', null=False)
     csw_insert_date = models.DateTimeField(_('CSW insert date'), auto_now_add=True)
     
@@ -1105,7 +1105,7 @@ class Layer(ResourceBase):
             record = cat.get_by_uuid(self.uuid)
             if record is None:
                 md_link = cat.create_from_layer(self)
-                self.metadata_links = [("text/xml", "TC211", md_link)]
+                self.metadata_links = gen_metadata_urls(self.uuid)
             else:
                 cat.update_layer(self)
             cat.logout()
@@ -1170,7 +1170,7 @@ class Layer(ResourceBase):
             self.resource.title = self.title
             self.resource.abstract = self.abstract
             self.resource.name= self.name
-            self.resource.metadata_links = [('text/xml', 'TC211', cat.url_for_uuid(self.uuid))]
+            self.metadata_links = gen_metadata_urls(self.uuid)
             self.resource.keywords = self.keyword_list()
             Layer.objects.gs_catalog.save(self._resource_cache)
             cat.logout()
