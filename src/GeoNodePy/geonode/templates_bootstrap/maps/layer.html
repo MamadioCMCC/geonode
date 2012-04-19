@@ -204,17 +204,9 @@
     {% endfor %}
 
     <li class="nav-header">{% trans "Download Metadata" %}</li>
-    <p> <strong>{% trans "Metadata" %}: </strong>
-            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://www.isotc211.org/2005/gmd&elementsetname=full">TC211</a></li>
-        {% if CSW_TYPE == 'pycsw' %}
-            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://www.opengis.net/cat/csw/2.0.2">Dublin Core</a></li>
-            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://www.opengis.net/cat/csw/csdgm">FGDC</a></li>
-            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=http://gcmd.gsfc.nasa.gov/Aboutus/xml/dif/">DIF</a></li>
-            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0">ebRIM</a></li>
-            <li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRepositoryItem&id={{uuid}}">Original Metadata</a></li>
-            <!--<li><a href="{{CSW_URL}}?service=CSW&version=2.0.2&request=GetRecordById&id={{uuid}}&outputschema=urn:us:mil:ces:metadata:ddms:4">DDMS</a></li>-->
-        {% endif %}
-    </p>
+    {% for mime_type, type, link in layer.metadata_links %}
+      <li><a href="{{ link }}">{{ type }}</a></li>
+    {% endfor %}
 
     <li class="nav-header">{% trans "The following maps use this data set" %}</li>
     {% for map in layer.maps %} 
