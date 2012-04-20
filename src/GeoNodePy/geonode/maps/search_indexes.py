@@ -84,12 +84,12 @@ class LayerIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
             "detail_url": obj.get_absolute_url(),  # @@@ Use Sites Framework?
             #"download_links": self.prepare_metadata_links(obj.download_links()),
             "metadata_links": obj.metadata_links,
-            "bbox": {
-                "minx": bbox[0],
-                "miny": bbox[2],
-                "maxx": bbox[1],
-                "maxy": bbox[3],
-            },
+            #"bbox": {
+            #    "minx": bbox[0],
+            #    "miny": bbox[2],
+            #    "maxx": bbox[1],
+            #    "maxy": bbox[3],
+            #},
             #"attribution": {
             #    "title": poc_profile.name,
             #    "href": poc_profile.get_absolute_url(),

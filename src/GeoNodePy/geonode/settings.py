@@ -148,7 +148,7 @@ ROOT_URLCONF = 'geonode.urls'
 # INSTALLED_APPS, se there is no need to add maps/templates or admin/templates
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT,"templates"),    
-    os.path.join(PROJECT_ROOT,"templates"),
+    os.path.join(PROJECT_ROOT, "templates_bootstrap"),
 )
 
 # The FULLY QUALIFIED url to the GeoServer instance for this GeoNode.

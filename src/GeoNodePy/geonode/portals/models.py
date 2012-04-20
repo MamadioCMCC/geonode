@@ -18,7 +18,7 @@ class Portal(models.Model):
     site = models.ForeignKey(Site, blank=True, null=True)
 
     logo = models.FileField(upload_to="portals/logo/", blank=True, null=True)
-    css = models.FileField(upload_to="portals/css/", blank=True, null=True)
+    custom_css = models.FileField(upload_to="portals/css/", blank=True, null=True)
 
     maps = models.ManyToManyField(Map, through="PortalMap")
     datasets = models.ManyToManyField(Layer)
@@ -56,6 +56,7 @@ class Portal(models.Model):
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, "portals/css")):
             os.makedirs(os.path.join(settings.MEDIA_ROOT, "portals/css"))
 
+        print css
         css_file = open(os.path.join(settings.MEDIA_ROOT, "portals/css/{0}.css".format(self.slug)), "w")
         css_file.write(css)
         css_file.close()
@@ -72,6 +73,15 @@ class PortalMap(models.Model):
 
 
 class PortalContextItem(models.Model):
+
+    PROPERTY_CHOICES = {
+        "body+background-color": "Page background color",
+        ".navbar-inner+background-color": "Header background color",
+        ".navbar-inner+color": "Header font color",
+        "body+font-family": "Body font",
+        "body+color": "Body font color",
+    }
+
     portal = models.ForeignKey(Portal, related_name="context_items")
     name = models.SlugField(max_length=150)
     value = models.TextField()
@@ -81,6 +91,14 @@ class PortalContextItem(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.portal.name, self.name)
+
+    @property
+    def selector(self):
+        return self.name.split("+")[0]
+
+    @property
+    def css_property(self):
+        return self.name.split("+")[1]
 
 
 class Document(models.Model):

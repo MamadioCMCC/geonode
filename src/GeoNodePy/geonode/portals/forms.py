@@ -1,5 +1,4 @@
 from django import forms
-from django.forms.formsets import BaseFormSet
 
 from geonode.maps.models import Map
 from .models import Document, Link, Portal, PortalContextItem, PortalMap
@@ -36,7 +35,8 @@ class PortalForm(forms.ModelForm):
         exclude = (
             "maps",
             "datasets",
-            "site"
+            "site",
+            "custom_css"  # @@ this could allow for greater control
         )
 
 
@@ -50,9 +50,13 @@ class PortalContextItemForm(forms.Form):
 
     def save(self, portal):
         data = self.cleaned_data
+        name = data["name"]
+        key = PortalContextItem.PROPERTY_CHOICES.keys()[
+            PortalContextItem.PROPERTY_CHOICES.values().index(name)
+        ]
         item, created = PortalContextItem.objects.get_or_create(
             portal=portal,
-            name=data["name"],
+            name=key,
             defaults={
                 "value": data["value"]
             }
