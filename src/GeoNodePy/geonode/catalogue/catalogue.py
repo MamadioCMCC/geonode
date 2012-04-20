@@ -239,12 +239,12 @@ def gen_anytext(xml):
     return ' '.join([value for value in xml.xpath('//text()')])
 
 def gen_metadata_urls(uuid):
-    ''' Generate a list of tuples of metadata urls for a given uuid '''
-    urls = []
-    urls.append(('text/xml', 'TC211', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://www.isotc211.org/2005/gmd&elementsetname=full' % (settings.CSW['url'], uuid)))
+    ''' Generate a list of tuples of metadata links for a given uuid '''
+    links = []
+    links.append(('text/xml', 'TC211', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://www.isotc211.org/2005/gmd&elementsetname=full' % (settings.CSW['url'], uuid)))
     if settings.CSW['type'] == 'pycsw':
-        urls.append(('text/xml', 'FGDC', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://www.opengis.net/cat/csw/csdgm' % (settings.CSW['url'], uuid)))
-        urls.append(('text/xml', 'Dublin Core', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://www.opengis.net/cat/csw/2.0.2' % (settings.CSW['url'], uuid)))
-        urls.append(('text/xml', 'DIF', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://gcmd.gsfc.nasa.gov/Aboutus/xml/dif/' % (settings.CSW['url'], uuid)))
-        urls.append(('text/xml', 'Original Metadata', '%s?service=CSW&version=2.0.2&request=GetRepositoryItem&id=%s' % (settings.CSW['url'], uuid)))
-    return urls
+        links.append(('text/xml', 'FGDC', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://www.opengis.net/cat/csw/csdgm' % (settings.CSW['url'], uuid)))
+        links.append(('text/xml', 'Dublin Core', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://www.opengis.net/cat/csw/2.0.2' % (settings.CSW['url'], uuid)))
+        links.append(('text/xml', 'DIF', '%s?service=CSW&version=2.0.2&request=GetRecordById&id=%s&outputschema=http://gcmd.gsfc.nasa.gov/Aboutus/xml/dif/' % (settings.CSW['url'], uuid)))
+        links.append(('text/xml', 'Original Metadata', '%s?service=CSW&version=2.0.2&request=GetRepositoryItem&id=%s' % (settings.CSW['url'], uuid)))
+    return links

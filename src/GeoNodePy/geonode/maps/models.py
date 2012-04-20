@@ -891,12 +891,12 @@ class Layer(ResourceBase):
                 return settings.GEOSERVER_BASE_URL + "wfs?" + urllib.urlencode(params)
 
             types = [
-                ("zip", _("Zipped Shapefile"), "SHAPE-ZIP", {'format_options': 'charset:UTF-8'}),
-                ("gml", _("GML 2.0"), "gml2", {}),
-                ("gml", _("GML 3.1.1"), "text/xml; subtype=gml/3.1.1", {}),
-                ("csv", _("CSV"), "csv", {}),
-                ("excel", _("Excel"), "excel", {}),
-                ("json", _("GeoJSON"), "json", {})
+                ("zip", ("Zipped Shapefile"), "SHAPE-ZIP", {'format_options': 'charset:UTF-8'}),
+                ("gml", ("GML 2.0"), "gml2", {}),
+                ("gml", ("GML 3.1.1"), "text/xml; subtype=gml/3.1.1", {}),
+                ("csv", ("CSV"), "csv", {}),
+                ("excel", ("Excel"), "excel", {}),
+                ("json", ("GeoJSON"), "json", {})
             ]
             links.extend((ext, name, 'WWW:DOWNLOAD-1.0-http--download', wfs_link(mime, extra_params)) for ext, name, mime, extra_params in types)
         elif self.resource.resource_type == "coverage":
@@ -949,9 +949,9 @@ class Layer(ResourceBase):
             })
 
         types = [
-            ("jpg", _("JPEG"), "image/jpeg"),
-            ("pdf", _("PDF"), "application/pdf"),
-            ("png", _("PNG"), "image/png")
+            ("jpg", ("JPEG"), "image/jpeg"),
+            ("pdf", ("PDF"), "application/pdf"),
+            ("png", ("PNG"), "image/png")
         ]
 
         links.extend((ext, name, 'WWW:DOWNLOAD-1.0-http--download', wms_link(mime)) for ext, name, mime in types)
@@ -966,8 +966,8 @@ class Layer(ResourceBase):
             'mode': "refresh"
         })
 
-        links.append(("KML", _("KML"), 'WWW:DOWNLOAD-1.0-http--download', kml_reflector_link_download))
-        links.append(("KML", _("View in Google Earth"), 'WWW:DOWNLOAD-1.0-http--download', kml_reflector_link_view))
+        links.append(("KML", ("KML"), 'WWW:DOWNLOAD-1.0-http--download', kml_reflector_link_download))
+        links.append(("KML", ("View in Google Earth"), 'WWW:DOWNLOAD-1.0-http--download', kml_reflector_link_view))
 
         return links
 
