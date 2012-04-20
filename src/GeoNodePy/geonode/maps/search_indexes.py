@@ -35,7 +35,10 @@ class LayerIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
       
     def prepare_json(self, obj):
         bbox = obj.resource.latlon_bbox
-        poc_profile = Contact.objects.get(user=obj.poc.user)
+        if obj.poc:
+            poc_profile = Contact.objects.get(user=obj.poc.user)
+        else:
+            poc_profile = None
 
         data = {
             "_type": self.prepare_type(obj),
@@ -57,7 +60,7 @@ class LayerIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
             "subtype": self.prepare_subtype(obj),
             "name": obj.title,
             "description": obj.abstract,
-            "owner": obj.metadata_author.name,
+            #"owner": obj.metadata_author.name,
             #"owner_detail": obj.owner.get_absolute_url(),
             "organization": "",
             "created": "",
@@ -79,7 +82,7 @@ class LayerIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
             "views": "",
             "thumb": Thumbnail.objects.get_thumbnail(obj),
             "detail_url": obj.get_absolute_url(),  # @@@ Use Sites Framework?
-            "download_links": self.prepare_metadata_links(obj.download_links()),
+            #"download_links": self.prepare_metadata_links(obj.download_links()),
             "metadata_links": obj.metadata_links,
             "bbox": {
                 "minx": bbox[0],
@@ -87,10 +90,10 @@ class LayerIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
                 "maxx": bbox[1],
                 "maxy": bbox[3],
             },
-            "attribution": {
-                "title": poc_profile.name,
-                "href": poc_profile.get_absolute_url(),
-            },
+            #"attribution": {
+            #    "title": poc_profile.name,
+            #    "href": poc_profile.get_absolute_url(),
+            #},
         }
 
         if obj.owner:
