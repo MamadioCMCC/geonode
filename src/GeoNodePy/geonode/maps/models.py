@@ -1175,7 +1175,7 @@ class Layer(ResourceBase):
             Layer.objects.gs_catalog.save(self._resource_cache)
             cat.logout()
         if self.poc and self.poc.user:
-            self.publishing.attribution = str(self.poc.user)
+            #self.publishing.attribution = str(self.poc.user)
             profile = Contact.objects.get(user=self.poc.user)
             self.publishing.attribution_link = settings.SITEURL[:-1] + profile.get_absolute_url()
             Layer.objects.gs_catalog.save(self.publishing)
