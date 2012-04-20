@@ -295,7 +295,6 @@ DB_DATASTORE_HOST = ''
 DB_DATASTORE_PORT = ''
 DB_DATASTORE_TYPE=''
 
-<<<<<<< HEAD
 # Agon Ratings
 AGON_RATINGS_CATEGORY_CHOICES = {
     "maps.Map": {
