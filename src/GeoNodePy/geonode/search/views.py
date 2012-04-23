@@ -12,6 +12,8 @@ from haystack.query import SearchQuerySet
 
 from geonode.maps.views import default_map_config, Map, Layer
 
+from taggit.models import Tag
+
 default_facets = ["map", "layer", "vector", "raster", "contact"]
 fieldsets = {
 	"brief": ["name", "type", "description"],
@@ -45,7 +47,7 @@ def search(request):
 		"GOOGLE_API_KEY": settings.GOOGLE_API_KEY,
 		"site": settings.SITEURL,
 		"facets": facets,
-		#"keywords": Layer.objects.gn_catalog.get_all_keywords()
+		"keywords": ",".join([kw.name for kw in Tag.objects.all()])
 	}))
 
 
