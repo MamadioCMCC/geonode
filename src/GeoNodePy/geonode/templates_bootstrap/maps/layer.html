@@ -182,8 +182,8 @@
   <ul class="nav nav-list">
 
     <li class="nav-header">{% trans "Download Data" %}</li>
-    {% for extension, type, link in layer.download_links %}
-      <li><a href="{{ link }}">{{ type }}</a></li>
+    {% for extension, name, type, link in layer.download_links %}
+      <li><a href="{{ link }}">{{ name }}</a></li>
     {% endfor %}
 
     <li class="nav-header">{% trans "Download Metadata" %}</li>
