@@ -59,6 +59,7 @@ def search_api(request):
 	# Retrieve Query Params
 	id = request.REQUEST.get("id", None)
 	query = request.REQUEST.get("q", None)
+	category = request.REQUEST.get("cat", None)
 	limit = int(request.REQUEST.get("limit", getattr(settings, "HAYSTACK_SEARCH_RESULTS_PER_PAGE", 20)))
 	startIndex = int(request.REQUEST.get("startIndex", 0))
 	startPage = int(request.REQUEST.get("startPage", 0))
@@ -101,6 +102,11 @@ def search_api(request):
 	# Filter by Query Params
 	if query:
 		sqs = sqs.filter(content=Raw(query))
+		
+	# filter by cateory
+	
+	if category is not None:
+		sqs = sqs.narrow('category:%s' % category)
 
 	# Apply Sort
 	# TODO: Handle for Revised sort types
