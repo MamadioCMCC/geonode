@@ -58,6 +58,7 @@ Administrators are expected to have some experience with Linux systems but they 
  * :doc:`Configuring Alternate CSW Backends <deploy/csw>`
  * :doc:`Running GeoNode under SSL <deploy/ssl>`
  * :doc:`Changing the Default Language <deploy/language>`
+ * :doc:`Backup configuration & data <deploy/backup>`
 
 .. toctree::
     :hidden:
@@ -69,6 +70,7 @@ Administrators are expected to have some experience with Linux systems but they 
     deploy/debug
     deploy/ssl
     deploy/language
+    deploy/backup
 
 For Developers
 ==============

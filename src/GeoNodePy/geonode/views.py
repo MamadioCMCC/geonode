@@ -31,7 +31,6 @@ class AjaxLoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput)
     username = forms.CharField()
 
-@csrf_exempt
 def ajax_login(request):
     if request.method != 'POST':
         return HttpResponse(
@@ -66,7 +65,6 @@ def ajax_login(request):
                 status=400
             )
 
-@csrf_exempt
 def ajax_lookup(request):
     if request.method != 'POST':
         return HttpResponse(

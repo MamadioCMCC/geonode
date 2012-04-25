@@ -133,7 +133,7 @@ function setup_django_every_time() {
     pushd $GEONODE_LIB
     easy_install -U virtualenv
     easy_install -U pip
-    virtualenv .
+    virtualenv . --system-site-packages --never-download
 
     if [ ! -f bin/activate ]
     then
@@ -155,6 +155,7 @@ function setup_django_every_time() {
 
     export DJANGO_SETTINGS_MODULE=geonode.settings
     django-admin.py syncdb --noinput
+    django-admin.py migrate --noinput
     django-admin.py collectstatic -v0 --noinput
     django-admin.py loaddata $GEONODE_SHARE/admin.json
 
@@ -169,10 +170,16 @@ function setup_apache_once() {
 	sed -i '1d' $APACHE_SITES/geonode
 	sed -i "1i WSGIDaemonProcess geonode user=www-data threads=15 processes=2 python-path=$sitedir" $APACHE_SITES/geonode
 
+	#FIXME: This could be removed if setup_apache_every_time is called after setup_apache_once
+	$APACHE_SERVICE restart
 }
 
 function setup_apache_every_time() {
 	a2dissite default
+
+	#FIXME: This could be removed if setup_apache_every_time is called after setup_apache_once
+	a2enmod proxy_http
+
 	a2ensite geonode
 	$APACHE_SERVICE restart
 }
