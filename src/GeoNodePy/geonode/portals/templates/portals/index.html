@@ -1,22 +1,42 @@
 {% extends "portals/base.html" %}
 {% load i18n %}
+
+{% block head %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}portals/portals.css" />
+{% if user.is_staff %}
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}portals/jqueryminicolors/jquery.miniColors.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}portals/jqueryfontselector/jquery.fontSelector.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}portals/wysihtml5/bootstrap-wysihtml5.css">
+{% endif %}    
+{% endblock head %}
 {% block main %}
     <div class="page-header">
         <h1>{{ portal.name }}</h1>
         {% if user.is_staff %}
         {% url portals_edit portal.pk as edit_portal %}
-        {% url portals_customize portal.slug as customize_portal %}
-        <div class="btn-group edit">
-            <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#">
-                Manage
-                <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-                {% blocktrans %}
-                <li><a href="{{ edit_portal }}" class="edit">Edit</a></li>
-                <li><a href="{{ customize_portal }}" class="customize">Customize Theme</a></li>{% endblocktrans %}
-            </ul>
+        <div class="btn-toolbar">
+        {% blocktrans %}
+        <div class="btn-group">
+            <a href="{{ edit_portal }}" class="btn edit">Edit Info</a>
         </div>
+        {% endblocktrans %}
+        <div class="btn-group">
+            <a href="#" class="btn customize">{% trans "Change Theme" %}</a>
+        </div>
+        <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            {% trans "Add" %}
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="{% url portals_add_map portal.slug %}" class="add"><i class="icon-map-marker"></i> {% trans "Map" %}</a></li>
+            <li><a href="{% url portals_add_dataset portal.slug %}" class="add"><i class="icon-list-alt"></i> {% trans "Dataset" %}</a></li>
+            <li><a href="{% url portals_add_link portal.slug %}" class="add"><i class="icon-share-alt"></i> {% trans "Link" %}</a></li>
+            <li><a href="{% url portals_add_document portal.slug %}" class="add"><i class="icon-file"></i> {% trans "Document" %}</a></li>
+          </ul>
+        </div>
+     </div>
         {% endif %}
     </div>
     <div class="row">
@@ -28,74 +48,98 @@
     <div class="span6">
     {% if featured_maps %}
     <h2>{% trans "Featured Maps" %}</h2>
-    <ul>
+    <ul class="unstyled">
         {% for m in featured_maps %}
             <li>
                 <a href="{{ m.map.get_absolute_url }}">{{ m.map.title }}</a>
                 {% if user.is_staff %}
-                    <a href="" title="{% trans "Unfeature" %}"><i class="icon-arrow-down"></i></a>
-                    <a href="{% url geonode.portals.views.portal_remove_map portal.slug m.map.pk %}">{% trans "Remove" %}</a>
+                <span class="actions">
+                    <a href="{% url portals_toggle_map portal.slug m.map.pk %}" title="{% trans "Unfeature" %}"><i class="icon-arrow-down"></i></a>
+                    <a href="{% url portals_remove_map portal.slug m.map.pk %}" title="{% trans "Remove" %}"><i class="icon-delete"></i></a>
+                </span>
                 {% endif %}
             </li>
         {% endfor %}
     </ul>
     {% endif %}
     <h2>{% trans "Maps" %}</h2>
-    {% if user.is_staff %}<p class="add"><a href="{% url geonode.portals.views.portal_add_map portal.slug %}" class="btn">{% trans "Add" %}</a></p>{% endif %}
-    <ul>
+    <ul class="unstyled">
         {% for m in maps %}
             <li>
                 <a href="{{ m.map.get_absolute_url }}">{{ m.map.title }}</a>
                 {% if user.is_staff %}
-                    <a href="" title="{% trans "Feature" %}"><i class="icon-arrow-up"></i></a>
-                    <a href="{% url geonode.portals.views.portal_remove_map portal.slug m.map.pk %}" title="{% trans "Remove" %}"><i class="icon-trash"></i></a>
+                <span class="actions">
+                    <a href="{% url portals_toggle_map portal.slug m.map.pk %}" title="{% trans "Feature" %}"><i class="icon-arrow-up"></i></a>
+                    <a href="{% url portals_remove_map portal.slug m.map.pk %}" title="{% trans "Remove" %}"><i class="icon-trash"></i></a>
+                </span>
                 {% endif %}
             </li>
         {% endfor %}
     </ul>
 </div>
 <div class="span6">
+    {% if portal.datasets.count %}
     <h2>{% trans "Datasets" %}</h2>
-    {% if user.is_staff %}<p class="add"><a href="{% url geonode.portals.views.portal_add_dataset portal.slug %}" class="btn">{% trans "Add" %}</a></p>{% endif %}
-    <ul>
+    <ul class="unstyled">
         {% for dataset in portal.datasets.all %}
             <li>
                 <a href="{{ dataset.get_absolute_url }}">{{ dataset.title }}</a>
                 {% if user.is_staff %}
-                <a href="{% url geonode.portals.views.portal_remove_dataset portal.slug dataset.pk %}" title="{% trans "Remove" %}"><i class="icon-trash"</i></a>
+                <span class="actions">
+                    <a href="{% url portals_remove_dataset portal.slug dataset.pk %}" title="{% trans "Remove" %}"><i class="icon-trash"></i></a>
+                </span>
                 {% endif %}
             </li>
         {% endfor %}
     </ul>
+    {% endif %}
+    {% if portal.links.count %}
     <h2>{% trans "Links" %}</h2>
-    {% if user.is_staff %}<p class="add"><a href="{% url geonode.portals.views.portal_add_link portal.slug %}" class="btn">{% trans "Add" %}</a></p>{% endif %}
-    <ul>
+    <ul class="unstyled">
         {% for link in portal.links.all %}
             <li>
                 <a href="{{ link.link }}">{{ link.label }}</a>
                 {% if user.is_staff %}
-                    <a href="{% url geonode.portals.views.portal_delete_link portal.slug link.pk %}" title="{% trans "Delete" %}"><i class="icon-trash"></i></a></li>
+                <span class="actions">
+                    <a href="{% url portals_delete_link portal.slug link.pk %}" title="{% trans "Delete" %}"><i class="icon-trash"></i></a>
+                </span>
                 {% endif %}
             </li>
         {% endfor %}
     </ul>
+    {% endif %}
+    {% if portal.documents.count %}
     <h2>{% trans "Documents" %}</h2>
-    {% if user.is_staff %}<p class="add"><a href="{% url geonode.portals.views.portal_add_document portal.slug %}" class="btn">{% trans "Add" %}</a></p>{% endif %}
-    <ul>
+    <ul class="unstyled">
         {% for document in portal.documents.all %}
             <li>
                 <a href="{{ document.file.url }}">{{ document.label }}</a>
                 {% if user.is_staff %}
-                    <a href="{% url geonode.portals.views.portal_delete_document portal.slug document.pk %}" title="{% trans "Delete" %}"><i class="icon-trash"></i></a>
+                <span class="actions">
+                    <a href="{% url portals_delete_document portal.slug document.pk %}" title="{% trans "Delete" %}"><i class="icon-trash"></i></a>
+                </span>
                 {% endif %}
             </li>
         {% endfor %}
     </ul>
+    {% endif %}
 </div>
 </div>
+{% if user.is_staff %}
+<div id="customize-modal" class="modal fade" style="display: none">
+    <div class="modal-body">
+    {{ portal_customize_snippet|safe }}
+    </div>
+</div>
+{% endif %}
 {% endblock main %}
 {% block extra_script %}
-    <script src="{{ STATIC_URL }}static/externals/jqueryminicolors/jquery.miniColors.min.js"></script>
-    <script src="{{ STATIC_URL }}static/script/portal.js"></script>
-    <script src="{{ STATIC_URL }}static/script/portal_customize.js"></script>
+    {% if user.is_staff %}
+<script src="{{ STATIC_URL }}portals/jqueryminicolors/jquery.miniColors.min.js"></script>
+<script src="{{ STATIC_URL }}portals/jqueryfontselector/jquery.fontSelector.js"></script>
+<script src="{{ STATIC_URL }}portals/wysihtml5/wysihtml5-0.3.0_rc2.min.js"></script>
+<script src="{{ STATIC_URL }}portals/wysihtml5/bootstrap-wysihtml5.js"></script>
+
+<script src="{{ STATIC_URL }}portals/portal_customize.js"></script>
+    {% endif %}
 {% endblock %}

@@ -1,7 +1,8 @@
 {% load portals %}
 {% if portal.logo %}
-#logo {
+.nav-logo {
     background-image: url({{ portal.logo.url }});
+    background-size: auto 50px;
 }
 {% endif %}
 {% for item in portal.context_items.all %}
