@@ -8,26 +8,20 @@ from django.utils.translation import ugettext_lazy as _
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.sites.models import Site
 
-from geonode.maps.models import Layer
 from .forms import (DocumentForm, LinkForm,
-    PortalForm, PortalContextItemForm, PortalMapForm)
+    PortalForm, PortalContextItemForm, PortalDatasetForm, PortalMapForm)
 from .models import Portal, PortalMap, PortalContextItem
 
 
 def hosts_callback(request, portal_slug):
     request.portal_slug = portal_slug
-    try:
-        request.site = Site.objects.get(domain="%s.geonode.org" % portal_slug)
-    except:
-        pass
 
 
 def portals(request):
 
     return render_to_response("portals/portal_list.html",
-        {"portal_list": Portal.objects.all()},
+        {"portal_list": Portal.objects.active(), "portal_archive_list": Portal.objects.archived()},
         context_instance=RequestContext(request)
     )
 
@@ -48,12 +42,9 @@ def index(request, **kwargs):
 
     """
     if kwargs.get("slug"):
-        portal = get_object_or_404(Portal, slug=kwargs.get("slug"))
+        portal = get_object_or_404(Portal.objects.active(), slug=kwargs.get("slug"))
     elif hasattr(request, "portal_slug"):
-        portal = get_object_or_404(Portal, slug=request.portal_slug)
-    else:
-        site = Site.objects.get_current()
-        portal = get_object_or_404(Portal, site__pk=site.pk)
+        portal = get_object_or_404(Portal.objects.active(), slug=request.portal_slug)
 
     featured_maps = PortalMap.objects.filter(portal=portal, featured=True)
     maps = PortalMap.objects.filter(portal=portal, featured=False)
@@ -62,12 +53,6 @@ def index(request, **kwargs):
 
     if request.user.is_staff:
         extra_context["portal_customize_snippet"] = portal_customize(request, portal.slug).content
-
-    # @@ Featured Maps, all maps and datasets, documents, links
-
-    # @@ In-page forms (for admins): upload documents, add links
-
-    # @@ Available: add map, dataset, demote featured map, feature map
 
     return render_to_response("portals/index.html",
         {
@@ -110,7 +95,7 @@ def portal_edit(request, pk):
     - Change navigation items
 
     """
-    portal = get_object_or_404(Portal, pk=pk)
+    portal = get_object_or_404(Portal.objects.active(), pk=pk)
 
     if request.method == "POST":
         form = PortalForm(request.POST, request.FILES, instance=portal)
@@ -125,6 +110,26 @@ def portal_edit(request, pk):
 
     return render_to_response("portals/portal_form.html",
         {"form": form, "portal": portal},
+        context_instance=RequestContext(request)
+    )
+
+
+@staff_member_required
+def portal_archive(request, pk):
+    """
+    Archive Portal
+
+    Toggles the active status of the portal, leaves all data intact
+    """
+    portal = get_object_or_404(Portal, pk=pk)
+
+    if request.method == "POST":
+        portal.active = portal.active == False
+        portal.save()
+        return redirect("portals_list")
+
+    return render_to_response("portals/portal_archive.html",
+        {"portal": portal},
         context_instance=RequestContext(request)
     )
 
@@ -230,27 +235,26 @@ def portal_remove_map(request, slug, map_pk):
 def portal_add_dataset(request, slug):
 
     portal = get_object_or_404(Portal, slug=slug)
-    datasets = Layer.objects.exclude(pk__in=[d.pk for d in portal.datasets.all()])
 
     if request.method == "POST":
-        dataset = get_object_or_404(
-            datasets,
-            pk=request.POST.get("dataset")
-        )
-        portal.datasets.add(dataset)
-        d = {
-            "title": dataset.title,
-            "url": dataset.get_absolute_url()
-        }
-        if request.is_ajax():
-            return HttpResponse(json.dumps({"dataset": d}), mimetype="application/javascript")
-        else:
-            return redirect(portal.get_absolute_url())
+        form = PortalDatasetForm(request.POST, portal=portal)
+        if form.is_valid():
+            dataset = form.save()
+            d = {
+                "title": dataset.title,
+                "url": dataset.get_absolute_url()
+            }
+            if request.is_ajax():
+                return HttpResponse(json.dumps({"dataset": d}), mimetype="application/javascript")
+            else:
+                return redirect(portal.get_absolute_url())
+    else:
+        form = PortalDatasetForm(portal=portal)
 
     return render_to_response("portals/dataset_add.html",
         {
             "portal": portal,
-            "datasets": datasets
+            "form": form
         },
         context_instance=RequestContext(request)
     )
@@ -260,16 +264,16 @@ def portal_add_dataset(request, slug):
 def portal_remove_dataset(request, slug, dataset_pk):
 
     portal = get_object_or_404(Portal, slug=slug)
-    dataset = get_object_or_404(portal.datasets, pk=dataset_pk)
+    dataset = get_object_or_404(portal.datasets, dataset__pk=dataset_pk)
 
     if request.method == "POST":
-        portal.datasets.remove(dataset)
+        dataset.delete()
         return redirect(portal.get_absolute_url())
 
     return render_to_response("portals/dataset_remove.html",
         {
             "portal": portal,
-            "dataset": dataset
+            "dataset": dataset.dataset
         },
         context_instance=RequestContext(request)
     )
@@ -289,9 +293,17 @@ def portal_add_link(request, slug):
                     "label": link.label,
                     "url": link.link
                     }
-                return HttpResponse(json.dumps({"link": l}), mimetype="application/javascript")
+                return HttpResponse(
+                    json.dumps({"link": l, "success": True}),
+                    mimetype="application/javascript"
+                )
             else:
                 return redirect(portal.get_absolute_url())
+        elif request.is_ajax():
+            return HttpResponse(
+                json.dumps({"success": False, "error": form.errors}),
+                mimetype="application/javascript"
+            )
     else:
         form = LinkForm(portal=portal)
 

@@ -4,9 +4,8 @@ from django.conf import settings
 from django.db import models
 from django.template.loader import render_to_string
 
-from django.contrib.sites.models import Site
-
 from geonode.maps.models import Map, Layer
+from .managers import DocumentManager, LinkManager, PortalManager
 
 
 class Portal(models.Model):
@@ -15,25 +14,22 @@ class Portal(models.Model):
     summary = models.TextField(blank=True, null=True)
     teaser = models.TextField(blank=True, null=True)
 
-    site = models.ForeignKey(Site, blank=True, null=True)
-
     logo = models.FileField(upload_to="portals/logo/", blank=True, null=True)
     custom_css = models.FileField(upload_to="portals/css/", blank=True, null=True)
 
     maps = models.ManyToManyField(Map, through="PortalMap")
-    datasets = models.ManyToManyField(Layer)
+    datasets = models.ManyToManyField(Layer, through="PortalDataset")
+
+    active = models.BooleanField(default=True)
+
+    objects = PortalManager()
 
     def __unicode__(self):
         return self.name
 
     @models.permalink
     def get_absolute_url(self):
-        site = Site.objects.get_current()
-        try:
-            if site.portal:
-                return ("geonode.portals.views.index")
-        except:
-            pass
+        # @@ in what context (if any) should this return its subdomain?
         return ("portals_detail", [self.slug])
 
     def get_context_value(self, name):
@@ -41,15 +37,6 @@ class Portal(models.Model):
             return self.context_items.get(name=name).value
         except:
             return ""
-
-    def save(self, *args, **kwargs):
-        if not self.site:
-            site = Site.objects.create(
-                domain="{0}.geonode.org".format(self.slug),
-                name=self.name
-            )
-            self.site = site
-        super(Portal, self).save(*args, **kwargs)
 
     def save_css(self):
         css = render_to_string("portals/portal_style.css", {"portal": self})
@@ -69,6 +56,13 @@ class PortalMap(models.Model):
     portal = models.ForeignKey(Portal)
     map = models.ForeignKey(Map)
     featured = models.BooleanField(default=False)
+    summary = models.TextField(blank=True, null=True)
+
+
+class PortalDataset(models.Model):
+    portal = models.ForeignKey(Portal)
+    dataset = models.ForeignKey(Layer)
+    summary = models.TextField(blank=True, null=True)
 
 
 class PortalContextItem(models.Model):
@@ -102,8 +96,11 @@ class PortalContextItem(models.Model):
 
 class Document(models.Model):
     portal = models.ForeignKey(Portal, related_name="documents")
-    file = models.FileField(upload_to="portals/document/")
+    parent = models.ForeignKey('self', blank=True, null=True, related_name="children")
+    file = models.FileField(upload_to="portals/document/", blank=True, null=True)
     label = models.CharField(max_length=255)
+
+    objects = DocumentManager()
 
     def __unicode__(self):
         return u"%s" % self.label
@@ -111,8 +108,12 @@ class Document(models.Model):
 
 class Link(models.Model):
     portal = models.ForeignKey(Portal, related_name="links")
+    parent = models.ForeignKey('self', blank=True, null=True, related_name="children")
     label = models.CharField(max_length=255)
-    link = models.URLField()
+    link = models.URLField(blank=True, null=True)
+    summary = models.TextField(blank=True, null=True)
+
+    objects = LinkManager()
 
     def __unicode__(self):
         return u"%s" % self.label
