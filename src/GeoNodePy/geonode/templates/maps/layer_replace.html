@@ -96,11 +96,13 @@ Ext.onReady(function(){
     });
 
     form_fields = [layer_name, base_file, dbf_file, shx_file, prj_file, xml_file];
+    
     var csrf_token = new Ext.form.Hidden({
         id: 'csrfmiddlewaretoken',
         name: 'csrfmiddlewaretoken',
         value: '{{csrf_token|escapejs}}'
     });
+
   }
   else {
     var base_file = new Ext.ux.form.FileUploadField({
