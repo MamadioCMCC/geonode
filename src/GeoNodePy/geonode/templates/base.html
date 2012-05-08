@@ -135,8 +135,8 @@
             <a href="{% url geonode.views.developer %}">{% trans "For Developers" %}</a>
           </div>
           <div class="pull-right">
-          {% if csrf_token != "NOTPROVIDED" %}
-            {% get_current_language as LANGUAGE %}
+            {% if csrf_token != "NOTPROVIDED" %}
+              {% get_current_language as LANGUAGE %}
               <form class="form-inline" action="/i18n/setlang/" method="post">
                 {% csrf_token %}
                 <label>{% trans "Language" %}</label>
@@ -148,7 +148,7 @@
                   {% endfor %}
                 </select>
               </form>
-          {% endif %}
+            {% endif %}
           </div>
         {% endblock %}
       </footer>
@@ -157,17 +157,11 @@
     <script src="{{ STATIC_URL }}bootstrap/js/jquery-1.7.1.min.js"></script>
     <script src="{{ STATIC_URL }}bootstrap/js/bootstrap.min.js"></script>
     <script src="{{ STATIC_URL }}datatables/js/jquery.dataTables.min.js"></script>
-    <script src="{{ STATIC_URL }}chosen/chosen.jquery.min.js"></script>
     <script src="{{ STATIC_URL }}geonode/js/datatables.js"></script>
     <script src="{{ STATIC_URL }}geonode/js/hogan.js"></script>
     <script src="{{ STATIC_URL }}geonode/js/jquery.timeago.js"></script>
     <script src="{{ STATIC_URL }}geonode/js/json2.js"></script>
     <script src="{{ STATIC_URL }}geonode/js/utils.js"></script>
-    <script type="text/javascript">
-      $(function() {
-        $(".user-select").chosen();
-      });
-    </script>
 
     {% block extra_script %}{% endblock extra_script %}
 

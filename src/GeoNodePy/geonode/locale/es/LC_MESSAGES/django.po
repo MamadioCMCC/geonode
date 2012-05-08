@@ -1070,15 +1070,9 @@ msgstr "Propósito"
 msgid "maintenance frequency"
 msgstr "Frecuencia de mantenimiento"
 
-<<<<<<< HEAD
-#: maps/models.py:671
-msgid "keywords (comma-separated)"
-msgstr "Palabras claves (separados por comas)"
-=======
 #: maps/models.py:691
 msgid "keywords"
 msgstr "Palabras claves"
->>>>>>> a1e0b329279a159e6c83e8f9f7273b6c2286889b
 
 #: maps/models.py:692
 msgid "keywords region"
