@@ -89,7 +89,7 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, "site_media", "media")
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = "/site_media/media/"
+MEDIA_URL = "/media/"
 
 # Absolute path to the directory that holds static files like app media.
 # Example: "/home/media/media.lawrence.com/apps/"
@@ -97,20 +97,12 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "site_media", "static")
 
 # URL that handles the static files like app media.
 # Example: "http://media.lawrence.com"
-STATIC_URL = "/media/"
+STATIC_URL = "/static/"
 
 # Additional directories which hold static files
 STATICFILES_DIRS = [
-    os.path.join(PROJECT_ROOT, "media"),
-    os.path.join(PROJECT_ROOT, "media_bootstrap"),
+    os.path.join(PROJECT_ROOT, "static"),
 ]
-
-GEONODE_UPLOAD_PATH = os.path.join(STATIC_URL, "upload/")
-
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = os.path.join(STATIC_URL, "admin/")
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'myv-y4#7j-d*p-__@j#*3z@!y24fz8%^z2v6atuy4bo9vqr1_a'
@@ -123,6 +115,7 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
@@ -134,6 +127,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django_hosts.middleware.HostsMiddleware',
@@ -193,12 +187,12 @@ LOGIN_REDIRECT_URL = "/"
 DEFAULT_LAYERS_OWNER='admin'
 
 # Where should newly created maps be focused?
-DEFAULT_MAP_CENTER = (-84.7, 12.8)
+DEFAULT_MAP_CENTER = (0, 0)
 
 # How tightly zoomed should newly created maps be?
 # 0 = entire world;
 # maximum zoom is between 12 and 15 (for Google Maps, coverage varies by area)
-DEFAULT_MAP_ZOOM = 7
+DEFAULT_MAP_ZOOM = 0
 
 DEFAULT_LAYER_SOURCE = {
     "ptype":"gxp_wmscsource",
@@ -217,9 +211,26 @@ MAP_BASELAYERS = [{
     "source": { "ptype":"gx_olsource"},
     "type":"OpenLayers.Layer.OSM",
     "args":["OpenStreetMap"],
-    "visibility": True,
+    "visibility": False,
     "fixed": True,
     "group":"background"
+  },{
+    "source": { "ptype":"gxp_mapquestsource"},
+    "name":"osm",
+    "group":"background",
+    "visibility": True
+  },{
+    "source": { "ptype":"gxp_mapquestsource"},
+    "name":"naip",
+    "group":"background",
+    "visibility": False
+  },{
+    "source": {"ptype": "gxp_bingsource"},
+    "name": "AerialWithLabels",
+    "visibility": False,
+    "group":"background",
+  },{
+    "source": {"ptype": "gxp_mapboxsource"},
   },{
     "source": {"ptype":"gx_olsource"},
     "type":"OpenLayers.Layer.WMS",
@@ -249,15 +260,24 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
+<<<<<<< HEAD
 
     'django_hosts',
+=======
+    'django.contrib.messages',
+
+>>>>>>> a1e0b329279a159e6c83e8f9f7273b6c2286889b
     'django_extensions',
 
     'registration',
     'profiles',
     'avatar',
+<<<<<<< HEAD
     'taggit',
     'haystack',
+=======
+    'dialogos',
+>>>>>>> a1e0b329279a159e6c83e8f9f7273b6c2286889b
     'agon_ratings',
     'south',
     "cbv",
@@ -289,7 +309,7 @@ REGISTRATION_OPEN = False
 SERVE_MEDIA = DEBUG
 
 #GEONODE_CLIENT_LOCATION = "http://localhost:8001/geonode-client/"
-GEONODE_CLIENT_LOCATION = "/media/static/"
+GEONODE_CLIENT_LOCATION = "/static/geonode/"
 
 #Import uploaded shapefiles into a database such as PostGIS?
 DB_DATASTORE=False
@@ -317,6 +337,7 @@ SOUTH_MIGRATION_MODULES = {
     'avatar': 'geonode.migrations.avatar',
 }
 
+<<<<<<< HEAD
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
@@ -329,6 +350,38 @@ SOUTH_MIGRATION_MODULES = {
     'registration': 'geonode.migrations.registration',
     'avatar': 'geonode.migrations.avatar',
 }
+=======
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "null": {
+            "level":"DEBUG",
+            "class":"django.utils.log.NullHandler",
+        },
+        "console":{
+            "level":"DEBUG",
+            "class":"logging.StreamHandler",
+        },
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+        },
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["mail_admins"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "geonode": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+    },
+}
+
+>>>>>>> a1e0b329279a159e6c83e8f9f7273b6c2286889b
 
 try:
     from local_settings import *

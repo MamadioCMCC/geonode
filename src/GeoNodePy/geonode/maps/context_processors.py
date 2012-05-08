@@ -1,5 +1,6 @@
 from django.conf import settings
 import geonode
+from geonode import __version__
 
 def resource_urls(request): 
     return dict(
@@ -9,5 +10,5 @@ def resource_urls(request):
         GOOGLE_API_KEY = settings.GOOGLE_API_KEY,
         SITENAME = settings.SITENAME,
         REGISTRATION_OPEN = settings.REGISTRATION_OPEN,
-        VERSION = geonode.__version__
+        VERSION = __version__,
     )
