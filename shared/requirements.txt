@@ -3,6 +3,7 @@
 PIL
 svn+https://owslib.svn.sourceforge.net/svnroot/owslib/trunk#egg=owslib
 Django==1.4
+Markdown==2.1.1
 simplejson # needed for python2.5
 django-extensions
 httplib2
