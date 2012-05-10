@@ -13,6 +13,7 @@ import inspect
 import string
 import urllib2
 from lxml import etree
+from zipfile import ZipFile
 import glob
 from itertools import cycle, izip
 #from xml.etree import ElementTree as etree
@@ -55,10 +56,25 @@ def layer_type(filename):
        that can be either 'featureType' or 'coverage'
     """
     base_name, extension = os.path.splitext(filename)
-    if extension.lower() in ['.shp']:
-        return FeatureType.resource_type
-    elif extension.lower() in ['.tif', '.tiff', '.geotiff', '.geotif']:
-        return Coverage.resource_type
+    
+    shp_exts = ['.shp',]
+    cov_exts = ['.tif', '.tiff', '.geotiff', '.geotif']
+
+    if extension.lower() == '.zip':
+        zf = ZipFile(filename)
+        # ZipFile doesn't support with statement in 2.6, so don't do it
+        try:
+            for n in zf.namelist():
+                b, e = os.path.splitext(n.lower())
+                if e in shp_exts or e in cov_exts:
+                    base_name, extension = b,e
+        finally:
+            zf.close()
+
+    if extension.lower() in shp_exts:
+         return FeatureType.resource_type
+    elif extension.lower() in cov_exts:
+         return Coverage.resource_type
     else:
         msg = ('Saving of extension [%s] is not implemented' % extension)
         raise GeoNodeException(msg)

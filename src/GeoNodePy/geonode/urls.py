@@ -29,19 +29,21 @@ urlpatterns = patterns('',
     # Data views
     (r'^data/', include(geonode.maps.urls.datapatterns)),
     (r'^maps/', include(geonode.maps.urls.urlpatterns)),
+    (r'^upload/', include('geonode.upload.urls')),
 
     (r'^comments/', include('dialogos.urls')),
     (r'^ratings/', include('agon_ratings.urls')),
+
+    (r'search/', include('geonode.search.urls')),
+    (r'^portals/', include('geonode.portals.urls')),
 
     # Accounts
     url(r'^accounts/ajax_login$', 'geonode.views.ajax_login', name='auth_ajax_login'),
     url(r'^accounts/ajax_lookup$', 'geonode.views.ajax_lookup', name='auth_ajax_lookup'),
     (r'^accounts/', include('registration.urls')),
-    (r'^portals/', include('geonode.portals.urls')),
     (r'^profiles/', include('profiles.urls')),
     (r'^avatar/', include('avatar.urls')),
 
-    (r'search/', include('geonode.search.urls')),
 
     # Meta
     url(r'^lang\.js$', 'django.views.generic.simple.direct_to_template',
