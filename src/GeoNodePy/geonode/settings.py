@@ -101,6 +101,7 @@ STATIC_URL = "/static/"
 
 # Additional directories which hold static files
 STATICFILES_DIRS = [
+    os.path.join(PROJECT_ROOT, "media_bootstrap"),
     os.path.join(PROJECT_ROOT, "static"),
 ]
 
@@ -126,7 +127,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',    
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -148,7 +149,8 @@ DEFAULT_HOST = 'www'
 # Note that Django automatically includes the "templates" dir in all the
 # INSTALLED_APPS, se there is no need to add maps/templates or admin/templates
 TEMPLATE_DIRS = (
-    os.path.join(PROJECT_ROOT, "templates"),
+    os.path.join(PROJECT_ROOT, "templates_bootstrap"),
+    os.path.join(PROJECT_ROOT,"templates"),    
 )
 
 # The FULLY QUALIFIED url to the GeoServer instance for this GeoNode.
@@ -169,7 +171,7 @@ CSW = {
     #'type': 'deegree',
 
     # The FULLY QUALIFIED base url to the CSW instance for this GeoNode
-    'url': 'http://catalog.dev.geonode.org/pycsw/trunk/csw.py',
+    'url': 'http://pycsw.etzlaub.local/csw.py',
     #'url': 'http://catalog.dev.geonode.org:8001/geonetwork/srv/en/csw',
     #'url': 'http://catalog.dev.geonode.org:8001/deegree-csw-demo-3.0.4/services',
 
@@ -262,6 +264,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'django_hosts',
+    'django.contrib.messages',
     'django_extensions',
     'registration',
     'profiles',
@@ -271,15 +274,12 @@ INSTALLED_APPS = (
     'dialogos',
     'agon_ratings',
     'south',
-    "cbv",
+    'haystack',
 
     'geonode.core',
     'geonode.maps',
     'geonode.proxy',
     'geonode.search',
-    'geonode.core',
-    'geonode.maps',
-    'geonode.proxy',
     "geonode.portals",
     'geonode'
 )
@@ -365,7 +365,6 @@ LOGGING = {
         },
     },
 }
-
 
 try:
     from local_settings import *

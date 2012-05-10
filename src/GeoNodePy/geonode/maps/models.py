@@ -7,6 +7,7 @@ from geoserver.catalog import Catalog
 from geonode.core.models import PermissionLevelMixin
 from geonode.core.models import AUTHENTICATED_USERS, ANONYMOUS_USERS
 from geonode.catalogue.catalogue import Catalogue, gen_iso_xml, gen_anytext, gen_metadata_urls
+from gsuploader.uploader import Uploader
 from django.db.models import signals
 from django.utils.html import escape
 from taggit.managers import TaggableManager
@@ -582,6 +583,7 @@ class LayerManager(models.Manager):
         url = "%srest" % settings.GEOSERVER_BASE_URL
         user, password = settings.GEOSERVER_CREDENTIALS
         self.gs_catalog = Catalog(url, _user, _password)
+        self.gs_uploader = Uploader(url, _user, _password)
         self.catalogue = Catalogue()
 
     @property
@@ -1767,6 +1769,41 @@ def post_save_layer(instance, sender, **kwargs):
         if not settings.CSW['localdb']:
             instance._populate_from_catalogue()
         instance.save(force_update=True)
+        
+class UploadManager(models.Manager):
+    def __init__(self):
+        models.Manager.__init__(self)
+    def update_from_session(self, import_session):
+        self.get(import_id = import_session.id).update_from_session(import_session)
+    def create_from_session(self, user, import_session):
+        return self.create(
+            user = user, 
+            import_id = import_session.id, 
+            state= import_session.state)
+        
+class Upload(models.Model):
+    objects = UploadManager()
+    
+    import_id = models.BigIntegerField()
+    user = models.ForeignKey(User, blank=True, null=True)
+    state = models.CharField(max_length=16)
+    date = models.DateTimeField('date', default = datetime.now)
+    
+    def update_from_session(self, import_session):
+        self.state = import_session.state
+        self.save()
+    def get_import_url(self):
+        return "%srest/imports/%s" % (settings.GEOSERVER_BASE_URL, self.import_id)
+    def delete(self, cascade=True):
+        models.Model.delete(self)
+        if cascade:
+            session = Layer.objects.gs_uploader.get_session(self.import_id)
+            if session:
+                try:
+                    session.delete()
+                except:
+                    logging.exception('error deleting upload session')
+
 
 
 
