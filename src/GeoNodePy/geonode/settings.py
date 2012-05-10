@@ -260,35 +260,24 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
-<<<<<<< HEAD
 
     'django_hosts',
-=======
     'django.contrib.messages',
-
->>>>>>> a1e0b329279a159e6c83e8f9f7273b6c2286889b
     'django_extensions',
 
     'registration',
     'profiles',
     'avatar',
-<<<<<<< HEAD
     'taggit',
-    'haystack',
-=======
     'dialogos',
->>>>>>> a1e0b329279a159e6c83e8f9f7273b6c2286889b
     'agon_ratings',
     'south',
-    "cbv",
+    'haystack',
 
     'geonode.core',
     'geonode.maps',
     'geonode.proxy',
     'geonode.search',
-    'geonode.core',
-    'geonode.maps',
-    'geonode.proxy',
     "geonode.portals",
     'geonode'
 )
@@ -337,7 +326,6 @@ SOUTH_MIGRATION_MODULES = {
     'avatar': 'geonode.migrations.avatar',
 }
 
-<<<<<<< HEAD
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
@@ -346,11 +334,6 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-SOUTH_MIGRATION_MODULES = {
-    'registration': 'geonode.migrations.registration',
-    'avatar': 'geonode.migrations.avatar',
-}
-=======
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -380,8 +363,6 @@ LOGGING = {
         },
     },
 }
-
->>>>>>> a1e0b329279a159e6c83e8f9f7273b6c2286889b
 
 try:
     from local_settings import *
