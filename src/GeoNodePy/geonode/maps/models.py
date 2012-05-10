@@ -583,6 +583,7 @@ class LayerManager(models.Manager):
         url = "%srest" % settings.GEOSERVER_BASE_URL
         user, password = settings.GEOSERVER_CREDENTIALS
         self.gs_catalog = Catalog(url, _user, _password)
+        self.gs_uploader = Uploader(url, _user, _password)
         self.catalogue = Catalogue()
 
     @property
