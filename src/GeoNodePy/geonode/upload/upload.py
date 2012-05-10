@@ -550,8 +550,11 @@ def final_step(upload_session, user):
     saved_layer.poc = poc_contact
     saved_layer.metadata_author = author_contact
 
-    _log('Saving to geonetwork')
-    saved_layer.save_to_geonetwork()
+    _log('Saving to catalogue')
+    saved_layer.save_to_catalogue()
+    xml_doc = gen_iso_xml(saved_layer)
+    # TODO: Only do this if xml is NOT uploaded (after adding xml_upload back in)
+    Layer.objects.filter(uuid=layer_uuid).update(metadata_xml=xml_doc, csw_anytext=gen_anytext(xml_doc))
 
     # Set default permissions on the newly created layer
     # FIXME: Do this as part of the post_save hook
