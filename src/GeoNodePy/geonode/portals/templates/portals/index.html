@@ -13,6 +13,9 @@
 {% block main %}
     <div class="page-header">
         <h1>{{ portal.name }}</h1>
+            {% if portal.logo %}
+            <div class="image"><a href="{{ portal_url }}"><img src="{{ portal.logo.url }}" alt=""></a></div>
+            {% endif %}
         {% if user.is_staff %}
         
         <div class="btn-toolbar">
