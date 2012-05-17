@@ -332,8 +332,8 @@ def portal_add_dataset(request, slug):
         if form.is_valid():
             dataset = form.save()
             d = {
-                "title": dataset.title,
-                "url": dataset.get_absolute_url()
+                "title": dataset.dataset.title,
+                "url": dataset.dataset.get_absolute_url()
             }
             if request.is_ajax():
                 return HttpResponse(json.dumps({"dataset": d}), mimetype="application/javascript")
