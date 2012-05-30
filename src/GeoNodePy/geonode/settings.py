@@ -267,6 +267,7 @@ INSTALLED_APPS = (
     'django_forms_bootstrap',
     'django_hosts',
     'django_extensions',
+
     'registration',
     'profiles',
     'avatar',

@@ -705,7 +705,11 @@ class ResourceBase(models.Model, PermissionLevelMixin):
     temporal_extent_start = models.DateField(_('temporal extent start'), blank=True, null=True)
     temporal_extent_end = models.DateField(_('temporal extent end'), blank=True, null=True)
     geographic_bounding_box = models.TextField(_('geographic bounding box'))
-    supplemental_information = models.TextField(_('supplemental information'), blank=True, null=True)
+    bbox_left = models.FloatField(blank=True, null=True)
+    bbox_right = models.FloatField(blank=True, null=True)
+    bbox_bottom = models.FloatField(blank=True, null=True)
+    bbox_top = models.FloatField(blank=True, null=True)
+    supplemental_information = models.TextField(_('supplemental information'), default=DEFAULT_SUPPLEMENTAL_INFORMATION)
 
     # Section 6
     distribution_url = models.TextField(_('distribution URL'), blank=True, null=True)
@@ -1234,6 +1238,10 @@ class Layer(ResourceBase):
         else:
             srid = box[4]
         self.geographic_bounding_box = bbox_to_wkt(box[0], box[1], box[2], box[3], srid=srid )
+        self.bbox_left = box[0]
+        self.bbox_right = box[1]
+        self.bbox_bottom = box[2]
+        self.bbox_top = box[3]
 
     def get_absolute_url(self):
         return "/data/%s" % (self.typename)
@@ -1306,6 +1314,15 @@ class Map(models.Model, PermissionLevelMixin):
     """
     
     keywords = TaggableManager(_('keywords'), help_text=_("A space or comma-separated list of keywords"), blank=True)
+
+    """
+    The extent of the layers in the map
+    """
+
+    bbox_top = models.FloatField(blank=True,null=True)
+    bbox_bottom = models.FloatField(blank=True,null=True)
+    bbox_right = models.FloatField(blank=True,null=True)
+    bbox_left = models.FloatField(blank=True,null=True)
 
     def __unicode__(self):
         return '%s by %s' % (self.title, (self.owner.username if self.owner else "<Anonymous>"))
@@ -1506,7 +1523,20 @@ class Map(models.Model, PermissionLevelMixin):
 
         # assign owner admin privs
         if self.owner:
-            self.set_user_level(self.owner, self.LEVEL_ADMIN)  
+            self.set_user_level(self.owner, self.LEVEL_ADMIN)    
+
+    def updateBounds(self):
+        bbox_left = bbox_right = bbox_bottom = bbox_top = 0
+        for layer in self.local_layers:
+            bbox_top = max(bbox_top,layer.bbox_top)
+            bbox_right = max(bbox_right,layer.bbox_right)
+            bbox_bottom = min(bbox_bottom,layer.bbox_bottom)
+            bbox_left = min(bbox_left,layer.bbox_left)
+        
+        self.bbox_bottom = bbox_bottom
+        self.bbox_left = bbox_left
+        self.bbox_top = bbox_top
+        self.bbox_right = bbox_right
 
 class MapLayerManager(models.Manager):
     def from_viewer_config(self, map, layer, source, ordering):
@@ -1805,7 +1835,8 @@ class Upload(models.Model):
                     logging.exception('error deleting upload session')
 
 
-
+def post_save_map(instance, sender, **kwargs):
+    instance.updateBounds()
 
 class ThumbnailManager(models.Manager):
     def __init__(self):
@@ -1897,3 +1928,4 @@ signals.pre_delete.connect(_remove_thumb, sender=Map)
 
 signals.pre_delete.connect(delete_layer, sender=Layer)
 signals.post_save.connect(post_save_layer, sender=Layer)
+signals.post_save.connect(post_save_map, sender=Map)

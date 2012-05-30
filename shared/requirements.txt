@@ -12,6 +12,7 @@ django-registration
 django-profiles
 -e git+https://github.com/ericflo/django-avatar.git#egg=avatar
 django-staticfiles
+requests
 django-taggit==0.9.3
 dialogos==0.1.dev4
 agon-ratings==0.2
