@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "page_layout.html" %}
 {% load i18n %}
 
 {% block title %} {% trans "Search Data" %} - {{ block.super }} {% endblock %}
@@ -221,7 +221,7 @@
             </ul>
         </div>
 
-        <div id="refine" class="refineSection collapse area">
+        <div id="refine" class="refineSection expand">
             <h5>By spatial extent</h5>
             <p>Limit the search to a specific area.</p>
 
