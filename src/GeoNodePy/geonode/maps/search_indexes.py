@@ -64,7 +64,7 @@ class LayerIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
 		
     def prepare_json(self, obj):
         bbox = obj.resource.latlon_bbox
-        poc_profile = Contact.objects.get(user=obj.poc.user)
+        #poc_profile = Contact.objects.get(user=obj.poc.user)
 		
         data = {
             "id": obj.id,
@@ -75,7 +75,7 @@ class LayerIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
             "title": obj.title,
             "name": obj.typename,
             "description": obj.abstract,
-            "owner": obj.metadata_author.name,
+            #"owner": obj.metadata_author.name,
             "owner_detail": obj.owner.get_absolute_url(),
             "last_modified": obj.date.strftime("%Y-%m-%dT%H:%M:%S.%f"),
             "category": obj.topic_category,
