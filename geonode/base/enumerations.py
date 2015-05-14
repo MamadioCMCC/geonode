@@ -467,3 +467,27 @@ CHARSETS = (('', 'None/Unknown'),
             ('windows-1256', 'Windows CP1256'),
             ('windows-1257', 'Windows CP1257'),
             ('windows-1258', 'Windows CP1258'))
+
+
+ALL_HAZARD_TYPES = (
+		('earthquake', _('Earthquake')),
+		('flood', _('Flood')),
+)
+
+ALL_HAZARD_UNITS = (
+		('m', _('Meters')),
+		('f',_('Feet')),
+		('pga', _('PGA')),
+		('ms', _('m/s')),
+)
+
+
+ALL_HAZARD_PERIODS = (
+		('50', _('50 years')),
+		('100', _('100 years')),
+		('250', _('250 years')),
+		('500', _('500 years')),
+		('1000', _('1000 years')),
+)
+
+
