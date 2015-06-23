@@ -158,8 +158,8 @@ class CommonModelApi(ModelResource):
         # Region filter
         regions = parameters.getlist("regions__name__in")
 
-        # Owner filter
-        owner = parameters.get("owner__username")
+        # Owner filters
+        owner = parameters.getlist("owner__username__in")
 
         # Sort order
         sort = parameters.get("order_by", "relevance")
@@ -253,13 +253,13 @@ class CommonModelApi(ModelResource):
             for region in regions:
                 sqs = (
                     SearchQuerySet() if sqs is None else sqs).filter_or(
-                    regions_exact=region)
+                    regions_exact__exact=region)
 
         # filter by owner
         if owner:
             sqs = (
-                SearchQuerySet() if sqs is None else sqs).filter(
-                owner_exact=owner)
+                SearchQuerySet() if sqs is None else sqs).narrow(
+                    "owner__username:%s" % ','.join(map(str, owner)))
 
         # filter by date
         if date_start:
