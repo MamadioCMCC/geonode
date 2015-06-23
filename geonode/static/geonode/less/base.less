@@ -1,23 +1,28 @@
 @import "../fonts/lato_font.css";
 @import "../css/font-awesome.css";
-/*@import "../../../../../lib/python2.7/site-packages/pinax_theme_bootstrap/static/bootstrap/less/variables.less";*/
 
 /* Variables
 ----------------------- */
-@brand-primary:   rgb(2, 139, 175);
-@brand-alternate: #f05a24;
-@brand-info:      #5bc0de;
-@brand-warning:   rgb(158, 179, 67); // #f0ad4e;
-@brand-danger:    #d9534f;
+@brand-gray: #373535;
+@brand-blue: rgb(40, 122, 176);
+@brand-yellow: #ffc63b;
+@brand-red: #aa0000;
+
+@brand-primary:   @brand-blue;
+@brand-alternate: @brand-yellow;
+@brand-info:      @brand-gray;
+@brand-warning:   @brand-red;
+@brand-danger:    darken(@brand-red, 20%);
+@brand-light: white;
 
 @gray-darker:  lighten(#000, 13.5%); // #222
 @gray-dark:    lighten(#000, 20%);   // #333
 @gray:         lighten(#000, 33.5%); // #555
 @gray-light:   lighten(#000, 60%);   // #999
-@gray-lighter: rgb(204,204,204);
+@gray-lighter: @brand-gray;
 
 @body-bg:          #fff;
-@text-color:       @gray-dark;
+@text-color:       @gray-lighter;
 @link-color:       @brand-primary;
 @link-color-hover: darken(@link-color, 15%);
 
@@ -46,7 +51,7 @@
 /* Basics
 ----------------------- */
 body {
-  background: @gray-lighter;
+  background: @brand-light;
   font-family: @font-family-sans-serif;
   font-size: @font-size-base;
   padding-top: 40px;
@@ -110,19 +115,30 @@ article.tab-pane {
 /* Header
 ----------------------- */
 .navbar {
+  margin-top: 20px;
   margin-bottom: 0;
 }
 .navbar-inverse {
-  background-color: @gray-dark;
+  background-color: @brand-light;
   border-radius: 0;
+  border-bottom: transparent;
 }
+
+.navbar-inverse .navbar-nav > li > a {
+  color: @brand-gray;
+}
+.navbar-inverse .navbar-nav > li > a:hover, .navbar-inverse .navbar-nav > li > a:focus {
+    color: @brand-gray;
+    border-bottom: 3px solid @brand-alternate;
+}
+
 .navbar-brand {
   background: url(../img/lab-logo.png) 15px 0 no-repeat;
-  height: 40px;
+  height: 60px;
   margin-right: 15px;
   margin-top: 10px;
   text-indent: -9999em;
-  width: 150px;
+  width: 180px;
 }
 .navbar-right > li > a {
   padding: 8px 15px;
@@ -153,7 +169,8 @@ form#search {
   }
 }
 .navbar-active {
-  color: white;
+  color: @brand-gray;
+  border-bottom: 3px solid @brand-alternate;
 }
 body.layers li#nav_layers a {
   .navbar-active;
@@ -177,16 +194,30 @@ body.groups li#nav_groups a {
    top: 100%;
 }
 
+#jumbo-innovation {
+  color: @brand-yellow;
+}
+
+#jumbo-lab {
+  font-weight: 300;
+}
+
+#jumbo-geonode{
+}
+
 /* Home
 ----------------------- */
 .jumbotron {
-  background: @brand-primary;
+  background-image: url(../../lab/lights.jpg);
+  background-color: @gray-dark;
+  background-size: 100%;
+  background-position: center;
   color: white;
-  padding: 40px 0 60px;
+  padding: 80px 0 60px;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
   margin-top: -10px;
   a {
-    color: @brand-warning;
+    color: @brand-alternate;
   }
   p {
     margin-bottom: 0;
