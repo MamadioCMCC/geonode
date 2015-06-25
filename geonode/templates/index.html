@@ -1,9 +1,13 @@
-{% extends "site_base.html" %}
+-{% extends "site_base.html" %}
 {% load i18n %}
 {% load staticfiles %}
 {% load base_tags %}
 
 {% block title %} {% trans "Welcome!" %} - {{ block.super }} {% endblock %}
+
+{% block extra_head %}
+<link href="{% static "lab/mapglyphs/mapglyphs.css" %}" rel="stylesheet">
+{% endblock %}
 
 {% block body_class %}home{% endblock %}
 
@@ -20,8 +24,92 @@
   {% endblock %}
 
   {% block mainbody %}
+  <div class="hazard-box">
   <div class="container">
     <div class="row home-facets">
+      <div>
+        <h1>Hazard datasets</h1>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+        <div class="col-md-3">
+          <p><a href="#earthquake"><img src="{% static "geonode/img/hazard-icon-earthquake.png" %}"></img></a></p>
+          <h3><a href="#earthquake">Earthquake</a></h3>
+          <p class="text-center"><a class="btn btn-default" href="#earthquake" role="button">{% trans "View 32 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-3">
+          <p><a href="#earthquake"><img src="{% static "geonode/img/hazard-icon-drought.png" %}"></img></a></p>
+          <h3><a href="#earthquake">Drought</a></h3>
+          <p class="text-center"><a class="btn btn-default" href="#earthquake" role="button">{% trans "View 12 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-3">
+          <p><a href="#earthquake"><img src="{% static "geonode/img/hazard-icon-flood.png" %}"></img></a></p>
+          <h3><a href="#earthquake">Flood</a></h3>
+          <p class="text-center"><a class="btn btn-default" href="#earthquake" role="button">{% trans "View 10 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-3">
+          <p><a href="#earthquake"><img src="{% static "geonode/img/hazard-icon-tsunami.png" %}"></img></a></p>
+          <h3><a href="#earthquake">Tsunami</a></h3>
+          <p class="text-center"><a class="btn btn-default" href="#earthquake" role="button">{% trans "View 8 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-2 col-md-offset-2">
+          <p><a href="#earthquake"><img src="{% static "geonode/img/hazard-icon-storm-surge.png" %}"></img></a></p>
+          <h3><a href="#earthquake">Storm Surge</a></h3>
+          <p class="text-center"><a class="btn btn-default" href="#earthquake" role="button">{% trans "View 43 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-2 col-md-offset-1">
+          <p><a href="#earthquake"><img src="{% static "geonode/img/hazard-icon-strong-wind.png" %}"></img></a></p>
+          <h3><a href="#earthquake">Strong Wind</a></h3>
+          <p class="text-center"><a class="btn btn-default" href="#earthquake" role="button">{% trans "View 3 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-2 col-md-offset-1">
+          <p><a href="#earthquake"><img src="{% static "geonode/img/hazard-icon-volcanic-ash.png" %}"></img></a></p>
+          <h3><a href="#earthquake">Volcanic Ash</a></h3>
+          <p class="text-center"><a class="btn btn-default" href="#earthquake" role="button">{% trans "View 51 layers" %} &raquo;</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="post-disaster-box">
+
+    <div class="container">
+      <div class="row home-facets">
+
+
+      <div class="col-md-12">
+        <h1>Post disaster</h1>
+
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        <div class="col-md-4">
+          <p><a href="#nepal"><i class="mg map-np mg-5x"></i></i></a></p>
+          <h3><a href="#nepal">Nepal Earthquake</a></h3>
+          <p class="text-center">2015-09-08</p>
+          <p class="text-center"><a class="btn btn-default" href="#nepal" role="button">{% trans "View 51 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+          <p><a href="#nepal"><i class="mg map-ph mg-5x"></i></a></p>
+          <h3><a href="#nepal">Philippines Typhoon</a></h3>
+          <p class="text-center">2015-09-08</p>
+          <p class="text-center"><a class="btn btn-default" href="#nepal" role="button">{% trans "View 51 layers" %} &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+          <p><a href="#nepal"><i class="mg map-mw mg-5x"></i></a></p>
+          <h3><a href="#nepal">Malawi Floods</a></h3>
+          <p class="text-center">2015-09-08</p>
+          <p class="text-center"><a class="btn btn-default" href="#nepal" role="button">{% trans "View 51 layers" %} &raquo;</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="container">
+
+      <div class="row home-facets">
+        <h1>Open Data</h1>
+
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
     {% with facet_type='home' %}
      {% facets as facets %}
       <div class="col-md-4">

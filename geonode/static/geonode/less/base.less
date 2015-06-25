@@ -62,6 +62,8 @@ a {
 h1, h2, h3, h4, h5, h6 {
   font-weight: @headings-font-weight;
 }
+
+
 select {
   background: white;
   border: 1px solid @gray-light;
@@ -115,15 +117,18 @@ article.tab-pane {
 /* Header
 ----------------------- */
 .navbar {
-  margin-top: 20px;
+  padding-top: 20px;
   margin-bottom: 0;
+
+  .btn-primary {
+    height: 34px;
+  }
 }
 .navbar-inverse {
   background-color: @brand-light;
   border-radius: 0;
   border-bottom: transparent;
 }
-
 .navbar-inverse .navbar-nav > li > a {
   color: @brand-gray;
 }
@@ -131,7 +136,6 @@ article.tab-pane {
     color: @brand-gray;
     border-bottom: 3px solid @brand-alternate;
 }
-
 .navbar-brand {
   background: url(../img/lab-logo.png) 15px 0 no-repeat;
   height: 60px;
@@ -147,10 +151,22 @@ article.tab-pane {
   cursor: pointer;
 }
 .navbar-collapse {
-  max-height: none;}
+  max-height: none;
+}
+navbar-toggle{
+  color: @brand-gray;
+}
+.navbar-inverse .navbar-toggle .icon-bar {
+  background-color: @brand-gray;
+}
+.navbar-inverse .navbar-toggle:hover,
+.navbar-inverse .navbar-toggle:focus {
+  background-color: white;
+}
 form#search {
   margin-top: 8px;
-  .fa {
+
+.fa {
     margin-right: 0;
   }
 }
@@ -193,15 +209,12 @@ body.groups li#nav_groups a {
 .yourlabs-autocomplete {
    top: 100%;
 }
-
 #jumbo-innovation {
   color: @brand-yellow;
 }
-
 #jumbo-lab {
   font-weight: 300;
 }
-
 #jumbo-geonode{
 }
 
@@ -215,7 +228,9 @@ body.groups li#nav_groups a {
   color: white;
   padding: 80px 0 60px;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
-  margin-top: -10px;
+  margin-top: 30px;
+  margin-bottom: 0px;
+  height: 300px;
   a {
     color: @brand-alternate;
   }
@@ -223,9 +238,73 @@ body.groups li#nav_groups a {
     margin-bottom: 0;
   }
 }
+
+.post-disaster-box, .hazard-box {
+  padding: 20px 0 60px;
+  //border-bottom: 5px solid @brand-yellow;
+  a {
+    color: @brand-blue;
+  }
+  p {
+    margin-bottom: 0;
+  }
+  img {
+    border: 4px solid white;
+    border-radius: 100%;
+    margin-top: 40px;
+  }
+}
+.hazard-box {
+  background: rgba(175,216,242,1);
+  background: -moz-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+  background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(175,216,242,1)), color-stop(100%, rgba(255,255,255,1)));
+  background: -webkit-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+  background: -o-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+  background: -ms-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+  background: linear-gradient(to bottom, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#afd8f2', endColorstr='#ffffff', GradientType=0 );
+}
+
 .home-facets {
   text-align: center;
   padding: 2em 0;
+  h3 > a{
+    color: @brand-primary;
+  }
+  p{
+    margin-bottom: 20px;
+  }
+  h1{
+    color: @brand-gray;
+    margin-bottom: 0px;
+  }
+  a {
+    color: black;
+    &:hover {
+      color: @link-color;
+      text-decoration: none;
+    }
+  }
+}
+
+.post-disaster-box {
+  background: black;
+
+  i {
+    color: @brand-yellow;
+  }
+
+  h3 > a{
+    color: @brand-alternate;
+  }
+  p{
+    margin-bottom: 20px;
+    color: @brand-light;
+  }
+  h1{
+    color: @brand-alternate;
+    margin-bottom: 0px;
+  }
   a {
     color: black;
     &:hover {
@@ -784,4 +863,9 @@ footer {
 
 .table-user-profile-attribute  {
   font-weight: bold;
+}
+
+.icon-earthquake {
+    background-image: url("../img/icon-earthquake.png");
+    background-position: center center;
 }
