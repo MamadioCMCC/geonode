@@ -25,7 +25,7 @@ from agon_ratings.models import OverallRating
 from geonode.base.enumerations import ALL_LANGUAGES, \
     HIERARCHY_LEVELS, UPDATE_FREQUENCIES, \
     DEFAULT_SUPPLEMENTAL_INFORMATION, LINK_TYPES, \
-    ALL_HAZARD_TYPES, ALL_HAZARD_UNITS, ALL_HAZARD_PERIODS
+    ALL_HAZARD_TYPES, ALL_HAZARD_UNITS
 from geonode.utils import bbox_to_wkt
 from geonode.utils import forward_mercator
 from geonode.security.models import PermissionLevelMixin
