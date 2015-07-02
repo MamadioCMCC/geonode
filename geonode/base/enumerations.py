@@ -471,8 +471,12 @@ CHARSETS = (('', 'None/Unknown'),
 
 ALL_HAZARD_TYPES = (
 		('earthquake', _('Earthquake')),
+		('drought', _('Drought')),
 		('flood', _('Flood')),
-		('', _('Flood')),
+		('tsunami', _('Tsunami')),
+		('storm_surge', _('Storm Surge')),
+		('strong_wind', _('Strong Wind')),
+		('volcanic_ash', _('Volcanic Ash')),
 )
 
 ALL_HAZARD_UNITS = (
