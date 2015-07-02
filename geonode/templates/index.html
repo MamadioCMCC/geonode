@@ -34,46 +34,46 @@
      {% facets as facets %}
  
         <div class="col-md-3">
-          <div><a href="#earthquake" class="btn btn-default" role="button">
+          <div><a href="/search/?hazard_type=earthquake" class="btn btn-default" role="button">
             <img src="{% static "geonode/img/hazard-icon-earthquake.png" %}"></img>
             <h3>Earthquake</h3>
             <h5 class="text-center">{{facets.hazard_earthquake|default:_("No")}} {% trans "datasets" %}</h5></a></div>
         </div>
         <div class="col-md-3">
-          <div><a href="#drought" class="btn btn-default" role="button">
+          <div><a href="/search/?hazard_type=drought" class="btn btn-default" role="button">
             <img src="{% static "geonode/img/hazard-icon-drought.png" %}"></img>
             <h3>Drought</h3>
             <h5 class="text-center">{{facets.hazard_drought|default:_("No")}} {% trans "datasets" %}</h5></a></div>
         </div>
         <div class="col-md-3">
-          <div><a href="#flood" class="btn btn-default" role="button">
+          <div><a href="/search/?hazard_type=flood" class="btn btn-default" role="button">
             <img src="{% static "geonode/img/hazard-icon-flood.png" %}"></img>
             <h3>Flood</h3>
             <h5 class="text-center">{{facets.hazard_flood|default:_("No")}} {% trans "datasets" %}</h5></a></div>
         </div>
         <div class="col-md-3">
-          <div><a href="#tsunami" class="btn btn-default" role="button">
+          <div><a href="/search/?hazard_type=tsunami" class="btn btn-default" role="button">
             <img src="{% static "geonode/img/hazard-icon-tsunami.png" %}"></img>
             <h3>Tsunami</h3>
             <h5 class="text-center">{{facets.hazard_tsunami|default:_("No")}} {% trans "datasets" %}</h5></a>
           </div>
         </div>
         <div class="col-md-2 col-md-offset-2">
-          <div><a href="#storm_surge" class="btn btn-default" role="button">
+          <div><a href="/search/?hazard_type=storm_surge" class="btn btn-default" role="button">
             <img src="{% static "geonode/img/hazard-icon-storm-surge.png" %}"></img>
             <h3>Storm Surge</h3>
             <h5 class="text-center">{{facets.hazard_storm_surge|default:_("No")}} {% trans "datasets" %}</h5></a>
           </div>
         </div>
         <div class="col-md-2 col-md-offset-1">
-          <div><a href="#strong_wind" class="btn btn-default" role="button">
+          <div><a href="/search/?hazard_type=strong_wind" class="btn btn-default" role="button">
             <img src="{% static "geonode/img/hazard-icon-strong-wind.png" %}"></img>
             <h3>Strong Wind</h3>
             <h5 class="text-center">{{facets.hazard_strong_wind|default:_("No")}} {% trans "datasets" %}</h5></a>
           </div>
         </div>
         <div class="col-md-2 col-md-offset-1">
-          <div><a href="#volcanic_ashes" class="btn btn-default" role="button">
+          <div><a href="/search/?hazard_type=volcanic_ashes" class="btn btn-default" role="button">
             <img src="{% static "geonode/img/hazard-icon-volcanic-ash.png" %}"></img>
             <h3>Volcanic Ashes</h3>
             <h5 class="text-center">{{facets.hazard_volcanic_ashes|default:_("No")}} {% trans "datasets" %}</h5></a>
@@ -91,19 +91,19 @@
           <h1>Post disaster</h1>
           <p>When our team receives request to help from governments with post disaster needs assessments we keep a copy of the publicly available datasets here.</p>
           <div class="col-md-4">
-            <div><a href="#nepal" class="btn btn-default" href="#nepal" role="button"><i class="mg map-np mg-5x"></i>
+            <div><a href="/search/?title__icontains=nepal" class="btn btn-default" role="button"><i class="mg map-np mg-5x"></i>
             <h3>Nepal Earthquake</h3>
             <h5 class="text-center">2015-09-08</h5>
            </a></div>
           </div>
           <div class="col-md-4">
-            <div><a href="#nepal" class="btn btn-default" href="#nepal" role="button"><i class="mg map-ph mg-5x"></i>
+            <div><a href="/search/?title__icontains=haiyan" class="btn btn-default" role="button"><i class="mg map-ph mg-5x"></i>
             <h3>Philippines Typhoon</h3>
             <h5 class="text-center">2015-09-08</h5>
            </a></div>
           </div>
           <div class="col-md-4">
-            <div><a href="#nepal" class="btn btn-default" href="#nepal" role="button"><i class="mg map-mw mg-5x"></i>
+            <div><a href="/search/?title__icontains=malawi" class="btn btn-default" role="button"><i class="mg map-mw mg-5x"></i>
             <h3>Malawi Floods</h3>
             <h5 class="text-center">2015-09-08</h5>
             </a></div>

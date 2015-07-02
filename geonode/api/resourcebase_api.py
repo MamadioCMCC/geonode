@@ -42,6 +42,7 @@ class CommonMetaApi:
     authorization = GeoNodeAuthorization()
     allowed_methods = ['get']
     filtering = {'title': ALL,
+                 'hazard_type': ALL,
                  'keywords': ALL_WITH_RELATIONS,
                  'regions': ALL_WITH_RELATIONS,
                  'category': ALL_WITH_RELATIONS,
