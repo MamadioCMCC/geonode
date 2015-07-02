@@ -92,7 +92,7 @@ form {
 ----------------------- */
 #wrap {
   background: @body-bg;
-  padding-bottom: 40px;
+  padding-bottom: 0px;
   padding-top: 10px;
   width: 100%;
 }
@@ -240,7 +240,7 @@ body.groups li#nav_groups a {
 }
 
 .post-disaster-box, .hazard-box {
-  padding: 20px 0 60px;
+  padding-top: 20px;
   //border-bottom: 5px solid @brand-yellow;
   a {
     color: @brand-blue;
@@ -273,6 +273,7 @@ body.groups li#nav_groups a {
     color: @brand-primary;
   }
   p{
+    font-size: 1.3em;
     margin-top: 30px;
     margin-bottom: 20px;
   }
@@ -307,7 +308,7 @@ body.groups li#nav_groups a {
 }
 
 .post-disaster-box {
-  background-color: black;
+  background-color: @gray-lighter;
 
   i {
     margin-top: 20px;
@@ -321,6 +322,7 @@ body.groups li#nav_groups a {
   }
   h5 {
     color: white;
+    font-weight: 300;
   }
   p{
     margin-bottom: 20px;
@@ -333,7 +335,7 @@ body.groups li#nav_groups a {
   .btn {
     margin-top: 10px;
     margin-bottom:10px;
-    min-width: 200px;
+    min-width: 250px;
     background-color: transparent;
     border-color: transparent;
   }
@@ -342,7 +344,7 @@ body.groups li#nav_groups a {
       color: @brand-yellow;
     }
     border-color:transparent;
-    box-shadow: 0px 1px 3px @gray;
+    box-shadow: 0px 1px 3px black;
   }
   a {
     color: white;
@@ -352,6 +354,22 @@ body.groups li#nav_groups a {
     }
   }
 }
+footer {
+
+}
+.contact-box {
+  background-color: white;
+  h3 {
+    color:@gray-light;
+  }
+  a {
+    color: @brand-gray;
+  }
+  a:hover {
+    color: @brand-blue;
+  }
+}
+
 /* Items
 ----------------------- */
 .filter, .actions {

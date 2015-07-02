@@ -58,7 +58,7 @@ form input {
 ----------------------- */
 #wrap {
   background: #ffffff;
-  padding-bottom: 40px;
+  padding-bottom: 0px;
   padding-top: 10px;
   width: 100%;
 }
@@ -204,7 +204,7 @@ body.groups li#nav_groups a {
 }
 .post-disaster-box,
 .hazard-box {
-  padding: 20px 0 60px;
+  padding-top: 20px;
 }
 .post-disaster-box a,
 .hazard-box a {
@@ -239,6 +239,7 @@ body.groups li#nav_groups a {
   color: #287ab0;
 }
 .home-facets p {
+  font-size: 1.3em;
   margin-top: 30px;
   margin-bottom: 20px;
 }
@@ -271,7 +272,7 @@ body.groups li#nav_groups a {
   text-decoration: none;
 }
 .post-disaster-box {
-  background-color: black;
+  background-color: #373535;
 }
 .post-disaster-box i {
   margin-top: 20px;
@@ -285,6 +286,7 @@ body.groups li#nav_groups a {
 }
 .post-disaster-box h5 {
   color: white;
+  font-weight: 300;
 }
 .post-disaster-box p {
   margin-bottom: 20px;
@@ -297,13 +299,13 @@ body.groups li#nav_groups a {
 .post-disaster-box .btn {
   margin-top: 10px;
   margin-bottom: 10px;
-  min-width: 200px;
+  min-width: 250px;
   background-color: transparent;
   border-color: transparent;
 }
 .post-disaster-box .btn:hover {
   border-color: transparent;
-  box-shadow: 0px 1px 3px #555555;
+  box-shadow: 0px 1px 3px black;
 }
 .post-disaster-box .btn:hover h3 {
   color: #ffc63b;
@@ -314,6 +316,18 @@ body.groups li#nav_groups a {
 .post-disaster-box a:hover {
   color: #ffc63b;
   text-decoration: none;
+}
+.contact-box {
+  background-color: white;
+}
+.contact-box h3 {
+  color: #999999;
+}
+.contact-box a {
+  color: #373535;
+}
+.contact-box a:hover {
+  color: #287ab0;
 }
 /* Items
 ----------------------- */
