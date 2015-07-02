@@ -472,22 +472,37 @@ CHARSETS = (('', 'None/Unknown'),
 ALL_HAZARD_TYPES = (
 		('earthquake', _('Earthquake')),
 		('flood', _('Flood')),
+		('', _('Flood')),
 )
 
 ALL_HAZARD_UNITS = (
-		('m', _('Meters')),
-		('f',_('Feet')),
-		('pga', _('PGA')),
-		('ms', _('m/s')),
+		('1/0', _('inundated / not inundated')),
+		('cm',_('centimeters')),
+		('CTA', _('Consumption to Availability Ratio')),
+		('dm', _('decimeters')),
+		('hz', _('hertz, wave frequencies')),
+		('kg', _('kilograms')),
+		('kg/s', _('kilograms per second')),
+		('km/h', _('kilometers per hour')),
+		('kn', _('decimeters')),
+		('m', _('meters')),
+		('m/s', _('meters per second')),
+		('mm', _('millimeters')),
+		('MMI', _('Modified Mercalli Intensity')),
+		('mph', _('Miles per hour')),
+		('PGA-g', _('Peak Ground Acceleration (g)')),
+		('PGA-cm/s^2', _('Peak Ground Acceleration (centimeter per second)')),
+		('PGA-m/s^2', _('Peak Ground Acceleration (meter per second)')),
+		('PGA-gal', _('Peak Ground Acceleration (gal: same as cm/s^2)')),
+		('PGV-cm/s^2', _('Peak Ground Velocity')),
+		('Q', _('Discharge (deficit)')),
+		('VEI', _('Volcanic Explosivity Index')),
+		('WCI', _('Water Crowding Index')),
+		('WRSI', _('Water Requirement Satisfaction Index')),
+		('PDSI', _('Palmer Drought Severity Index')),
+		('PON', _('Percent of Normal')),
+		('SPI', _('Standardized Precipitation Index')),
+		('CMI', _('Crop Moisture Index')),
+		('SWSI', _('Surface Water Supply Index')),
+		('RDI', _('Reclamation Drought Index')),
 )
-
-
-ALL_HAZARD_PERIODS = (
-		('50', _('50 years')),
-		('100', _('100 years')),
-		('250', _('250 years')),
-		('500', _('500 years')),
-		('1000', _('1000 years')),
-)
-
-

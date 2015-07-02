@@ -240,7 +240,7 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin):
     hazard_set_help_text = _('This ID will link the three associated layers for each hazard dataset so that the analytical framework knows to reference these three layers in the same query.')
     hazard_glide_help_text = _('ID associated with hazard event; only to keep historic layers')
     hazard_unit_help_text = _('The units of intensity specified in the hazard layer (e.g. metres, feet, PGA, m/s, index name)')
-    hazard_period_help_text = _('The return period of the layer')
+    hazard_period_help_text = _('The return period of the layer (in years)')
 
     # internal fields
     uuid = models.CharField(max_length=36)
@@ -278,7 +278,7 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin):
     hazard_set = models.CharField(_('hazard set id'), max_length=255, null=True, blank=True, help_text=hazard_set_help_text)
     hazard_glide = models.CharField(_('glide number'), max_length=255, null=True, blank=True, help_text=hazard_glide_help_text)
     hazard_unit = models.CharField(_('intesity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True, help_text=hazard_unit_help_text)
-    hazard_period = models.CharField(_('return period'), max_length=10, choices=ALL_HAZARD_PERIODS, null=True, blank=True, help_text=hazard_period_help_text)
+    hazard_period = models.CharField(_('return period'), max_length=10, null=True, blank=True, help_text=hazard_period_help_text)
     
     category = models.ForeignKey(TopicCategory, null=True, blank=True, limit_choices_to=Q(is_choice=True),
                                  help_text=category_help_text)
