@@ -612,11 +612,6 @@ MAP_BASELAYERS = [{
     "source": {"ptype": "gxp_mapquestsource"},
     "name": "osm",
     "group": "background",
-    "visibility": True
-}, {
-    "source": {"ptype": "gxp_mapquestsource"},
-    "name": "naip",
-    "group": "background",
     "visibility": False
 }, {
     "source": {"ptype": "gxp_bingsource"},
@@ -625,7 +620,17 @@ MAP_BASELAYERS = [{
     "visibility": False,
     "group": "background"
 }, {
-    "source": {"ptype": "gxp_mapboxsource"},
+  "source": {"ptype": "gxp_olsource"},
+    "type":"OpenLayers.Layer.XYZ",
+    "group":"background",
+    "visibility": True,
+    "fixed": True,
+    "args":[ "mapbox",
+       ["https://a.tiles.mapbox.com/v4/ingenieroariel.m9a2h374/${z}/${x}/${y}.png?access_token=pk.eyJ1IjoiaW5nZW5pZXJvYXJpZWwiLCJhIjoibXhDZ3pIMCJ9.qTmPYCbnUKtaNFkvKKysAQ",
+       "https://b.tiles.mapbox.com/v4/ingenieroariel.m9a2h374/${z}/${x}/${y}.png?access_token=pk.eyJ1IjoiaW5nZW5pZXJvYXJpZWwiLCJhIjoibXhDZ3pIMCJ9.qTmPYCbnUKtaNFkvKKysAQ",
+       "https://c.tiles.mapbox.com/v4/ingenieroariel.m9a2h374/${z}/${x}/${y}.png?access_token=pk.eyJ1IjoiaW5nZW5pZXJvYXJpZWwiLCJhIjoibXhDZ3pIMCJ9.qTmPYCbnUKtaNFkvKKysAQ"],
+       {"transitionEffect": "resize","attribution": "osm_attribution"}
+    ]
 }]
 
 SOCIAL_BUTTONS = True
@@ -752,7 +757,11 @@ LEAFLET_CONFIG = {
     'TILES': [
         # Find tiles at:
         # http://leaflet-extras.github.io/leaflet-providers/preview/
-
+#        ('Mapbox',
+#         'https://{s}.tiles.mapbox.com/v4/ingenieroariel.m9a2h374/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5nZW5pZXJvYXJpZWwiLCJhIjoibXhDZ3pIMCJ9.qTmPYCbnUKtaNFkvKKysAQ',
+#         '<a href="http://openstreetmap.org">OpenStreetMap</a> contributors, \
+#         <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'),
+      
         # Stamen toner lite.
         ('Watercolor',
          'http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png',
@@ -779,6 +788,8 @@ LEAFLET_CONFIG = {
         },
     }
 }
+
+
 
 # option to enable/disable resource unpublishing for administrators
 RESOURCE_PUBLISHING = False
