@@ -47,7 +47,8 @@ from agon_ratings.models import OverallRating
 
 from geonode.base.enumerations import ALL_LANGUAGES, \
     HIERARCHY_LEVELS, UPDATE_FREQUENCIES, \
-    DEFAULT_SUPPLEMENTAL_INFORMATION, LINK_TYPES
+    DEFAULT_SUPPLEMENTAL_INFORMATION, LINK_TYPES, \
+    ALL_HAZARD_TYPES, ALL_HAZARD_UNITS
 from geonode.utils import bbox_to_wkt
 from geonode.utils import forward_mercator
 from geonode.security.models import PermissionLevelMixin
@@ -345,6 +346,13 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
                                     ' metadata')
     license_help_text = _('license of the dataset')
     language_help_text = _('language used within the dataset')
+
+    hazard_type = models.CharField(_('hazard type'), max_length=50, choices=ALL_HAZARD_TYPES, null=True, blank=True, help_text=hazard_type_help_text)
+    hazard_set = models.CharField(_('hazard set id'), max_length=255, null=True, blank=True, help_text=hazard_set_help_text)
+    hazard_glide = models.CharField(_('glide number'), max_length=255, null=True, blank=True, help_text=hazard_glide_help_text)
+    hazard_unit = models.CharField(_('intesity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True, help_text=hazard_unit_help_text)
+    hazard_period = models.CharField(_('return period'), max_length=10, null=True, blank=True, help_text=hazard_period_help_text)
+
     category_help_text = _('high-level geographic data thematic classification to assist in the grouping and search of '
                            'available geographic data sets.')
     spatial_representation_type_help_text = _('method used to represent geographic information in the dataset.')
@@ -352,6 +360,12 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
     temporal_extent_end_help_text = _('time period covered by the content of the dataset (end)')
     data_quality_statement_help_text = _('general explanation of the data producer\'s knowledge about the lineage of a'
                                          ' dataset')
+    hazard_type_help_text = _('Choose the hazard type from a drop down menu.')
+    hazard_set_help_text = _('This ID will link the three associated layers for each hazard dataset so that the analytical framework knows to reference these three layers in the same query.')
+    hazard_glide_help_text = _('ID associated with hazard event; only to keep historic layers')
+    hazard_unit_help_text = _('The units of intensity specified in the hazard layer (e.g. metres, feet, PGA, m/s, index name)')
+    hazard_period_help_text = _('The return period of the layer (in years)')
+
     # internal fields
     uuid = models.CharField(max_length=36)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='owned_resource',
