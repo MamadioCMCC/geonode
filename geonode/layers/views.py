@@ -23,6 +23,7 @@ import sys
 import logging
 import shutil
 import traceback
+import csv
 from guardian.shortcuts import get_perms
 import decimal
 
@@ -30,6 +31,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
@@ -483,7 +485,6 @@ def layer_metadata(request, layername, template='layers/layer_metadata.html'):
         "category_form": category_form,
     }))
 
-
 @login_required
 def layer_change_poc(request, ids, template='layers/layer_change_poc.html'):
     layers = Layer.objects.filter(id__in=ids.split('_'))
@@ -503,7 +504,15 @@ def layer_change_poc(request, ids, template='layers/layer_change_poc.html'):
         template, RequestContext(
             request, {
                 'layers': layers, 'form': form}))
-
+@login_required
+def layer_list(request):
+    layer = Layer.objects.all()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="geonode.csv"'
+    writer = csv.writer(response)
+    for layer in Layer.objects.all():
+        writer.writerow([layer.name, layer.title, layer.hazard_type, layer.hazard_period, layer.hazard_unit, settings.SITEURL + layer.get_absolute_url()])
+    return response
 
 @login_required
 def layer_replace(request, layername, template='layers/layer_replace.html'):
