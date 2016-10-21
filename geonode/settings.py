@@ -504,8 +504,9 @@ MISSING_THUMBNAIL = os.getenv('MISSING_THUMBNAIL','geonode/img/missing_thumb.png
 # Search Snippet Cache Time in Seconds
 CACHE_TIME = int(os.getenv('CACHE_TIME','0'))
 
-GEOSERVER_LOCATION = os.getenv('GEOSERVER_LOCATION', 'http://localhost:8080/geoserver/')
-GEOSERVER_PUBLIC_LOCATION = os.getenv('GEOSERVER_PUBLIC_LOCATION', 'http://localhost:8080/geoserver/')
+
+GEOSERVER_LOCATION= os.getenv('GEOSERVER_BASE_URL', 'http://geoserver:8080/geoserver/')
+GEOSERVER_PUBLIC_LOCATION = os.getenv ('GEOSERVER_PUBLIC_URL','http://localhost/geoserver/')
 
 # OGC (WMS/WFS/WCS) Server Settings
 # OGC (WMS/WFS/WCS) Server Settings
