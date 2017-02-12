@@ -7,7 +7,7 @@ build:
 	docker-compose build celery
 
 sync: up
-	# set up the database tablea
+	# set up the database tables
 	docker-compose exec django django-admin.py makemigrations --noinput
 	docker-compose exec django django-admin.py migrate account --noinput
 	docker-compose exec django django-admin.py migrate --noinput
@@ -33,6 +33,10 @@ unittest: up
 
 test: smoketest unittest
 
-reset: down up wait sync
+clear:
+	docker volume rm labsgeonode_elasticsearch_data labsgeonode_geoserver_data labsgeonode_geoserver_datadir labsgeonode_postgresql_data labsgeonode_rabbitmq_data
 
-hardreset: pull build reset
+reset: down clear up wait sync
+
+#~ hardreset: pull build reset
+hardreset: build reset
