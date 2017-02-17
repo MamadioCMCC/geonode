@@ -3,6 +3,7 @@ version: '2'
 services:
 
   postgres:
+    # TODO: replace with https://github.com/camptocamp/docker-postgresql
     image: postgres:9.4
     volumes:
       - postgresql_data:/var/lib/postgresql/data
