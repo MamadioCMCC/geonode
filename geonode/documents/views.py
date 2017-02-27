@@ -1,4 +1,6 @@
 import json
+import csv
+import string
 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
@@ -351,3 +353,22 @@ def document_remove(request, docid, template='documents/document_remove.html'):
             mimetype="text/plain",
             status=401
         )
+
+@login_required
+def document_list(request):
+    documents = Document.objects.all()
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="geonode_documents.csv"'
+    writer = csv.writer(response)
+    for document in documents:
+        t = filter(lambda x: x in string.printable, document.title)
+        i = document.id
+        other_perils = document.supplemental_information
+        if "No information provided" in other_perils:
+            other_perils = document.hazard_type
+        else:
+            other_perils = document.supplemental_information
+        if document.hazard_type is not None:
+            other_perils += ", " + document.hazard_type
+        writer.writerow([i, t, other_perils, document.hazard_period, document.hazard_unit, settings.SITEURL + document.get_absolute_url(),document.distribution_url, [r for r in document.regions.all()] ])
+    return response
