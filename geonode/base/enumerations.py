@@ -521,4 +521,6 @@ ALL_HAZARD_UNITS = (
 		('VHL', _('Volcanic Hazard Level')),
 		('THL', _('Tsunami Hazard Level')),
 		('WA', _('Water Availability (aggregated runoff)')),
+		('WBGT_C', _('Wet Bulb Globe Temperature (Celcius)')),
+		('kW_m', _('Fire Line Intensity'))
 )
