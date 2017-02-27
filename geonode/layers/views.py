@@ -26,6 +26,7 @@ import traceback
 import csv
 from guardian.shortcuts import get_perms
 import decimal
+import unicodedata
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -511,7 +512,13 @@ def layer_list(request):
     response['Content-Disposition'] = 'attachment; filename="geonode.csv"'
     writer = csv.writer(response)
     for layer in Layer.objects.all():
-        writer.writerow([layer.name, layer.title, layer.hazard_type, layer.hazard_period, layer.hazard_unit, settings.SITEURL + layer.get_absolute_url()])
+        regions = layer.regions.all().values('name')
+
+        regions = [region['name'] for region in regions]
+
+        regions = "||".join(regions)
+
+        writer.writerow([layer.name, layer.title, layer.hazard_type, layer.hazard_period, layer.hazard_unit, settings.SITEURL + layer.get_absolute_url(), unicodedata.normalize('NFKD', layer.supplemental_information).encode('ascii','ignore'), layer.metadata_author.username, layer.owner.username, regions,])
     return response
 
 @login_required

@@ -357,7 +357,7 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
     hazard_type = models.CharField(_('hazard type'), max_length=50, choices=ALL_HAZARD_TYPES, null=True, blank=True, help_text=hazard_type_help_text)
     hazard_set = models.CharField(_('hazard set id'), max_length=255, null=True, blank=True, help_text=hazard_set_help_text)
     hazard_glide = models.CharField(_('glide number'), max_length=255, null=True, blank=True, help_text=hazard_glide_help_text)
-    hazard_unit = models.CharField(_('intesity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True, help_text=hazard_unit_help_text)
+    hazard_unit = models.CharField(_('intensity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True, help_text=hazard_unit_help_text)
     hazard_period = models.CharField(_('return period'), max_length=10, null=True, blank=True, help_text=hazard_period_help_text)
 
     category_help_text = _('high-level geographic data thematic classification to assist in the grouping and search of '
@@ -374,6 +374,10 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
                               verbose_name=_("Owner"))
     contacts = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ContactRole')
     title = models.CharField(_('title'), max_length=255, help_text=_('name by which the cited resource is known'))
+    creation_date = models.DateTimeField(_('creation date'), default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
+    publication_date = models.DateTimeField(_('publication date'), auto_now_add=True, default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
+    data_update_date = models.DateTimeField(_('data update date'), default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
+    metadata_update_date = models.DateTimeField(_('metadata update date'), auto_now=True, default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
     date = models.DateTimeField(_('date'), default=datetime.datetime.now, help_text=date_help_text)
     date_type = models.CharField(_('date type'), max_length=255, choices=VALID_DATE_TYPES, default='publication',
                                  help_text=date_type_help_text)
@@ -400,6 +404,14 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
                                 help_text=license_help_text)
     language = models.CharField(_('language'), max_length=3, choices=ALL_LANGUAGES, default='eng',
                                 help_text=language_help_text)
+
+    hazard_type = models.CharField(_('hazard type'), max_length=50, choices=ALL_HAZARD_TYPES, null=True, blank=True, help_text=hazard_type_help_text)
+    hazard_set = models.CharField(_('hazard set id'), max_length=255, null=True, blank=True, help_text=hazard_set_help_text)
+    hazard_glide = models.CharField(_('glide number'), max_length=255, null=True, blank=True, help_text=hazard_glide_help_text)
+    hazard_unit = models.CharField(_('intensity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True, help_text=hazard_unit_help_text)
+    hazard_period = models.CharField(_('return period'), max_length=10, null=True, blank=True, help_text=hazard_period_help_text)
+    calculation_method_quality = models.DecimalField(max_digits=3, decimal_places=2) 
+    scientific_quality = models.DecimalField(max_digits=3, decimal_places=2)
 
     category = models.ForeignKey(TopicCategory, null=True, blank=True, limit_choices_to=Q(is_choice=True),
                                  help_text=category_help_text)
@@ -466,6 +478,7 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
 
     # fields necessary for the apis
     thumbnail_url = models.TextField(null=True, blank=True)
+    download_url = models.TextField(null=True, blank=True)
     detail_url = models.CharField(max_length=255, null=True, blank=True)
     rating = models.IntegerField(default=0, null=True, blank=True)
 

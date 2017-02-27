@@ -472,11 +472,12 @@ CHARSETS = (('', 'None/Unknown'),
 ALL_HAZARD_TYPES = (
         ('earthquake', _('Earthquake')),
         ('drought', _('Drought')),
-        ('flood', _('Flood')),
+        ('river_flood', _('River Flood')),
         ('tsunami', _('Tsunami')),
-        ('storm_surge', _('Storm Surge')),
+        ('coastal_flood', _('Coastal Flood')),
         ('strong_wind', _('Strong Wind')),
         ('volcanic_ash', _('Volcanic Ash')),
+        ('landslide', _('Landslide')),
 )
 
 ALL_HAZARD_UNITS = (
@@ -494,7 +495,9 @@ ALL_HAZARD_UNITS = (
         ('mm', _('millimeters')),
         ('MMI', _('Modified Mercalli Intensity')),
         ('mph', _('Miles per hour')),
-        ('PGA-g', _('Peak Ground Acceleration (g)')),
+        ('SA-g-dec', _('Spectral Acceleration (g)')),
+        ('PGA-g-dec', _('Peak Ground Acceleration (g)')),
+        ('PGA-g-per', _('Peak Ground Acceleration (%g)')),
         ('PGA-cm/s^2', _('Peak Ground Acceleration (centimeter per second)')),
         ('PGA-m/s^2', _('Peak Ground Acceleration (meter per second)')),
         ('PGA-gal', _('Peak Ground Acceleration (gal: same as cm/s^2)')),
@@ -509,4 +512,9 @@ ALL_HAZARD_UNITS = (
         ('CMI', _('Crop Moisture Index')),
         ('SWSI', _('Surface Water Supply Index')),
         ('RDI', _('Reclamation Drought Index')),
+        ('LSI', _('Landslide Susceptibility Index')),
+        ('RDI', _('Reclamation Drought Index')),
+        ('VHL', _('Volcanic Hazard Level')),
+        ('THL', _('Tsunami Hazard Level')),
+        ('WA', _('Water Availability (aggregated runoff)')),
 )
