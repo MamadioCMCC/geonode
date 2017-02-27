@@ -471,14 +471,18 @@ CHARSETS = (('', 'None/Unknown'),
 
 ALL_HAZARD_TYPES = (
 		('earthquake', _('Earthquake')),
-		('drought', _('Drought')),
 		('river_flood', _('River Flood')),
-		('tsunami', _('Tsunami')),
 		('coastal_flood', _('Coastal Flood')),
+                ('urban_flood', _('Urban Flood')),
+		('tsunami', _('Tsunami')),
 		('strong_wind', _('Strong Wind')),
-		('volcanic_ash', _('Volcanic Ash')),
 		('landslide', _('Landslide')),
+		('drought', _('Drought')),
+                ('extreme_heat', _('Extreme Heat')),
+                ('wildfire', _('Wildfire')),
+		('volcanic_ash', _('Volcanic Cash')),
 )
+
 
 ALL_HAZARD_UNITS = (
 		('1/0', _('inundated / not inundated')),
