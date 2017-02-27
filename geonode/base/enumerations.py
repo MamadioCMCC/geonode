@@ -480,7 +480,7 @@ ALL_HAZARD_TYPES = (
 		('drought', _('Drought')),
                 ('extreme_heat', _('Extreme Heat')),
                 ('wildfire', _('Wildfire')),
-		('volcanic_ash', _('Volcanic Cash')),
+		('volcanic_ash', _('Volcanic Ash')),
 )
 
 
