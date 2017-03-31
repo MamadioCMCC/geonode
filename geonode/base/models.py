@@ -281,7 +281,7 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin):
     hazard_type = models.CharField(_('hazard type'), max_length=50, choices=ALL_HAZARD_TYPES, null=True, blank=True, help_text=hazard_type_help_text)
     hazard_set = models.CharField(_('hazard set id'), max_length=255, null=True, blank=True, help_text=hazard_set_help_text)
     hazard_glide = models.CharField(_('glide number'), max_length=255, null=True, blank=True, help_text=hazard_glide_help_text)
-    hazard_unit = models.CharField(_('intesity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True, help_text=hazard_unit_help_text)
+    hazard_unit = models.CharField(_('intensity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True, help_text=hazard_unit_help_text)
     hazard_period = models.CharField(_('return period'), max_length=10, null=True, blank=True, help_text=hazard_period_help_text)
     calculation_method_quality = models.DecimalField(max_digits=3, decimal_places=2) 
     scientific_quality = models.DecimalField(max_digits=3, decimal_places=2)
