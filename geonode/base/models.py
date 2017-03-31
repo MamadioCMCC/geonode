@@ -375,9 +375,9 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
     contacts = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ContactRole')
     title = models.CharField(_('title'), max_length=255, help_text=_('name by which the cited resource is known'))
     creation_date = models.DateTimeField(_('creation date'), default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
-    publication_date = models.DateTimeField(_('publication date'), auto_now_add=True, default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
+    publication_date = models.DateTimeField(_('publication date'), default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
     data_update_date = models.DateTimeField(_('data update date'), default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
-    metadata_update_date = models.DateTimeField(_('metadata update date'), auto_now=True, default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
+    metadata_update_date = models.DateTimeField(_('metadata update date'), default=datetime.datetime.now, help_text=date_help_text, null=True, blank=True)
     date = models.DateTimeField(_('date'), default=datetime.datetime.now, help_text=date_help_text)
     date_type = models.CharField(_('date type'), max_length=255, choices=VALID_DATE_TYPES, default='publication',
                                  help_text=date_type_help_text)
