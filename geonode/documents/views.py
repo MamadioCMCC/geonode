@@ -22,6 +22,7 @@ import json
 from guardian.shortcuts import get_perms
 import csv
 import string
+import datetime
 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
@@ -489,18 +490,57 @@ def document_metadata_detail(request, docid, template='documents/document_metada
 @login_required
 def document_list(request):
     documents = Document.objects.all()
+	filename = (str(datetime.datetime.now()) + "_documents.csv")
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="geonode_documents.csv"'
+	response['Content-Disposition'] = 'attachment; filename=' + filename
     writer = csv.writer(response)
+	# Writes header row
+	writer.writerow(['Layer ID',
+					'Title',
+					'Name',
+					'Creation Date',
+					'Hazard Type',
+					'Supplemental Information',
+					'Hazard Unit',
+					'Region',
+					'Owner Organization',
+					'License',
+					'Restrictions',
+					'Document URL',
+					'Distribution URL',
+					'Data Quality Statement',
+					'Is Published',
+					'Point of Contact',
+					'Category',
+					'Abstract'
+					])
     for document in documents:
         t = filter(lambda x: x in string.printable, document.title)
-        i = document.id
-        other_perils = document.supplemental_information
-        if "No information provided" in other_perils:
+		i = document.id
+		other_perils = document.supplemental_information
+		if "No information provided" in other_perils:
             other_perils = document.hazard_type
         else:
             other_perils = document.supplemental_information
         if document.hazard_type is not None:
             other_perils += ", " + document.hazard_type
-        writer.writerow([i, t, other_perils, document.hazard_period, document.hazard_unit, settings.SITEURL + document.get_absolute_url(),document.distribution_url, [r for r in document.regions.all()] ])
-    return response
+        writer.writerow([i,
+						 t,
+						 document.creation_date,
+						 document.hazard_type,
+						 other_perils,
+						 document.hazard_unit,
+						 document.distribution_url,
+						 [r for r in document.regions.all()],
+						 document.owner.organization,
+						 document.license,
+						 document.restriction_code_type,
+						 settings.SITEURL + document.get_absolute_url(),
+						 document.distribution_url,
+						 document.data_quality_statement,
+						 document.is_published,
+						 document.contacts,
+						 document.category,
+						 document.abstract
+						 ])
+return response
