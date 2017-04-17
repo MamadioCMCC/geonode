@@ -508,37 +508,35 @@ def layer_change_poc(request, ids, template='layers/layer_change_poc.html'):
                 'layers': layers, 'form': form}))
 @login_required
 def layer_list(request):
-    layer = Layer.objects.all()
-	filename = (str(datetime.datetime.now()) + "_layers.csv")
+    filename = str(datetime.datetime.now()) + "_layers.csv"
     response = HttpResponse(content_type='text/csv')
-    # response['Content-Disposition'] = 'attachment; filename="geonode_layers.csv"'  #ALTERNATIVE NAME IF DATETIME DOESNT WORK
+    response['Content-Disposition'] = 'attachment; filename=' + filename
     writer = csv.writer(response)
     # Writes header row
-	writer.writerow(['Layer ID',
-					'Name',
-					'Creation Date',
-					'Title',
-					'Hazard Set',
-					'Hazard Type',
-					'Hazard Period',
-					'Hazard Unit',
-					'Region',
-					'Owner Organization',
-					'License',
-					'Restrictions',
-					'Calculation Method Quality',
-					'Scientific Quality',
-					'Layer URL',
-					'Supplemental Information',
-					'Data Quality Statement',
-					'Is Published',
-					'Metadata Author',
-					'Owner',
-					'Keywords',
-					'Category',
-					'Abstract'
-					])
-	for layer in Layer.objects.all():
+    writer.writerow(['Layer ID','Name',
+                    'Creation Date',
+                    'Title',
+                    'Hazard Set',
+                    'Hazard Type',
+                    'Hazard Period',
+                    'Hazard Unit',
+                    'Region',
+                    'Owner Organization',
+                    'License',
+                    'Restrictions',
+                    'Calculation Method Quality',
+                    'Scientific Quality',
+                    'Layer URL',
+                    'Supplemental Information',
+                    'Data Quality Statement',
+                    'Is Published',
+                    'Metadata Author',
+                    'Owner',
+                    'Keywords',
+                    'Category',
+                    'Abstract'
+                    ])
+    for layer in Layer.objects.all():
         regions = layer.regions.all().values('name')
 
         regions = [region['name'] for region in regions]
@@ -546,29 +544,29 @@ def layer_list(request):
         regions = "||".join(regions)
 
         writer.writerow([layer.id,
-						 layer.name,
-						 layer.creation_date,
-						 layer.title,
-						 layer.hazard_set,
-						 layer.hazard_type,
-						 layer.hazard_period,
-						 layer.hazard_unit,
-						 regions,
-						 layer.owner.organization,
-						 layer.license,
-						 layer.restriction_code_type,
-						 layer.calculation_method_quality,
-						 layer.scientific_quality,
-						 settings.SITEURL + layer.get_absolute_url(),
-						 unicodedata.normalize('NFKD', layer.supplemental_information).encode('ascii','ignore'),
-						 layer.data_quality_statement,
-						 layer.is_published,
-						 layer.metadata_author.username,
-						 layer.owner.username,
-						 layer.keywords,
-						 layer.category,
-						 layer.abstract
-						 ])
+                         layer.name,
+                         layer.creation_date,
+                         layer.title,
+                         layer.hazard_set,
+                         layer.hazard_type,
+                         layer.hazard_period,
+                         layer.hazard_unit,
+                         regions,
+                         layer.owner.organization,
+                         layer.license,
+                         layer.restriction_code_type,
+                         layer.calculation_method_quality,
+                         layer.scientific_quality,
+                         settings.SITEURL + layer.get_absolute_url(),
+                         unicodedata.normalize('NFKD', layer.supplemental_information).encode('ascii','ignore'),
+                         layer.data_quality_statement,
+                         layer.is_published,
+                         layer.metadata_author.username,
+                         layer.owner.username,
+                         layer.keywords,
+                         layer.category,
+                         layer.abstract
+                         ])
 return response
 
 @login_required
