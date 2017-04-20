@@ -513,28 +513,29 @@ def layer_list(request):
     response['Content-Disposition'] = 'attachment; filename=' + filename
     writer = csv.writer(response)
     # Writes header row
-    writer.writerow(['Layer ID','Name',
-                    'Creation Date',
-                    'Title',
-                    'Hazard Set',
-                    'Hazard Type',
-                    'Hazard Period',
-                    'Hazard Unit',
-                    'Region',
-                    'Owner Organization',
-                    'License',
-                    'Restrictions',
-                    'Calculation Method Quality',
-                    'Scientific Quality',
-                    'Layer URL',
-                    'Supplemental Information',
-                    'Data Quality Statement',
-                    'Is Published',
-                    'Metadata Author',
-                    'Owner',
-                    'Keywords',
-                    'Category',
-                    'Abstract'
+    writer.writerow(['Layer ID',
+                     'Name',
+                     'Creation Date',
+                     'Title',
+                     'Hazard Set',
+                     'Hazard Type',
+                     'Hazard Period',
+                     'Hazard Unit',
+                     'Region',
+                     'Owner Organization',
+                     'License',
+                     'Restrictions',
+                     'Calculation Method Quality',
+                     'Scientific Quality',
+                     'Layer URL',
+                     'Supplemental Information',
+                     'Data Quality Statement',
+                     'Is Published',
+                     'Metadata Author',
+                     'Owner',
+                     'Keywords',
+                     'Category',
+                     'Abstract'
                     ])
     for layer in Layer.objects.all():
         regions = layer.regions.all().values('name')
@@ -558,7 +559,7 @@ def layer_list(request):
                          layer.calculation_method_quality,
                          layer.scientific_quality,
                          settings.SITEURL + layer.get_absolute_url(),
-                         unicodedata.normalize('NFKD', layer.supplemental_information).encode('ascii','ignore'),
+                         unicodedata.normalize('NFKD', layer.supplemental_information).encode('ascii', 'ignore'),
                          layer.data_quality_statement,
                          layer.is_published,
                          layer.metadata_author.username,
@@ -567,7 +568,7 @@ def layer_list(request):
                          layer.category,
                          layer.abstract
                          ])
-return response
+    return response
 
 @login_required
 def layer_replace(request, layername, template='layers/layer_replace.html'):
