@@ -526,7 +526,7 @@ def document_list(request):
             other_perils += ", " + document.hazard_type
         writer.writerow([docid,
                          title,
-                         document.name
+                         document.name,
                          document.creation_date,
                          document.hazard_type,
                          other_perils,
