@@ -496,27 +496,27 @@ def document_list(request):
     writer = csv.writer(response)
     # Writes header row
     writer.writerow(['Layer ID',
-                    'Title',
-                    'Name',
-                    'Creation Date',
-                    'Hazard Type',
-                    'Supplemental Information',
-                    'Hazard Unit',
-                    'Region',
-                    'Owner Organization',
-                    'License',
-                    'Restrictions',
-                    'Document URL',
-                    'Distribution URL',
-                    'Data Quality Statement',
-                    'Is Published',
-                    'Point of Contact',
-                    'Category',
-                    'Abstract'
+                     'Title',
+                     'Name',
+                     'Creation Date',
+                     'Hazard Type',
+                     'Supplemental Information',
+                     'Hazard Unit',
+                     'Region',
+                     'Owner Organization',
+                     'License',
+                     'Restrictions',
+                     'Document URL',
+                     'Distribution URL',
+                     'Data Quality Statement',
+                     'Is Published',
+                     'Point of Contact',
+                     'Category',
+                     'Abstract'
                     ])
     for document in documents:
-        t = filter(lambda x: x in string.printable, document.title)
-        i = document.id
+        title = filter(lambda x: x in string.printable, document.title)
+        docid = document.id
         other_perils = document.supplemental_information
         if "No information provided" in other_perils:
             other_perils = document.hazard_type
@@ -524,8 +524,9 @@ def document_list(request):
             other_perils = document.supplemental_information
         if document.hazard_type is not None:
             other_perils += ", " + document.hazard_type
-        writer.writerow([i,
-                         t,
+        writer.writerow([docid,
+                         title,
+                         document.name
                          document.creation_date,
                          document.hazard_type,
                          other_perils,
@@ -543,4 +544,4 @@ def document_list(request):
                          document.category,
                          document.abstract
                          ])
-return response
+    return response
