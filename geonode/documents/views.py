@@ -531,7 +531,6 @@ def document_list(request):
                          document.hazard_type,
                          other_perils,
                          document.hazard_unit,
-                         document.detail_url,
                          [r for r in document.regions.all()],
                          document.owner.organization,
                          document.license,
