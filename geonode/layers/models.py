@@ -645,8 +645,25 @@ def post_delete_layer_file(instance, sender, **kwargs):
     instance.file.delete(save=False)
 
 
+def set_download_url(instance, sender, **kwargs):
+    """
+    Save download url for geotiffs
+    """
+    if instance.is_vector():
+        return
+
+    if instance.upload_session is None:
+        return
+
+    file_set = instance.upload_session.layerfile_set
+
+    if file_set.all().count() == 1:
+        Layer.objects.filter(id=instance.id).update(download_url=file_set.get().file.url)
+
+
 signals.pre_save.connect(pre_save_layer, sender=Layer)
 signals.post_save.connect(resourcebase_post_save, sender=Layer)
+signals.post_save.connect(set_download_url, sender=Layer)
 signals.pre_delete.connect(pre_delete_layer, sender=Layer)
 signals.post_delete.connect(post_delete_layer, sender=Layer)
 signals.post_delete.connect(post_delete_layer_file, sender=LayerFile)

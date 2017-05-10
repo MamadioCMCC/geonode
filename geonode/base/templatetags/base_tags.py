@@ -29,6 +29,8 @@ from django.conf import settings
 
 from guardian.shortcuts import get_objects_for_user
 
+from geonode import settings
+from geonode.base.enumerations import ALL_HAZARD_TYPES
 from geonode.layers.models import Layer
 from geonode.maps.models import Map
 from geonode.documents.models import Document
@@ -272,6 +274,11 @@ def facets(context):
 
             facets['layer'] = facets['raster'] + \
                 facets['vector'] + facets['remote'] + facets['wms']  # + facets['vector_time']
+
+            hazardcounts = layers.values('hazard_type').annotate(count=Count('storeType'))
+            hazardcount_dict = dict([(count['hazard_type'], count['count']) for count in hazardcounts])
+            for hazard, __ in ALL_HAZARD_TYPES:
+                 facets['hazard_'+hazard] = hazardcount_dict.get(hazard, 0)
 
     return facets
 

@@ -55,11 +55,13 @@ from geonode.base.enumerations import (
     ALL_LANGUAGES,
     HIERARCHY_LEVELS,
     UPDATE_FREQUENCIES,
-    DEFAULT_SUPPLEMENTAL_INFORMATION)
+    DEFAULT_SUPPLEMENTAL_INFORMATION,
+    ALL_HAZARD_TYPES, ALL_HAZARD_UNITS)
 from geonode.utils import (
     add_url_params,
     bbox_to_wkt,
     forward_mercator)
+from geonode import geoserver
 from geonode.security.models import PermissionLevelMixin
 from taggit.managers import TaggableManager, _TaggableManager
 from taggit.models import TagBase, ItemBase
@@ -546,6 +548,14 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
     data_quality_statement_help_text = _(
         'general explanation of the data producer\'s knowledge about the lineage of a'
         ' dataset')
+    hazard_type_help_text = _('Choose the hazard type from a drop down menu.')
+    hazard_set_help_text = _('This ID will link the three associated layers for each hazard dataset so that the '
+                             'analytical framework knows to reference these three layers in the same query.')
+    hazard_glide_help_text = _('ID associated with hazard event; only to keep historic layers')
+    hazard_unit_help_text = _('The units of intensity specified in the hazard layer (e.g. metres, feet, PGA, m/s, '
+                              'index name)')
+    hazard_period_help_text = _('The return period of the layer (in years)')
+
     # internal fields
     uuid = models.CharField(max_length=36)
     owner = models.ForeignKey(
@@ -570,6 +580,14 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
         choices=VALID_DATE_TYPES,
         default='publication',
         help_text=date_type_help_text)
+    creation_date = models.DateTimeField(_('creation date'), default=datetime.datetime.now,
+                                         help_text=date_help_text, null=True, blank=True)
+    publication_date = models.DateTimeField(_('publication date'), auto_now_add=True,
+                                            help_text=date_help_text, null=True, blank=True)
+    data_update_date = models.DateTimeField(_('data update date'), default=datetime.datetime.now,
+                                            help_text=date_help_text, null=True, blank=True)
+    metadata_update_date = models.DateTimeField(_('metadata update date'), auto_now=True,
+                                                help_text=date_help_text, null=True, blank=True)
     edition = models.CharField(
         _('edition'),
         max_length=255,
@@ -769,11 +787,26 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
 
     # fields necessary for the apis
     thumbnail_url = models.TextField(_("Thumbnail url"), null=True, blank=True)
+    download_url = models.TextField(_("download url"), null=True, blank=True)
     detail_url = models.CharField(max_length=255, null=True, blank=True)
     rating = models.IntegerField(default=0, null=True, blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+    # Hazards related fields
+    hazard_type = models.CharField(_('hazard type'), max_length=50, choices=ALL_HAZARD_TYPES, null=True, blank=True,
+                                   help_text=hazard_type_help_text)
+    hazard_set = models.CharField(_('hazard set id'), max_length=255, null=True, blank=True,
+                                  help_text=hazard_set_help_text)
+    hazard_glide = models.CharField(_('glide number'), max_length=255, null=True, blank=True,
+                                    help_text=hazard_glide_help_text)
+    hazard_unit = models.CharField(_('intensity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True,
+                                   help_text=hazard_unit_help_text)
+    hazard_period = models.CharField(_('return period'), max_length=10, null=True, blank=True,
+                                     help_text=hazard_period_help_text)
+    calculation_method_quality = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    scientific_quality = models.DecimalField(max_digits=3, decimal_places=2, null=True)
 
     def __unicode__(self):
         return u"{0}".format(self.title)
