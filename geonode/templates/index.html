@@ -13,171 +13,162 @@
   <div class="jumbotron">
   	<div class="container">
   		<h1>{% trans "Welcome" %}</h1>
-  		<p></p>
-  		<p>{% blocktrans %}GeoNode is an open source platform for sharing geospatial data and maps.{% endblocktrans %}</p>
-		<p>{% blocktrans %}If you have any questions about the software or service, join our <a href="http://lists.osgeo.org/cgi-bin/mailman/listinfo/geonode-users">mailing list</a>.{% endblocktrans %}</p>
-  		<a class="btn btn-default btn-lg" target="_blank" href="http://docs.geonode.org/en/master/tutorials/users/index.html" role="button">{% blocktrans %}Get Started &raquo;{% endblocktrans %}</a>
+		<h1>
+			<span id="jumbo-innovation">Innovation</span><span id="jumbo-lab">Lab</span>
+			<span id="jumbo-geonode">GeoNode</span>
+		</h1>
+		<p>{% blocktrans %}Open data to further your understanding of disaster risk{% endblocktrans %}</p>
   	</div>
   </div>
   {% endblock %}
 
   {% block mainbody %}
-  {% block bigsearch %}
-  <div class="big-search">
-  	<div class="container">
-  		<h1>{% trans "Search for Data." %}</h1>
-  		<div class="search">
-  			<form id="search" action="{% url "search" %}" >
-  				<span class="fa fa-search fa-2x"></span>
-  				{% if HAYSTACK_SEARCH %}
-  				<input id="search_input" type="text" placeholder="Search" class="form-control" name="q">
-  				{% else %}
-  				<input id="search_input" type="text" placeholder="Search" class="form-control" name="title__icontains">
-  				{% endif %}
-  			</form>
-  		</div>
-  		<p><a class="btn btn-default btn-lg" href="/search/">Advanced Search</a></p>
-  	</div>
-  </div>
-  {% endblock %}
-
   {% block datasets %}
   <section id="datasets">
-  	<div class="container">
-  		<div class="row">
-  			<div class="container text-center">
-  				<h1>Discover the available datasets.</h1>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=boundaries&category__identifier__in=planningCadastre" data-toggle="tooltip" data-placement="auto"
-  						title="Political and administrative boundaries, land use maps, zoning maps, cadastral surveys, land ownership.">
-  						<div class="category">
-  							<i class="fa fa-flag fa-4x"></i>
-  							<h4>Boundaries</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=society" data-toggle="tooltip" data-placement="auto"
-  						title="Buildings, museums, churches, factories, housing, monuments, shops, towers. Energy, water and waste systems and communications infrastructure and services. Military bases, structures, activities." >
-  						<div class="category">
-  							<i class="fa fa-home fa-4x"></i>
-  							<h4>Buildings</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=climatologyMeteorologyAtmosphere" data-toggle="tooltip" data-placement="auto"
-  						title="Cloud cover, weather, climate, atmospheric conditions, climate change, precipitation" >
-  						<div class="category">
-  							<i class="fa fa-umbrella fa-4x"></i>
-  							<h4>Climate</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=elevation" data-toggle="tooltip" data-placement="auto"
-  						title="Altitude, bathymetry, digital elevation models, slope, derived products" >
-  						<div class="category">
-  							<i class="fa fa-level-up fa-4x"></i>
-  							<h4>Elevation</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=geoscientificInformation" data-toggle="tooltip" data-placement="auto"
-  						title="Geophysical features and processes, geology, minerals, sciences dealing with the composition, structure and origin of the earth s rocks, risks of earthquakes, volcanic activity, landslides, gravity information, soils, permafrost, hydrogeology, erosion." >
-  						<div class="category">
-  							<i class="fa fa-globe fa-4x"></i>
-  							<h4>Geology</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=health" data-toggle="tooltip" data-placement="auto"
-  						title="Health, health services, human ecology, and safety." >
-  						<div class="category">
-  							<i class="fa fa-medkit fa-4x"></i>
-  							<h4>Health</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=imageryBaseMapsEarthCover" data-toggle="tooltip" data-placement="auto"
-  						title="Land cover, topographic maps, imagery, unclassified images, annotations." >
-  						<div class="category">
-  							<i class="fa fa-tree fa-4x"></i>
-  							<h4>Land Cover</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=farming&category__identifier__in=environment" data-toggle="tooltip" data-placement="auto"
-  						title="Wildlife, vegetation, biological sciences, ecology, wilderness, sealife, wetlands, habitat. Environmental resources, protection and conservation. Agriculture, irrigation, aquaculture, plantations, herding, pests and diseases affecting crops and livestock" >
-  						<div class="category">
-  							<i class="fa fa-leaf fa-4x"></i>
-  							<h4>Nature</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=location" data-toggle="tooltip" data-placement="auto"
-  						title="Addresses, geodetic networks, control points, postal zones and services, place names" >
-  						<div class="category">
-  							<i class="fa fa-map-marker fa-4x"></i>
-  							<h4>Places</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="#" data-toggle="tooltip" data-placement="auto"
-  						title="Settlements, anthropology, archaeology, education, traditional beliefs, manners and customs, demographic data, recreational areas and activities, social impact assessments, crime and justice, census information. Economic activities, conditions and employment." >
-  						<div class="category">
-  							<i class="fa fa-male fa-4x"></i>
-  							<h4>Population</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=transportation" data-toggle="tooltip" data-placement="auto"
-  						title="Roads, airports/airstrips, shipping routes, tunnels, nautical charts, vehicle or vessel location, aeronautical charts, railways." >
-  						<div class="category">
-  							<i class="fa fa-road fa-4x"></i>
-  							<h4>Transportation</h4>
-  						</div>
-  					</a>
-  				</div>
-  				<div class="col-xs-4 col-sm-2">
-  					<a href="/search/?limit=100&offset=0&category__identifier__in=inlandWaters" data-toggle="tooltip" data-placement="auto"
-  						title="Rivers and glaciers, salt lakes, water utilization plans, dams, currents, floods, water quality, hydrographic charts, tides, tidal waves, coastal information, reefs." >
-  						<div class="category">
-  							<i class="fa fa-tint fa-4x"></i>
-  							<h4>Water</h4>
-  						</div>
-  					</a>
-  				</div>
-  			</div>
-  		</div>
-  	</div>
+	<div class="container">
+		<div class="row home-facets">
+			<div>
+				<h1>Hazard datasets</h1>
+				<p>We maintain a curation of hazard datasets at the global and country level. Tools like ThinkHazard! use these datasets in the backend.</p>
+				{% with facet_type='home' %}
+     			{% facets as facets %}
+		 		<div class="col-xs-4 col-sm-3">
+				  <div>
+					  <a href="/search/?hazard_type=earthquake" data-toggle="tooltip" data-placement="auto">
+						  <div class="category">
+							  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-earthquake.png" %}"></i>
+							  <h4>Earthquake</h4>
+							  <h5 class="text-center">{{facets.hazard_earthquake|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+				</div>
+				<div class="col-xs-4 col-sm-3">
+				  <div>
+					  <a href="/search/?hazard_type=drought" data-toggle="tooltip" data-placement="auto">
+						  <div class="category">
+							  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-drought.png" %}"></i>
+							  <h4>Drought</h4>
+							  <h5 class="text-center">{{facets.hazard_drought|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+				</div>
+				<div class="col-xs-4 col-sm-3">
+				  <div>
+					  <a href="/search/?hazard_type=river_flood" data-toggle="tooltip" data-placement="auto">
+						  <div class="category">
+							  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-flood.png" %}"></i>
+							  <h4>River Flood</h4>
+							  <h5 class="text-center">{{facets.hazard_river_flood|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+				</div>
+				<div class="col-xs-4 col-sm-3">
+				  <div>
+					  <a href="/search/?hazard_type=tsunami" data-toggle="tooltip" data-placement="auto">
+						  <div class="category">
+							  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-tsunami.png" %}"></i>
+							  <h4>Tsunami</h4>
+							  <h5 class="text-center">{{facets.hazard_tsunami|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+				</div>
+				<div class="col-xs-4 col-sm-3">
+					<div>
+					  <a href="/search/?hazard_type=coastal_flood" data-toggle="tooltip" data-placement="auto">
+						  <div class="category">
+							  <i class="fa fa-4x"><img src="{% static "geonode/img/hazard-icon-storm-surge.png" %}"></img></i>
+							  <h4>Coastal Flood</h4>
+							  <h5 class="text-center">{{facets.hazard_coastal_flood|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+				</div>
+				<div class="col-xs-4 col-sm-3">
+					<div>
+					  <a href="/search/?hazard_type=strong_wind" data-toggle="tooltip" data-placement="auto">
+						  <div class="category">
+							  <i class="fa fa-4x"><img src="{% static "geonode/img/hazard-icon-strong-wind.png" %}"></img></i>
+							  <h4>Strong Wind</h4>
+							  <h5 class="text-center">{{facets.hazard_strong_wind|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+				</div>
+				<div class="col-xs-4 col-sm-3">
+				  <div>
+					  <a href="/search/?hazard_type=volcanic_ash" data-toggle="tooltip" data-placement="auto">
+						  <div class="category">
+							  <i class="fa fa-4x"><img src="{% static "geonode/img/hazard-icon-volcanic-ash.png" %}"></img></i>
+							  <h4>Volcanic</h4>
+							  <h5 class="text-center">{{facets.hazard_volcanic_ash|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+				</div>
+				<div class="col-xs-4 col-sm-3">
+				  <div>
+					  <a href="/search/?hazard_type=landslide" data-toggle="tooltip" data-placement="auto" >
+						  <div class="category">
+							  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-landslide.png" %}"></i>
+							  <h4>Landslide</h4>
+							  <h5 class="text-center">{{facets.hazard_landslide|default:_("No")}} {% trans "datasets" %}</h5>
+						  </div>
+					  </a>
+				  </div>
+			  	</div>
+			  {% endwith %}
+			</div>
+		</div>
+	</div>
   </section>
   {% endblock %}
 
   {% block showcase %}
   <section id="showcase">
     <div class="container">
-      <div class="row">
-        <h2>Featured Datasets</h2>
-        {% verbatim %}
-        <div ng-app="featured">
-          <div ng-repeat="item in featured | limitTo:4">
-            <div class="col-md-3">
-              <a href="{{ item.detail_url }}"><img ng-src="{{ item.thumbnail_url }}" /></a>
-              <h4>{{ item.title | limitTo: 20 }}{{item.title.length > 20 ? '...' : ''}}</h4>
-            </div>
-          </div>
-        </div>
-  		{% endverbatim %}
-      </div>
-      <p><a href="/search/">Explore all datasets</a></p>
+      <div class="row home-facets">
+		  <div class="col-md-12">
+			  <h1>Post disaster</h1>
+			  <p> Geospatial datasets collected for Post-disaster damage and needs assessments by World Bank teams </p>
+			  <div class="col-md-4">
+				  <div>
+					  <a href="/search/?title__icontains=nepal" data-toggle="tooltip" data-placement="auto">
+						  <div>
+							  <i class="mg map-np mg-5x"></i>
+							  <h3>Nepal Earthquake</h3>
+							  <h5 class="text-center">2015-09-08</h5>
+						  </div>
+					  </a>
+				  </div>
+			  </div>
+			  <div class="col-md-4">
+				  <div>
+					  <a href="/search/?title__icontains=haiyan" data-toggle="tooltip" data-placement="auto">
+						  <div>
+							  <i class="mg map-ph mg-5x"></i>
+							  <h3>Philippines Typhoon</h3>
+							  <h5 class="text-center">2015-09-08</h5>
+						  </div>
+					  </a>
+				  </div>
+			  </div>
+			  <div class="col-md-4">
+				  <div>
+					  <a href="/search/?title__icontains=malawi" data-toggle="tooltip" data-placement="auto">
+						  <div>
+							  <i class="mg map-mw mg-5x"></i>
+							  <h3>Malawi Floods</h3>
+							  <h5 class="text-center">2015-09-08</h5>
+						  </div>
+					  </a>
+				  </div>
+			  </div>
+		  </div>
+	  </div>
     </div>
   </section>
   {% endblock %}
