@@ -35,7 +35,7 @@ from urlparse import urljoin, urlsplit
 from django.db import models
 from django.core import serializers
 from django.db.models import Q, signals
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.staticfiles.templatetags import staticfiles
@@ -55,7 +55,7 @@ from agon_ratings.models import OverallRating
 
 from geonode.base.enumerations import ALL_LANGUAGES, \
     HIERARCHY_LEVELS, UPDATE_FREQUENCIES, \
-    DEFAULT_SUPPLEMENTAL_INFORMATION, LINK_TYPES
+    DEFAULT_SUPPLEMENTAL_INFORMATION, LINK_TYPES, ALL_HAZARD_TYPES, ALL_HAZARD_UNITS
 from geonode.utils import bbox_to_wkt
 from geonode.utils import forward_mercator
 from geonode.security.models import PermissionLevelMixin
@@ -525,6 +525,14 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
     data_quality_statement_help_text = _(
         'general explanation of the data producer\'s knowledge about the lineage of a'
         ' dataset')
+    hazard_type_help_text = _('Choose the hazard type from a drop down menu.')
+    hazard_set_help_text = _('This ID will link the three associated layers for each hazard dataset so that the '
+                             'analytical framework knows to reference these three layers in the same query.')
+    hazard_glide_help_text = _('ID associated with hazard event; only to keep historic layers')
+    hazard_unit_help_text = _('The units of intensity specified in the hazard layer (e.g. metres, feet, PGA, m/s, '
+                              'index name)')
+    hazard_period_help_text = _('The return period of the layer (in years)')
+
     # internal fields
     uuid = models.CharField(max_length=36)
     owner = models.ForeignKey(
@@ -539,6 +547,14 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
     title = models.CharField(_('title'), max_length=255, help_text=_(
         'name by which the cited resource is known'))
     alternate = models.CharField(max_length=128, null=True, blank=True)
+    creation_date = models.DateTimeField(_('creation date'), default=datetime.datetime.now,
+                                         help_text=date_help_text, null=True, blank=True)
+    publication_date = models.DateTimeField(_('publication date'), auto_now_add=True,
+                                            help_text=date_help_text, null=True, blank=True)
+    data_update_date = models.DateTimeField(_('data update date'), default=datetime.datetime.now,
+                                            help_text=date_help_text, null=True, blank=True)
+    metadata_update_date = models.DateTimeField(_('metadata update date'), auto_now=True,
+                                                help_text=date_help_text, null=True, blank=True)
     date = models.DateTimeField(
         _('date'),
         default=datetime.datetime.now,
@@ -739,8 +755,24 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
 
     # fields necessary for the apis
     thumbnail_url = models.TextField(null=True, blank=True)
+    download_url = models.TextField(null=True, blank=True)
     detail_url = models.CharField(max_length=255, null=True, blank=True)
     rating = models.IntegerField(default=0, null=True, blank=True)
+
+    # Hazards related fields
+    hazard_type = models.CharField(_('hazard type'), max_length=50, choices=ALL_HAZARD_TYPES, null=True, blank=True,
+                                   help_text=hazard_type_help_text)
+    hazard_set = models.CharField(_('hazard set id'), max_length=255, null=True, blank=True,
+                                  help_text=hazard_set_help_text)
+    hazard_glide = models.CharField(_('glide number'), max_length=255, null=True, blank=True,
+                                    help_text=hazard_glide_help_text)
+    hazard_unit = models.CharField(_('intensity unit'), max_length=10, choices=ALL_HAZARD_UNITS, null=True, blank=True,
+                                   help_text=hazard_unit_help_text)
+    hazard_period = models.CharField(_('return period'), max_length=10, null=True, blank=True,
+                                     help_text=hazard_period_help_text)
+    calculation_method_quality = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    scientific_quality = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+
 
     def __unicode__(self):
         return self.title
