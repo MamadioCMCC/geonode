@@ -17,16 +17,19 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 #########################################################################
-import re
 import os
 import sys
 import logging
+import unicodecsv as csv
 import shutil
 import base64
 import traceback
 from types import TracebackType
 import decimal
 import cPickle as pickle
+import re
+import datetime
+
 from django.db.models import Q
 from celery.exceptions import TimeoutError
 
@@ -1613,3 +1616,67 @@ def layer_view_counter(layer_id, viewer):
     _l = Layer.objects.get(id=layer_id)
     _u = get_user_model().objects.get(username=viewer)
     _l.view_count_up(_u, do_local=True)
+
+
+@login_required
+def layer_list(request):
+    filename = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S_layers.csv")
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+    writer = csv.writer(response)
+    # Writes header row
+    writer.writerow(['Layer ID',
+                     'Name',
+                     'Creation Date',
+                     'Title',
+                     'Hazard Set',
+                     'Hazard Type',
+                     'Hazard Period',
+                     'Hazard Unit',
+                     'Region',
+                     'Owner Organization',
+                     'License',
+                     'Restrictions',
+                     'Calculation Method Quality',
+                     'Scientific Quality',
+                     'Layer URL',
+                     'Supplemental Information',
+                     'Data Quality Statement',
+                     'Is Published',
+                     'Metadata Author',
+                     'Owner',
+                     'Keywords',
+                     'Category',
+                     'Abstract'
+                    ])
+    for layer in Layer.objects.all():
+        regions = layer.regions.all().values('name')
+        regions = [region['name'] for region in regions]
+        regions = "||".join(regions)
+
+        writer.writerow([layer.id,
+                         layer.name,
+                         layer.creation_date,
+                         layer.title,
+                         layer.hazard_set,
+                         layer.hazard_type,
+                         layer.hazard_period,
+                         layer.hazard_unit,
+                         regions,
+                         layer.owner.organization,
+                         layer.license,
+                         layer.restriction_code_type,
+                         layer.calculation_method_quality,
+                         layer.scientific_quality,
+                         settings.SITEURL + layer.get_absolute_url(),
+                         layer.supplemental_information,
+                         layer.data_quality_statement,
+                         layer.is_published,
+                         layer.metadata_author.username,
+                         layer.owner.username,
+                         '||'.join(layer.keywords.names()),
+                         layer.category,
+                         layer.abstract
+                         ])
+
+    return response

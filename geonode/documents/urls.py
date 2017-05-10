@@ -39,6 +39,8 @@ urlpatterns = [  # 'geonode.documents.views',
         {'facet_type': 'documents'},
         name='document_browse'
         ),
+    url(r'^list$',
+        view.document_list, name='document_list'),
     url(r'^(?P<docid>\d+)/?$',
         views.document_detail, name='document_detail'),
     url(r'^(?P<docid>\d+)/download/?$',

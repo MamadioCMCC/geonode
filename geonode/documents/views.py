@@ -19,7 +19,9 @@
 #########################################################################
 
 import os
+import unicodecsv as csv
 import json
+import datetime
 import logging
 import traceback
 from itertools import chain
@@ -737,3 +739,56 @@ def document_metadata_detail(
 @login_required
 def document_batch_metadata(request, ids):
     return batch_modify(request, ids, 'Document')
+    }))
+
+
+@login_required
+def document_list(request):
+    documents = Document.objects.all()
+    filename = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S_documents.csv")
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+    writer = csv.writer(response)
+    # Writes header row
+    writer.writerow(['Document ID',
+                     'Title',
+                     'Creation Date',
+                     'Hazard Type',
+                     'Supplemental Information',
+                     'Hazard Unit',
+                     'Region',
+                     'Owner Organization',
+                     'License',
+                     'Restrictions',
+                     'Document URL',
+                     'Data Quality Statement',
+                     'Is Published',
+                     'Point of Contact',
+                     'Category',
+                     'Abstract'
+                    ])
+    for document in documents:
+        if "No information provided" in document.supplemental_information:
+            other_perils = document.hazard_type
+        else:
+            other_perils = document.supplemental_information
+        if document.hazard_type is not None:
+            other_perils += ", " + document.hazard_type
+        writer.writerow([document.id,
+                         document.title,
+                         document.creation_date,
+                         document.hazard_type,
+                         other_perils,
+                         document.hazard_unit,
+                         [r for r in document.regions.all()],
+                         document.owner.organization,
+                         document.license,
+                         document.restriction_code_type,
+                         settings.SITEURL + document.get_absolute_url(),
+                         document.data_quality_statement,
+                         document.is_published,
+                         document.contacts,
+                         document.category,
+                         document.abstract
+                         ])
+    return response
