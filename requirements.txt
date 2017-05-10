@@ -70,6 +70,7 @@ pyyaml==3.11
 regex==2016.7.21
 requests==2.11.1
 transifex-client==0.10
+unicodecsv==0.14.1
 xmltodict==0.9.2
 django-treebeard==3.0
 django-geonode-client==0.0.15
