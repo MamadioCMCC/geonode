@@ -1224,7 +1224,7 @@ def layer_view_counter(layer_id, viewer):
 
 @login_required
 def layer_list(request):
-    filename = str(datetime.datetime.now()) + "_layers.csv"
+    filename = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S_layers.csv")
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
     writer = csv.writer(response)
