@@ -522,5 +522,6 @@ ALL_HAZARD_UNITS = (
         ('THL', _('Tsunami Hazard Level')),
         ('WA', _('Water Availability (aggregated runoff)')),
         ('WBGT_C', _('Wet Bulb Globe Temperature (Celcius)')),
-        ('kW_m', _('Fire Line Intensity'))
+        ('kW_m', _('Fire Line Intensity')),
+        ('FAI', _('Flooded Area Index'))
 )
