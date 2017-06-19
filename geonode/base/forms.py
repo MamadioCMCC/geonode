@@ -108,14 +108,14 @@ class ResourceBaseForm(TranslationModelForm):
         widget=DateTimePicker(**_date_widget_options)
     )
     temporal_extent_start = forms.DateTimeField(
-        label=_("temporal extent start"),
+        label=_("Temporal extent start"),
         required=False,
         localize=True,
         input_formats=['%Y-%m-%d %I:%M %p'],
         widget=DateTimePicker(**_date_widget_options)
     )
     temporal_extent_end = forms.DateTimeField(
-        label=_("temporal extent end"),
+        label=_("Temporal extent end"),
         required=False,
         localize=True,
         input_formats=['%Y-%m-%d %I:%M %p'],
