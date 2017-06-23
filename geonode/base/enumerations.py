@@ -523,5 +523,6 @@ ALL_HAZARD_UNITS = (
         ('WA', _('Water Availability (aggregated runoff)')),
         ('WBGT_C', _('Wet Bulb Globe Temperature (Celcius)')),
         ('kW_m', _('Fire Line Intensity')),
-        ('FAI', _('Flooded Area Index'))
+        ('FAI', _('Flooded Area Index')),
+        ('FWI', _('Canadian Fire Weather Index'))
 )
