@@ -40,7 +40,7 @@ class Command(BaseCommand):
             '-u',
             '--user',
             dest="user",
-            default=None,
+            default="gfdrr",
             help="Name of the user account which should own the imported layers")
 
         parser.add_argument(
