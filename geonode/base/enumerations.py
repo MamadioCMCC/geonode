@@ -483,6 +483,7 @@ ALL_HAZARD_TYPES = (
         ('extreme_heat', _('Extreme Heat')),
         ('wildfire', _('Wildfire')),
         ('volcanic_ash', _('Volcanic Ash')),
+        ('water_scarcity', _('Water Scarcity')),
 )
 
 

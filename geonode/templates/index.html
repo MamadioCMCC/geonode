@@ -125,6 +125,55 @@
               </a>
             </div>
           </div>
+
+          <div class="col-xs-4 col-sm-3 dataset-icon">
+            <div>
+              <a href="{% url "search" %}?hazard_type=wildfire" data-toggle="tooltip" data-placement="auto" >
+                <div class="category">
+                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-wildfire.png" %}"></i>
+                  <h4>Wildfire</h4>
+                  <h5 class="text-center">{{facets.hazard_wildfire|default:_("No")}} {% trans "datasets" %}</h5>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="col-xs-4 col-sm-3 dataset-icon">
+            <div>
+              <a href="{% url "search" %}?hazard_type=extreme_heat" data-toggle="tooltip" data-placement="auto" >
+                <div class="category">
+                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-extreme-heat.png" %}"></i>
+                  <h4>Extreme Heat</h4>
+                  <h5 class="text-center">{{facets.hazard_extreme_heat|default:_("No")}} {% trans "datasets" %}</h5>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="col-xs-4 col-sm-3 dataset-icon">
+            <div>
+              <a href="{% url "search" %}?hazard_type=urban_flood" data-toggle="tooltip" data-placement="auto" >
+                <div class="category">
+                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-urban-flood.png" %}"></i>
+                  <h4>Urban Flood</h4>
+                  <h5 class="text-center">{{facets.hazard_urban_flood|default:_("No")}} {% trans "datasets" %}</h5>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="col-xs-4 col-sm-3 dataset-icon">
+            <div>
+              <a href="{% url "search" %}?hazard_type=water_scarcity" data-toggle="tooltip" data-placement="auto" >
+                <div class="category">
+                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-water-scarcity.png" %}"></i>
+                  <h4>Water Scarcity</h4>
+                  <h5 class="text-center">{{facets.hazard_water_scarcity|default:_("No")}} {% trans "datasets" %}</h5>
+                </div>
+              </a>
+            </div>
+          </div>
+
           {% endwith %}
         </div>
       </div>
