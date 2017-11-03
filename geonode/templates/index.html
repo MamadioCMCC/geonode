@@ -40,7 +40,7 @@
             <div>
               <a href="{% url "search" %}?hazard_type=earthquake" data-toggle="tooltip" data-placement="auto">
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-earthquake.png" %}"></i>
+                  <i class="fa fa-4x icon-eq"></i>
                   <h4>Earthquake</h4>
                   <h5 class="text-center">{{facets.hazard_earthquake|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
@@ -51,7 +51,7 @@
             <div>
               <a href="{% url "search" %}?hazard_type=drought" data-toggle="tooltip" data-placement="auto">
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-drought.png" %}"></i>
+                  <i class="fa fa-4x icon-dr"></i>
                   <h4>Drought</h4>
                   <h5 class="text-center">{{facets.hazard_drought|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
@@ -62,7 +62,7 @@
             <div>
               <a href="{% url "search" %}?hazard_type=river_flood" data-toggle="tooltip" data-placement="auto">
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-flood.png" %}"></i>
+                  <i class="fa fa-4x icon-fl"></i>
                   <h4>River Flood</h4>
                   <h5 class="text-center">{{facets.hazard_river_flood|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
@@ -73,7 +73,7 @@
             <div>
               <a href="{% url "search" %}?hazard_type=tsunami" data-toggle="tooltip" data-placement="auto">
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-tsunami.png" %}"></i>
+                  <i class="fa fa-4x icon-ts"></i>
                   <h4>Tsunami</h4>
                   <h5 class="text-center">{{facets.hazard_tsunami|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
@@ -84,7 +84,7 @@
             <div>
               <a href="{% url "search" %}?hazard_type=coastal_flood" data-toggle="tooltip" data-placement="auto">
                 <div class="category">
-                  <i class="fa fa-4x"><img src="{% static "geonode/img/hazard-icon-storm-surge.png" %}"></img></i>
+                  <i class="fa fa-4x icon-cf"></i>
                   <h4>Coastal Flood</h4>
                   <h5 class="text-center">{{facets.hazard_coastal_flood|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
@@ -95,7 +95,7 @@
             <div>
               <a href="{% url "search" %}?hazard_type=strong_wind" data-toggle="tooltip" data-placement="auto">
                 <div class="category">
-                  <i class="fa fa-4x"><img src="{% static "geonode/img/hazard-icon-strong-wind.png" %}"></img></i>
+                  <i class="fa fa-4x icon-cy"></i>
                   <h4>Strong Wind</h4>
                   <h5 class="text-center">{{facets.hazard_strong_wind|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
@@ -106,7 +106,7 @@
             <div>
               <a href="{% url "search" %}?hazard_type=volcanic_ash" data-toggle="tooltip" data-placement="auto">
                 <div class="category">
-                  <i class="fa fa-4x"><img src="{% static "geonode/img/hazard-icon-volcanic-ash.png" %}"></img></i>
+                  <i class="fa fa-4x icon-va"></i>
                   <h4>Volcanic</h4>
                   <h5 class="text-center">{{facets.hazard_volcanic_ash|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
@@ -117,62 +117,57 @@
             <div>
               <a href="{% url "search" %}?hazard_type=landslide" data-toggle="tooltip" data-placement="auto" >
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-landslide.png" %}"></i>
+                  <i class="fa fa-4x icon-ls"></i>
                   <h4>Landslide</h4>
                   <h5 class="text-center">{{facets.hazard_landslide|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
               </a>
             </div>
           </div>
-
-          <div class="col-xs-4 col-sm-3 dataset-icon">
+          <div class="col-xs-4 col-sm-3 col-md-2 col-lg-1">
             <div>
               <a href="{% url "search" %}?hazard_type=wildfire" data-toggle="tooltip" data-placement="auto" >
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-wildfire.png" %}"></i>
+                  <i class="fa fa-4x icon-wf"></i>
                   <h4>Wildfire</h4>
                   <h5 class="text-center">{{facets.hazard_wildfire|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
               </a>
             </div>
           </div>
-
-          <div class="col-xs-4 col-sm-3 dataset-icon">
+          <div class="col-xs-4 col-sm-3 col-md-2 col-lg-1">
             <div>
               <a href="{% url "search" %}?hazard_type=extreme_heat" data-toggle="tooltip" data-placement="auto" >
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-extreme-heat.png" %}"></i>
+                  <i class="fa fa-4x icon-eh"></i>
                   <h4>Extreme Heat</h4>
                   <h5 class="text-center">{{facets.hazard_extreme_heat|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
               </a>
             </div>
           </div>
-
-          <div class="col-xs-4 col-sm-3 dataset-icon">
+          <div class="col-xs-4 col-sm-3 col-md-2 col-lg-1">
             <div>
               <a href="{% url "search" %}?hazard_type=urban_flood" data-toggle="tooltip" data-placement="auto" >
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-urban-flood.png" %}"></i>
+                  <i class="fa fa-4x icon-uf"></i>
                   <h4>Urban Flood</h4>
                   <h5 class="text-center">{{facets.hazard_urban_flood|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
               </a>
             </div>
           </div>
-
-          <div class="col-xs-4 col-sm-3 dataset-icon">
+          <div class="col-xs-4 col-sm-3 col-md-2 col-lg-1">
             <div>
               <a href="{% url "search" %}?hazard_type=water_scarcity" data-toggle="tooltip" data-placement="auto" >
                 <div class="category">
-                  <i class="fa fa-4x"><img height=70px src="{% static "geonode/img/hazard-icon-water-scarcity.png" %}"></i>
+                  <i class="fa fa-4x icon-ws"></i>
                   <h4>Water Scarcity</h4>
                   <h5 class="text-center">{{facets.hazard_water_scarcity|default:_("No")}} {% trans "datasets" %}</h5>
                 </div>
               </a>
             </div>
           </div>
-
           {% endwith %}
         </div>
       </div>
