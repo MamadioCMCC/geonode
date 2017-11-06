@@ -36,9 +36,6 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["django-admin.py", "runserver", "0.0.0.0:8000", "--settings=geonode.settings"]
 
-# Install gunicorn
-RUN pip install gunicorn
-
 # Install tools for frontend (node, npm, grunt, bower, ...)
 ADD https://nodejs.org/dist/v6.11.2/node-v6.11.2-linux-x64.tar.xz /usr/local/
 RUN cd /usr/local/ \
