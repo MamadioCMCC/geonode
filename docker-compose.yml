@@ -34,7 +34,6 @@ services:
       - "8000:8000"
     environment:
       - DJANGO_SETTINGS_MODULE=geonode.settings
-      - ALLOWED_HOSTS='[''localhost'']'
       - C_FORCE_ROOT=1
       - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
       - DB_HOST=database
@@ -68,6 +67,19 @@ services:
       - -E
     env_file:
       - ./scripts/docker/env/production/django.env
+
+  consumers:
+    image: camptocamp/geonode_django
+    links:
+      - rabbitmq
+      - database
+      - elasticsearch
+    entrypoint: ["/bin/sh", "-c"]
+    command: python manage.py runmessaging
+    environment:
+      - DJANGO_SETTINGS_MODULE=geonode.settings
+      - C_FORCE_ROOT=1
+      - BROKER_URL=amqp://guest:guest@rabbitmq:5672/
 
   geoserver:
     image: camptocamp/geonode_geoserver
