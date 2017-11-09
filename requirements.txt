@@ -64,7 +64,7 @@ pep8==1.7.0
 pillow==3.3.1
 pinax-theme-bootstrap==3.0a11
 pinax-theme-bootstrap-account==1.0b2
-psycopg2==2.6.2
+psycopg2==2.7.3.1
 pycsw==2.0.3
 elasticsearch==2.4.0
 pyflakes==1.6.0
