@@ -1,22 +1,23 @@
-FROM python:2.7
+FROM ubuntu:xenial
 
 ENV POSTGRES_VERSION 9.5
 
-# This section is borrowed from the official Django image but adds GDAL and others
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main" > /etc/apt/sources.list.d/postgres.list \
+RUN apt-get update && apt-get install -y python python-pip wget git unoconv
+
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/postgres.list \
  && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
  && apt-get update && apt-get install -y \
+        postgresql-client-${POSTGRES_VERSION} libpq-dev \
         gcc \
         gettext \
-        postgresql-client-${POSTGRES_VERSION} libpq-dev \
         sqlite3 \
+        libmemcached-dev libsasl2-dev zlib1g-dev \
         python-gdal python-psycopg2 \
         python-imaging python-lxml \
         python-dev libgdal-dev \
+        libxslt1-dev \
         python-ldap \
-        libmemcached-dev libsasl2-dev zlib1g-dev \
         python-pylibmc \
-        wget \
     --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
@@ -26,7 +27,7 @@ COPY package/docker/ /
 RUN pip install --upgrade pip \
 # python-gdal does not seem to work, let's install manually the version that is
 # compatible with the provided libgdal-dev
-    && pip install GDAL==1.10 --global-option=build_ext --global-option="-I/usr/include/gdal" \
+    && pip install GDAL==1.11.2 --global-option=build_ext --global-option="-I/usr/include/gdal" \
 # install gunicorn for production setup
     && pip install gunicorn
 
@@ -52,7 +53,7 @@ RUN cd /usr/local/ \
 
 ENV PATH=/usr/local/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Install geonode code and dependencies
+# Install geonode code, dependencies and generate static files
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY requirements.txt /usr/src/app/

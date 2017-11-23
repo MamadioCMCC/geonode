@@ -3,7 +3,7 @@ up:
 	docker-compose up -d
 
 build:
-	docker pull python:2.7
+	docker pull ubuntu:xenial
 	docker build -t camptocamp/geonode_django:latest .
 	docker build -t camptocamp/geonode_django:`date +%Y%m%d%H%M%S` .
 
