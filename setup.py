@@ -89,7 +89,7 @@ setup(name='GeoNode',
 
         # geopython dependencies
         "pyproj==1.9.5.1",  # python-pyproj (1.9.5)
-        "OWSLib==0.14-dev",  # python-owslib (0.10.3) FIXME
+        "OWSLib==0.14",  # python-owslib (0.10.3) FIXME
         "pycsw==2.0.3",  # python-pycsw (1.10.1, 2.0.0 in ppa) FIXME
         "%s" % shapely_dep,  # python-shapely (1.5.13)
 
@@ -114,7 +114,7 @@ setup(name='GeoNode',
         "geonode-announcements==1.0.8",
         "geonode-agon-ratings==0.3.5",  # (0.3.1 in ppa) FIXME
         "pinax-notifications<4.0",
-        "django-user-accounts==2.0.2dev",
+        "django-user-accounts==2.0.2",
         # we can't use django-user-account until upstream merge changes for geonode.
         # this is temporary solution
         # "git+https://github.com/cezio/django-user-accounts/archive/252_255_mixed.zip",
@@ -144,6 +144,6 @@ setup(name='GeoNode',
         ],
       zip_safe=False,
       dependency_links=[
-        'https://github.com/cezio/django-user-accounts/archive/252_255_mixed.zip#egg=django-user-accounts-2.0.2dev'
+        'https://github.com/cezio/django-user-accounts/archive/252_255_mixed.zip#egg=django-user-accounts-2.0.2'
       ]
       )
