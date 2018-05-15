@@ -89,11 +89,11 @@ article.tab-pane {
 /* ------ Nav
 ------------------------------ */
 .navbar-inverse {
-    background-color: @gray-dark;
+    background-color: @brand-light;
     border: 0;
 
     .navbar-nav > li > a {
-        color: white;
+        color: @brand-gray;
         font-weight: 600;
         padding-top: 25px;
         padding-bottom: 25px;
@@ -116,13 +116,13 @@ article.tab-pane {
         border-top: 1px solid @brand-primary;
 
         a {
-            color: white;
+            color: @brand-gray;
         }
 
         li a {
             &:hover {
                 background-color: darken(@brand-primary, 10%);
-                color: white;
+                color: @brand-gray;
             }
         }
 
@@ -175,7 +175,7 @@ article.tab-pane {
 }
 
 .navbar-brand {
-    background: url("../img/logo.png") 0 10px no-repeat;
+    background: url("../img/lab-logo.png") 18px 19px no-repeat;
     background-size: 100%;
     text-indent: -9999px;
     height: 65px;
@@ -201,7 +201,7 @@ article.tab-pane {
 ------------------------------ */
 .home {
     .navbar-inverse {
-        background-color: rgba(0,0,0,0.5);
+        background-color: white;
     }
 
     #wrap {
@@ -210,10 +210,14 @@ article.tab-pane {
     }
 
     .jumbotron {
-        background: @brand-primary;
+        background: @gray-dark;
+        background-image: url(../../lab/lights.jpg);
+        background-size: 100%;
+        background-position: center;
         color: white;
         margin-bottom: 0;
-        padding: 7.5em 0 3.75em;
+        margin-top: 25px;
+        padding: 7.5em 0 0 0;
         text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
 
         a {
@@ -238,15 +242,21 @@ article.tab-pane {
         }
     }
 
+    #jumbo-innovation {
+      color: @brand-yellow;
+    }
+
+    #jumbo-lab {
+      font-weight: 300;
+    }
+
     .big-search {
-        background: @gray-dark;
-        color: white;
+        color: @gray-dark;
 
         h1,
         p {
             text-align: center;
         }
-        padding-bottom: 3em;
         padding-top: 1em;
 
         a {
@@ -294,47 +304,61 @@ article.tab-pane {
     }
 
     #datasets {
-        /*background: @brand-primary;
-		color: white;*/
-        padding: 1em 0;
+      background: rgba(175,216,242,1);
+      background: -moz-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+      background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(175,216,242,1)), color-stop(100%, rgba(255,255,255,1)));
+      background: -webkit-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+      background: -o-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+      background: -ms-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+      background: linear-gradient(to bottom, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#afd8f2', endColorstr='#ffffff', GradientType=0 );
 
-        p {
-            font-size: 14px;
+      color: @brand-gray;
+
+      p {
+        font-size: 18px;
+      }
+
+      h4 {
+        font-size: 24px;
+      }
+
+      i img {
+        border: 4px solid white;
+        border-radius: 100%;
+        margin-top: 20px;
+      }
+
+      a {
+        color: @gray-dark;
+
+        &:hover {
+          text-decoration: none;
         }
 
-        h4 {
-            text-transform: uppercase;
-            font-size: 14px;
+        .category {
+          margin: 0 50px;
+          padding: 2em 0;
+
+          &:hover {
+            color: @brand-primary;
+            img {
+              border-color: @brand-primary;
+            }
+          }
         }
 
-        a {
-            color: @gray-dark;
-
-            &:hover {
-                text-decoration: none;
-            }
-
-            .category {
-                /*background: @brand-primary;
-				border-radius: 4px;*/
-                margin: 0 -15px;
-                padding: 2em 0;
-
-                &:hover {
-                    color: @brand-primary;
-                }
-            }
-
-            span {
-                font-size: 4em;
-            }
+        span {
+          font-size: 4em;
         }
+      }
     }
 
     #showcase {
         background: @gray-lighter;
-        padding: 2em 0;
+        padding: 1em 0;
         text-align: center;
+        color: white;
 
         .col-md-3 {
             padding: 2em 1em;
@@ -344,9 +368,32 @@ article.tab-pane {
                 width: 100%;
             }
         }
+        h1{
+          color: @brand-yellow;
+          font-size: 36px;
+        }
+        h3{
+          font-size: 24px;
+        }
+        h5 {
+          font-weight: 300;
+        }
+        h3, h5 {
+          color: white;
+        }
 
+        i {
+          color: @brand-yellow;
+        }
+
+        a:hover {
+          h3{
+            color: @brand-yellow;
+          }
+        }
         p {
-            font-size: 18px;
+          font-size: 18px;
+          margin: 30px 0 20px 0;
         }
     }
 }
@@ -966,14 +1013,15 @@ nav.filter {
 /* Footer
 ----------------------- */
 footer {
-    color: white;
+    background: white;
+    color: #999999;
     padding: 1.5em;
 
     a {
-        color: @brand-warning;
+        color: @brand-gray;
 
         &:hover {
-            color: darken(@brand-warning, 13.5%);
+            color: darken(@brand-gray, 13.5%);
         }
     }
 
