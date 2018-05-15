@@ -1,1 +1,5 @@
-
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block extra_head %}
+ <link href="{% static "lab/mapglyphs/mapglyphs.css" %}" rel="stylesheet">
+{% endblock %}
