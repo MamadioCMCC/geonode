@@ -515,8 +515,7 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
     tkeywords = models.ManyToManyField(
         ThesaurusKeyword,
         help_text=tkeywords_help_text,
-        blank=True,
-        null=True)
+        blank=True)
     regions = models.ManyToManyField(Region, verbose_name=_('keywords region'), blank=True,
                                      help_text=regions_help_text)
 
