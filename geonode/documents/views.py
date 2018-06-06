@@ -702,7 +702,6 @@ def document_metadata_detail(
 @login_required
 def document_batch_metadata(request, ids):
     return batch_modify(request, ids, 'Document')
-    }))
 
 
 @login_required
