@@ -208,50 +208,9 @@
   <footer>
     <div class="container">
       <div class="row">
-        <div class="col-md-2">
-          <ul class="list-unstyled">
-            <li>Data</li>
-            <li><a href="{% url "layer_browse" %}?limit={{ CLIENT_RESULTS_LIMIT }}">{% trans "Layers" %}</a></li>
-            <li><a href="{% url "document_browse" %}?limit={{ CLIENT_RESULTS_LIMIT }}">{% trans "Documents" %}</a></li>
-            <li><a href="{% url "services" %}?limit={{ CLIENT_RESULTS_LIMIT }}">{% trans "Remote Services" %}</a></li>
-            {% if user.is_authenticated %}
-                <li role="separator" class="divider"></li>
-                <li><a href="{% url "layer_upload" %}">Upload Layer</a></li>
-                {% if 'geonode.contrib.createlayer' in INSTALLED_APPS %}
-                    <li><a href="{% url "layer_create" %}">{% trans "Create Layer" %}</a></li>
-                {% endif %}
-                <li><a href="{% url "document_upload" %}">Upload Document</a></li>
-            {% endif %}
-            {% if user.is_superuser or user.is_staff %}
-                <li><a href="{% url "register_service" %}">{% trans "Add Remote Service" %}</a></li>
-            {% endif %}
-          </ul>
+        <div class="col-md-8">
+          <h3>Feedback? Contact us at <a href="mailto:vdeparday@worldbank.org">vdeparday@worldbank.org</a></h3>
         </div>
-        <div class="col-md-2">
-          <ul class="list-unstyled">
-            <li>Maps</li>
-            <li><a href="{% url "maps_browse" %}?limit={{ CLIENT_RESULTS_LIMIT }}">{% trans "Explore Maps" %}</a></li>
-            {% if user.is_authenticated %}
-            <li> <a href="{% url "new_map" %}">{% trans "Create Map" %}</a></li>
-            {% endif %}
-          </ul>
-        </div>
-		<div class="col-md-2">
-          <ul class="list-unstyled">
-            <li>About</li>
-            <li><a href="{% url "profile_browse" %}">{% trans "People" %}</a></li>
-            <li><a href="{% url "group_list" %}">{% trans "Groups" %}</a></li>
-            {% if perms.announcements.can_manage %}
-            <li><a href="{% url "announcements_list" %}">{% trans "Announcements" %}</a></li>
-            {% endif %}
-            <li><a href="{% url "geonode.invitations:geonode-send-invite" %}">{% trans "Invite Users" %}</a></li>
-            {% if user.is_superuser %}
-            <li><a href="/admin/people/profile/add/">{% trans "Add User" %}</a></li>
-            <li><a href="{% url "group_create" %}">{% trans "Create Group" %}</a></li>
-            {% endif %}
-          </ul>
-        </div>
-
         <div class="col-md-6 text-right">
           {% block contactus %}
           {% endblock contactus %}
