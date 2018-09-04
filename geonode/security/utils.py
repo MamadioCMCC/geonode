@@ -169,10 +169,10 @@ def get_geofence_rules_count():
         # Check first that the rules does not exist already
         """
         curl -X GET -u admin:geoserver \
-              http://<host>:<port>/geoserver/geofence/rest/rules/count.json
+              http://<host>:<port>/geoserver/rest/geofence/rules/count.json
         """
         headers = {'Content-type': 'application/json'}
-        r = requests.get(url + 'geofence/rest/rules/count.json',
+        r = requests.get(url + 'rest/geofence/rules/count.json',
                          headers=headers,
                          auth=HTTPBasicAuth(user, passwd))
         if (r.status_code < 200 or r.status_code > 201):
@@ -285,7 +285,7 @@ def set_geofence_all(instance):
         """
         curl -X POST -u admin:geoserver -H "Content-Type: text/xml" -d \
         "<Rule><workspace>geonode</workspace><layer>{layer}</layer><access>ALLOW</access></Rule>" \
-        http://<host>:<port>/geoserver/geofence/rest/rules
+        http://<host>:<port>/geoserver/rest/geofence/rules
         """
         headers = {'Content-type': 'application/xml'}
         payload = _get_geofence_payload(
@@ -374,7 +374,7 @@ def remove_object_permissions(instance):
                 # Scan GeoFence Rules associated to the Layer
                 """
                 curl -u admin:geoserver
-                http://<host>:<port>/geoserver/geofence/rest/rules.json?workspace=geonode&layer={layer}
+                http://<host>:<port>/geoserver/rest/geofence/rules.json?workspace=geonode&layer={layer}
                 """
                 url = settings.OGC_SERVER['default']['LOCATION']
                 user = settings.OGC_SERVER['default']['USER']
@@ -382,7 +382,7 @@ def remove_object_permissions(instance):
                 headers = {'Content-type': 'application/json'}
                 workspace = _get_layer_workspace(resource.layer)
                 r = requests.get(
-                    "{}geofence/rest/rules.json?workspace={}&layer={}".format(
+                    "{}rest/geofence/rules.json?workspace={}&layer={}".format(
                         url, workspace, resource.layer.name),
                     headers=headers,
                     auth=HTTPBasicAuth(user, passwd)
@@ -396,9 +396,9 @@ def remove_object_permissions(instance):
                                 r_ids.append(r['id'])
 
                     # Delete GeoFence Rules associated to the Layer
-                    # curl -X DELETE -u admin:geoserver http://<host>:<port>/geoserver/geofence/rest/rules/id/{r_id}
+                    # curl -X DELETE -u admin:geoserver http://<host>:<port>/geoserver/rest/geofence/rules/id/{r_id}
                     for i, r_id in enumerate(r_ids):
-                        r = requests.delete(url + 'geofence/rest/rules/id/' + str(r_id),
+                        r = requests.delete(url + 'rest/geofence/rules/id/' + str(r_id),
                                             headers=headers,
                                             auth=HTTPBasicAuth(user, passwd))
                         if (r.status_code < 200 or r.status_code > 201):
@@ -487,7 +487,7 @@ def _update_geofence_rule(layer, workspace, service, user=None, group=None):
     )
     logger.debug("request data: {}".format(payload))
     response = requests.post(
-        "{base_url}geofence/rest/rules".format(
+        "{base_url}rest/geofence/rules".format(
             base_url=settings.OGC_SERVER['default']['LOCATION']),
         data=payload,
         headers={
