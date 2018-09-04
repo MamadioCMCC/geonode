@@ -38,6 +38,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from guardian.utils import get_user_obj_perms_model
 from guardian.shortcuts import assign_perm
 from geonode.groups.models import GroupProfile
+from ..services.enumerations import CASCADED
 from geonode.utils import get_layer_workspace
 
 logger = logging.getLogger("geonode.security.utils")
@@ -404,7 +405,7 @@ def set_geofence_all(instance):
             access="ALLOW"
         )
         response = requests.post(
-            url + 'rest/geofence/rules',
+            url + 'geofence/rest/rules',
             headers=headers,
             data=payload,
             auth=HTTPBasicAuth(user, passwd)
@@ -483,6 +484,7 @@ def remove_object_permissions(instance):
     resourcebase permissions
 
     """
+
     from guardian.models import UserObjectPermission, GroupObjectPermission
     resource = instance.get_self_resource()
     if hasattr(resource, "layer"):
@@ -506,10 +508,44 @@ def remove_object_permissions(instance):
         except BaseException:
             tb = traceback.format_exc()
             logger.debug(tb)
+        finally:
+            set_geofence_invalidate_cache()
+
     UserObjectPermission.objects.filter(content_type=ContentType.objects.get_for_model(resource),
                                         object_pk=instance.id).delete()
     GroupObjectPermission.objects.filter(content_type=ContentType.objects.get_for_model(resource),
                                          object_pk=instance.id).delete()
+
+
+# # Logic to login a user automatically when it has successfully
+# # activated an account:
+# def autologin(sender, **kwargs):
+#     user = kwargs['user']
+#     request = kwargs['request']
+#     # Manually setting the default user backed to avoid the
+#     # 'User' object has no attribute 'backend' error
+#     user.backend = 'django.contrib.auth.backends.ModelBackend'
+#     # This login function does not need password.
+#     login(request, user)
+#
+# # FIXME(Ariel): Replace this signal with the one from django-user-accounts
+# # user_activated.connect(autologin)
+
+
+def _get_layer_workspace(layer):
+    """Get the workspace where the input layer belongs"""
+    workspace = layer.workspace
+    if not workspace:
+        default_workspace = getattr(settings, "DEFAULT_WORKSPACE", "geonode")
+        try:
+            if layer.remote_service.method == CASCADED:
+                workspace = getattr(
+                    settings, "CASCADE_WORKSPACE", default_workspace)
+            else:
+                raise RuntimeError("Layer is not cascaded")
+        except AttributeError:  # layer does not have a service
+            workspace = default_workspace
+    return workspace
 
 
 def _get_geofence_payload(layer, workspace, access, user=None, group=None,
@@ -518,6 +554,7 @@ def _get_geofence_payload(layer, workspace, access, user=None, group=None,
     root_el = etree.Element("Rule")
     username_el = etree.SubElement(root_el, "userName")
     if user is not None:
+        username_el = etree.SubElement(root_el, "userName")
         username_el.text = user
     else:
         username_el.text = ''
@@ -549,7 +586,7 @@ def _update_geofence_rule(layer, workspace, service, user=None, group=None):
     )
     logger.debug("request data: {}".format(payload))
     response = requests.post(
-        "{base_url}rest/geofence/rules".format(
+        "{base_url}geofence/rest/rules".format(
             base_url=settings.OGC_SERVER['default']['LOCATION']),
         data=payload,
         headers={
@@ -563,51 +600,3 @@ def _update_geofence_rule(layer, workspace, service, user=None, group=None):
     logger.debug("response status_code: {}".format(response.status_code))
     if response.status_code not in (200, 201):
         msg = ("Could not ADD GeoServer User {!r} Rule for "
-               "Layer {!r}: '{!r}'".format(user, layer, response.text))
-        if 'Duplicate Rule' in response.text:
-            logger.warning(msg)
-        else:
-            raise RuntimeError(msg)
-
-
-def sync_resources_with_guardian(resource=None):
-    """
-    Sync resources with Guardian and clear their dirty state
-    """
-
-    from geonode.base.models import ResourceBase
-    from geonode.layers.models import Layer
-
-    if resource:
-        dirty_resources = ResourceBase.objects.filter(id=resource.id)
-    else:
-        dirty_resources = ResourceBase.objects.filter(dirty_state=True)
-    if dirty_resources and dirty_resources.count() > 0:
-        logger.debug(" --------------------------- synching with guardian!")
-        for r in dirty_resources:
-            if r.polymorphic_ctype.name == 'layer':
-                layer = None
-                try:
-                    purge_geofence_layer_rules(r)
-                    layer = Layer.objects.get(id=r.id)
-                    perm_spec = layer.get_all_level_info()
-                    logger.debug(" %s --------------------------- %s " % (layer, perm_spec))
-                    # All the other users
-                    if 'users' in perm_spec:
-                        for user, perms in perm_spec['users'].items():
-                            user = get_user_model().objects.get(username=user)
-                            # Set the GeoFence User Rules
-                            geofence_user = str(user)
-                            if "AnonymousUser" in geofence_user:
-                                geofence_user = None
-                            sync_geofence_with_guardian(layer, perms, user=geofence_user)
-                    # All the other groups
-                    if 'groups' in perm_spec:
-                        for group, perms in perm_spec['groups'].items():
-                            group = Group.objects.get(name=group)
-                            # Set the GeoFence Group Rules
-                            sync_geofence_with_guardian(layer, perms, group=group)
-                    r.clear_dirty_state()
-                except BaseException as e:
-                    logger.exception(e)
-                    logger.warn("!WARNING! - Failure Synching-up Security Rules for Resource [%s]" % (r))
