@@ -205,6 +205,8 @@ class RegionsSelect(forms.Select):
         def _region_id_from_choice(choice):
             if isinstance(choice, int):
                 return choice
+            elif isinstance(choice, basestring):
+                return int(choice)
             else:
                 return choice.id
 

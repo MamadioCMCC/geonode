@@ -20,12 +20,13 @@
 
 # Django settings for the GeoNode project.
 import ast
+import json
 import os
 import re
 import sys
 from datetime import timedelta
 from distutils.util import strtobool
-from urlparse import urlparse, urlunparse, urljoin
+from urlparse import urlparse, urljoin
 
 import django
 import dj_database_url
@@ -81,7 +82,7 @@ try:
 except ValueError:
     # fallback to regular list of values separated with misc chars
     ALLOWED_HOSTS = ['localhost', 'django', 'geonode'] if os.getenv('ALLOWED_HOSTS') is None \
-        else re.split(r' *[,|:|;] *', os.getenv('ALLOWED_HOSTS'))
+        else re.split(r' *[,|:;] *', os.getenv('ALLOWED_HOSTS'))
 
 # AUTH_IP_WHITELIST property limits access to users/groups REST endpoints
 # to only whitelisted IP addresses.
@@ -246,11 +247,12 @@ STATIC_ROOT = os.getenv('STATIC_ROOT',
 STATIC_URL = os.getenv('STATIC_URL', "/static/")
 
 # Additional directories which hold static files
-_DEFAULT_STATICFILES_DIRS = [
-    os.path.join(PROJECT_ROOT, "static"),
-]
-
-STATICFILES_DIRS = os.getenv('STATICFILES_DIRS', _DEFAULT_STATICFILES_DIRS)
+if 'STATICFILES_DIRS' in os.environ:
+    STATICFILES_DIRS =  re.split(r' *[,|:;] *', os.environ['STATICFILES_DIRS'])
+else:
+    STATICFILES_DIRS = [
+        os.path.join(PROJECT_ROOT, "static"),
+    ]
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -908,15 +910,18 @@ else:
     _DATETIME_INPUT_FORMATS = ('%Y-%m-%d %H:%M:%S.%f %Z', '%Y-%m-%dT%H:%M:%S.%f', '%Y-%m-%dT%H:%M:%S%Z')
 DATETIME_INPUT_FORMATS = DATETIME_INPUT_FORMATS + _DATETIME_INPUT_FORMATS
 
-MAP_BASELAYERS = [{
-    "source": {"ptype": "gxp_olsource"},
-    "type": "OpenLayers.Layer",
-    "args": ["No background"],
-    "name": "background",
-    "visibility": False,
-    "fixed": True,
-    "group":"background"
-},
+if 'MAP_BASELAYERS' in os.environ:
+    MAP_BASELAYERS = json.loads(os.environ['MAP_BASELAYERS'])
+else:
+    MAP_BASELAYERS = [{
+        "source": {"ptype": "gxp_olsource"},
+        "type": "OpenLayers.Layer",
+        "args": ["No background"],
+        "name": "background",
+        "visibility": False,
+        "fixed": True,
+        "group":"background"
+    },
     # {
     #     "source": {"ptype": "gxp_olsource"},
     #     "type": "OpenLayers.Layer.XYZ",
@@ -929,13 +934,13 @@ MAP_BASELAYERS = [{
     #     "group":"background"
     # },
     {
-    "source": {"ptype": "gxp_osmsource"},
-    "type": "OpenLayers.Layer.OSM",
-    "name": "mapnik",
-    "visibility": True,
-    "fixed": True,
-    "group": "background"
-}]
+        "source": {"ptype": "gxp_osmsource"},
+        "type": "OpenLayers.Layer.OSM",
+        "name": "mapnik",
+        "visibility": True,
+        "fixed": True,
+        "group": "background"
+    }]
 
 DISPLAY_SOCIAL = strtobool(os.getenv('DISPLAY_SOCIAL', 'True'))
 DISPLAY_COMMENTS = strtobool(os.getenv('DISPLAY_COMMENTS', 'True'))
