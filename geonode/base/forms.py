@@ -210,8 +210,9 @@ class RegionsSelect(forms.Select):
 
         # Normalize to strings.
         def _region_id_from_choice(choice):
-            if isinstance(choice, int) or \
-            (isinstance(choice, basestring) and choice.isdigit()):
+            if isinstance(choice, int):
+                return choice
+            elif isinstance(choice, basestring):
                 return int(choice)
             else:
                 return choice.id

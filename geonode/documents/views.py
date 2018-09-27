@@ -223,7 +223,7 @@ class DocumentUploadView(CreateView):
         self.object.is_published = is_published
         self.object.save()
         form.save_many2many()
-        self.object.set_permissions(form.cleaned_data['permissions'])
+        self.object.set_permissions(form.cleaned_data['permissions'], is_layer=False)
 
         abstract = None
         date = None

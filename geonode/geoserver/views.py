@@ -250,13 +250,11 @@ def layer_style_manage(request, layername):
                 }
             )
         except (FailedRequestError, EnvironmentError):
-            tb = traceback.format_exc()
-            logger.debug(tb)
             msg = ('Could not connect to geoserver at "%s"'
                    'to manage style information for layer "%s"' % (
                        ogc_server_settings.LOCATION, layer.name)
                    )
-            logger.debug(msg)
+            logger.warn(msg, exc_info=True)
             # If geoserver is not online, return an error
             return render(
                 request,
