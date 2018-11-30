@@ -112,7 +112,7 @@ def get_visible_resources(queryset,
                     Q(is_published=False) & ~(
                         Q(owner__username__iexact=str(user)) | Q(group__in=group_list_all)))
             else:
-                filter_set = filter_set.exclude(Q(is_published=False))
+                filter_set = filter_set.exclude(is_published=False)
 
     if private_groups_not_visibile:
         if not is_admin:
@@ -124,14 +124,6 @@ def get_visible_resources(queryset,
             else:
                 filter_set = filter_set.exclude(group__in=private_groups)
 
-    # Hide Dirty State Resources
-    if not is_admin:
-        if user:
-            filter_set = filter_set.exclude(
-                Q(dirty_state=True) & ~(
-                    Q(owner__username__iexact=str(user)) | Q(group__in=group_list_all)))
-        else:
-            filter_set = filter_set.exclude(Q(dirty_state=True))
     return filter_set
 
 
@@ -240,10 +232,10 @@ def purge_geofence_all():
             passwd = settings.OGC_SERVER['default']['PASSWORD']
             """
             curl -X GET -u admin:geoserver -H "Content-Type: application/json" \
-                  http://<host>:<port>/geoserver/rest/geofence/rules.json
+                  http://<host>:<port>/geoserver/geofence/rest/rules.json
             """
             headers = {'Content-type': 'application/json'}
-            r = requests.get(url + 'rest/geofence/rules.json',
+            r = requests.get(url + 'geofence/rest/rules.json',
                              headers=headers,
                              auth=HTTPBasicAuth(user, passwd),
                              timeout=10,
@@ -259,7 +251,7 @@ def purge_geofence_all():
                         # Delete GeoFence Rules associated to the Layer
                         # curl -X DELETE -u admin:geoserver http://<host>:<port>/geoserver/rest/geofence/rules/id/{r_id}
                         for i, rule in enumerate(rules):
-                            r = requests.delete(url + 'rest/geofence/rules/id/' + str(rule['id']),
+                            r = requests.delete(url + 'geofence/rest/rules/id/' + str(rule['id']),
                                                 headers=headers,
                                                 auth=HTTPBasicAuth(user, passwd))
                             if (r.status_code < 200 or r.status_code > 201):
@@ -586,7 +578,7 @@ def _update_geofence_rule(layer, workspace, service, user=None, group=None):
     )
     logger.debug("request data: {}".format(payload))
     response = requests.post(
-        "{base_url}geofence/rest/rules".format(
+        "{base_url}rest/geofence/rules".format(
             base_url=settings.OGC_SERVER['default']['LOCATION']),
         data=payload,
         headers={
@@ -600,3 +592,6 @@ def _update_geofence_rule(layer, workspace, service, user=None, group=None):
     logger.debug("response status_code: {}".format(response.status_code))
     if response.status_code not in (200, 201):
         msg = ("Could not ADD GeoServer User {!r} Rule for "
+               "Layer {!r}".format(user, layer))
+        raise RuntimeError(msg)
+==== BASE ====

@@ -25,11 +25,14 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.contrib.auth import get_user_model
+import logging
 
 from geonode.utils import resolve_object
 from geonode.base.models import ResourceBase
 from geonode.layers.models import Layer
 from geonode.people.models import Profile
+
+logger = logging.getLogger(__name__)
 
 if "notification" in settings.INSTALLED_APPS:
     from notification import models as notification
@@ -96,6 +99,7 @@ def resource_permissions(request, resource_id):
         except BaseException:
             success = False
             message = "Error updating permissions :("
+            logger.error(message, exc_info=True)
             return HttpResponse(
                 json.dumps({'success': success, 'message': message}),
                 status=500,
