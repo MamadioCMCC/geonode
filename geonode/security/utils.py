@@ -594,4 +594,3 @@ def _update_geofence_rule(layer, workspace, service, user=None, group=None):
         msg = ("Could not ADD GeoServer User {!r} Rule for "
                "Layer {!r}".format(user, layer))
         raise RuntimeError(msg)
-==== BASE ====
