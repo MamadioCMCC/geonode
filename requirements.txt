@@ -13,7 +13,6 @@ httplib2<0.14.1
 hyperlink==19.0.0
 idna>=2.5,<2.9
 Paver==1.3.4
-python-slugify==4.0.0
 decorator==4.4.1
 celery==4.2.1
 kombu==4.6.6
@@ -42,7 +41,6 @@ click==6.7 # python-click (6.7 in our ppa)
 coreapi==2.3.3 # python-coreapi (2.3.3 in our ppa)
 coreschema==0.0.4 # python-coreschema (0.0.4 in our ppa)
 autoflake<=0.7 # python-autoflake (0.7 in our ppa)
-flake8>=2.6.2,<=3.5.0 # python-flake8 (2.5.4) FIXME
 pycodestyle<=2.3.0 # missing TODO
 pyflakes>=1.2.3,<=1.6.0 # python-pyflakes (1.6.0 in our ppa) FIXME
 pep8<=1.7.1 # python-pep8 (1.7.1 in our ppa)
@@ -55,6 +53,7 @@ django-filter==1.1.0
 django-imagekit==4.0.2
 django-jsonfield<1.3.2
 django-jsonfield-compat<=0.4.4
+jsonfield==2.1.1
 django-taggit==0.24.0
 django-mptt==0.9.1
 django-modeltranslation>=0.11,<0.15.0
@@ -84,6 +83,7 @@ dj-pagination==2.4.0
 pinax-notifications==5.0.3
 django-celery-monitor<=1.1.2
 django-celery-beat==1.5.0
+django-celery-results
 django-floppyforms<1.9.0
 django-forms-bootstrap<=3.1.0
 geonode-django-activity-stream==0.9.0
@@ -132,16 +132,13 @@ pytz==2019.3
 requests==2.22.0
 timeout-decorator==0.4.1
 et-xmlfile<=1.0.1 # python-et-xmlfile (1.0.1 in our ppa)
-urllib3<=1.22
 vine<=1.1.4 # (1.1.4 in our ppa)
 xlrd<=1.1.0 # (1.1.0 in ppa)
 xlwt<=1.3.0 # (1.3.0 in our ppa)
 funcsigs<=1.0.2 # (1.0.2 in our ppa)
 geolinks<=0.2.0 # python-geolinks (0.2.0 in ppa)
 ipaddress<=1.0.18 # (1.0.18 in our ppa)
-kombu==4.1.0 # python-kombu (4.1.0 in our ppa)
 mccabe>=0.5.3,<=0.6.1 # (0.4.0 in our ppa) FIXME
-numpy<=1.13.1 # (1.11.0 in ppa) FIXME
 odfpy<=1.3.6 # python-odfpy (1.3.6 in our ppa)
 openpyxl<=2.5.0 # (2.5.0 in our ppa)
 pbr<=3.1.1 # (1.8.0 in ppa) FIXME
