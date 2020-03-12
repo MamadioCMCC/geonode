@@ -580,11 +580,11 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin, ItemBase):
         choices=VALID_DATE_TYPES,
         default='publication',
         help_text=date_type_help_text)
-    creation_date = models.DateTimeField(_('creation date'), default=datetime.datetime.now,
+    creation_date = models.DateTimeField(_('creation date'), default=now,
                                          help_text=date_help_text, null=True, blank=True)
     publication_date = models.DateTimeField(_('publication date'), auto_now_add=True,
                                             help_text=date_help_text, null=True, blank=True)
-    data_update_date = models.DateTimeField(_('data update date'), default=datetime.datetime.now,
+    data_update_date = models.DateTimeField(_('data update date'), default=now,
                                             help_text=date_help_text, null=True, blank=True)
     metadata_update_date = models.DateTimeField(_('metadata update date'), auto_now=True,
                                                 help_text=date_help_text, null=True, blank=True)
