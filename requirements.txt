@@ -21,6 +21,7 @@ six<1.14.0
 tqdm==4.39.0
 Deprecated==1.2.7
 wrapt==1.11.2
+python-slugify==4.0.0
 anyjson<=0.3.3 # (python-anyjson 0.3.3 in our ppa)
 arrow==0.12.1 # (python-arrow 0.12.1 in our ppa)
 attrs==17.4.0 # (python-attrs 17.4.0 in our ppa)
