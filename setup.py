@@ -18,21 +18,13 @@
 #
 #########################################################################
 
-try:  # for pip >= 10
-    from pip._internal.req import parse_requirements
-    pip_session = 'hack'
-except ImportError:  # for pip <= 9.0.3
-    from pip.req import parse_requirements
-    from pip.download import PipSession
-    pip_session = PipSession()
-from distutils.core import setup
+import os
+from setuptools import setup, find_packages
 
-from setuptools import find_packages
+here = os.path.abspath(os.path.dirname(__file__))
 
-# Parse requirements.txt to get the list of dependencies
-inst_req = parse_requirements('requirements.txt',
-                              session=pip_session)
-REQUIREMENTS = [str(r.req) for r in inst_req]
+with open(os.path.join(here, "requirements.txt")) as f:
+    REQUIREMENTS = f.read()
 
 setup(name='GeoNode',
       version=__import__('geonode').get_version(),
