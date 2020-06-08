@@ -124,28 +124,28 @@ article.tab-pane {
 /* ------ Nav
 ------------------------------ */
 .navbar-inverse {
-  background-color: @gray-dark;
+  background-color: white;
   border: 0;
 
   .navbar-nav > li > a {
-    color: white;
+    color: @brand-light;
     font-weight: 600;
     padding-top: 25px;
     padding-bottom: 25px;
 
     &:hover {
-       background-color: @brand-light;
-       border: 0;
-       .navbar-nav > li > a {
-               color: @brand-gray;
-               font-weight: 600;
-               padding-top: 25px;
-               padding-bottom: 25px;
+      background-color: @brand-light;
+      border: 0;
+      .navbar-nav > li > a {
+        color: @brand-gray;
+        font-weight: 600;
+        padding-top: 25px;
+        padding-bottom: 25px;
 
-               &:hover {
-                       background-color: @brand-primary;
-               }
-       }
+        &:hover {
+          background-color: @brand-primary;
+        }
+      }
     }
   }
 }
@@ -218,67 +218,67 @@ article.tab-pane {
   .fa-angle-down {
     margin-left: 10px;
   }
-        .dropdown-menu {
-                background-color: @brand-primary;
-                border-top: 1px solid @brand-primary;
+  .dropdown-menu {
+    background-color: @brand-primary;
+    border-top: 1px solid @brand-primary;
 
-                a {
-                        color: @brand-gray;
-                }
+    a {
+      color: @brand-gray;
+    }
 
-                li a {
-                        &:hover {
-                                background-color: darken(@brand-primary, 10%);
-                                color: @brand-gray;
-                        }
-                }
+    li a {
+      &:hover {
+        background-color: darken(@brand-primary, 10%);
+        color: @brand-gray;
+      }
+    }
 
-                .divider {
-                        background-color: darken(@brand-primary, 10%);
-                }
-        }
+    .divider {
+      background-color: darken(@brand-primary, 10%);
+    }
+  }
 
-        .search {
-                left: 15px;
-                position: relative;
-                color: #444;
-                top: 20px;
-                margin-right: 25px;
+  .search {
+    left: 15px;
+    position: relative;
+    color: #444;
+    top: 20px;
+    margin-right: 25px;
 
-                .fa-search {
-                        position: absolute;
-                        top: 8px;
-                        left: 10px;
-                }
-        }
+    .fa-search {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+    }
+  }
 
-        .search input {
-                width: 120px;
-                height: 32px;
-                border: 1px solid @gray-dark;
-                border-radius: 5px;
-                outline-width: 0;
-                text-indent: 32px;
-                -webkit-transition: width 0.2s;
-                transition: width 0.2s;
+  .search input {
+    width: 120px;
+    height: 32px;
+    border: 1px solid @gray-dark;
+    border-radius: 5px;
+    outline-width: 0;
+    text-indent: 32px;
+    -webkit-transition: width 0.2s;
+    transition: width 0.2s;
 
-                &:focus {
-                        width: 240px;
-                }
-        }
+    &:focus {
+      width: 240px;
+    }
+  }
 
-        .avatar img {
-                border-radius: 50%;
-                margin-bottom: -15px;
-                margin-right: 10px;
-                margin-top: -15px;
-                height: 42px;
-                width: 42px;
-        }
+  .avatar img {
+    border-radius: 50%;
+    margin-bottom: -15px;
+    margin-right: 10px;
+    margin-top: -15px;
+    height: 42px;
+    width: 42px;
+  }
 
-        .fa-angle-down {
-                margin-left: 10px;
-        }
+  .fa-angle-down {
+    margin-left: 10px;
+  }
 }
 
 .navbar-brand {
@@ -474,191 +474,191 @@ article.tab-pane {
       font-size: 18px;
     }
   }
-    .navbar-inverse {
-        background-color: white;
+  .navbar-inverse {
+    background-color: white;
+  }
+
+  #wrap {
+    margin-top: -60px;
+    padding-bottom: 0;
+  }
+
+  .jumbotron {
+    background: @gray-dark;
+    background-image: url(../../lab/lights.jpg);
+    background-size: cover;
+    background-position: center;
+    color: white;
+    margin-bottom: 0;
+    margin-top: 25px;
+    padding: 7.5em 0 5.5em 0;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+    a {color: @brand-warning;}
+    p {margin-bottom: 0;}
+    h1 { font-size: 63px; }
+
+    .btn-default {
+      background: rgba(0,0,0,0.2);
+      border: 2px solid white;
+      color: white;
+      font-weight: 600;
+      margin-top: 1em;
+      min-width: 320px;
+
+      &:hover {
+        background: rgba(0,0,0,0.4);
+      }
+    }
+  }
+
+  #jumbo-innovation {
+    color: @brand-yellow;
+  }
+
+  #jumbo-lab {
+    font-weight: 300;
+  }
+
+  .big-search {
+    color: @gray-dark;
+
+    h1, p {text-align: center}
+    padding-top: 1em;
+
+    a {
+      color: @brand-primary;
     }
 
-    #wrap {
-        margin-top: -60px;
-        padding-bottom: 0;
+    .search {
+      left: 0;
+      position: relative;
+      color: #444;
+      top: 20px;
+      padding-bottom: 2em;
+      margin: auto;
+      width: 50%;
     }
 
-    .jumbotron {
-        background: @gray-dark;
-        background-image: url(../../lab/lights.jpg);
-        background-size: cover;
-        background-position: center;
-        color: white;
-        margin-bottom: 0;
-        margin-top: 25px;
-        padding: 7.5em 0 5.5em 0;
-        text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
-        a {color: @brand-warning;}
-        p {margin-bottom: 0;}
-        h1 { font-size: 63px; }
-
-        .btn-default {
-            background: rgba(0,0,0,0.2);
-            border: 2px solid white;
-            color: white;
-            font-weight: 600;
-            margin-top: 1em;
-            min-width: 320px;
-
-            &:hover {
-                background: rgba(0,0,0,0.4);
-            }
-        }
+    .search input {
+      width: 100%;
+      height: 56px;
+      border: 1px solid @gray-dark;
+      border-radius: 5px;
+      outline-width: 0;
+      font-size: 1.5em;
     }
 
-    #jumbo-innovation {
-      color: @brand-yellow;
+    .search input { text-indent: 64px;}
+    .search .fa-search {
+      position: absolute;
+      top: 10px;
+      left: 15px;
     }
-
-    #jumbo-lab {
-      font-weight: 300;
+    .btn-default {
+      background: transparent;
+      border: none;
+      color: @brand-warning;
+      &:hover {
+        text-decoration: underline;
+      }
     }
+  }
+  #datasets {
+    background: rgba(175,216,242,1);
+    background: -moz-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(175,216,242,1)), color-stop(100%, rgba(255,255,255,1)));
+    background: -webkit-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+    background: -o-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+    background: -ms-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+    background: linear-gradient(to bottom, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#afd8f2', endColorstr='#ffffff', GradientType=0 );
 
-    .big-search {
-        color: @gray-dark;
+    color: @brand-gray;
 
-        h1, p {text-align: center}
-        padding-top: 1em;
-
-        a {
-            color: @brand-primary;
-        }
-
-        .search {
-            left: 0;
-            position: relative;
-            color: #444;
-            top: 20px;
-            padding-bottom: 2em;
-            margin: auto;
-            width: 50%;
-        }
-
-        .search input {
-            width: 100%;
-            height: 56px;
-            border: 1px solid @gray-dark;
-            border-radius: 5px;
-            outline-width: 0;
-            font-size: 1.5em;
-        }
-
-		.search input { text-indent: 64px;}
-		.search .fa-search {
-		  position: absolute;
-		  top: 10px;
-		  left: 15px;
-		}
-		.btn-default {
-			background: transparent;
-			border: none;
-			color: @brand-warning;
-			&:hover {
-				text-decoration: underline;
-			}
-		}
-	}
-	#datasets {
-        background: rgba(175,216,242,1);
-        background: -moz-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
-        background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(175,216,242,1)), color-stop(100%, rgba(255,255,255,1)));
-        background: -webkit-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
-        background: -o-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
-        background: -ms-linear-gradient(top, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
-        background: linear-gradient(to bottom, rgba(175,216,242,1) 0%, rgba(255,255,255,1) 100%);
-        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#afd8f2', endColorstr='#ffffff', GradientType=0 );
-
-        color: @brand-gray;
-
-      padding: 1em 0;
-      p {font-size: 18px;}
-      h4 {
-        font-size: 24px;}
+    padding: 1em 0;
+    p {font-size: 18px;}
+    h4 {
+      font-size: 24px;}
+    i img {
+      border: 4px solid white;
+      border-radius: 100%;
+      margin-top: 20px;
+    }
+    a {
+      color: @gray-dark;
+      .col-xs-4.col-sm-3{
+        height: 15em;
+      }
+      i {
+        font-size: 64px;
+      }
       i img {
-        border: 4px solid white;
+        border: 3px solid white;
         border-radius: 100%;
         margin-top: 20px;
       }
-      a {
-        color: @gray-dark;
-        .col-xs-4.col-sm-3{
-            height: 15em;
-        }
-        i {
-            font-size: 64px;
-        }
-        i img {
-            border: 3px solid white;
-            border-radius: 100%;
-            margin-top: 20px;
-        }
+      &:hover {
+        text-decoration: none;
+      }
+
+      .category {
+        margin: 0 50px;
+        padding: 2em 0;
+
         &:hover {
-            text-decoration: none;
-        }
-
-        .category {
-          margin: 0 50px;
-          padding: 2em 0;
-
-          &:hover {
-            color: @brand-primary;
-            img {
-              border-color: @brand-primary;
-            }
+          color: @brand-primary;
+          img {
+            border-color: @brand-primary;
           }
         }
+      }
 
-        span {
-          font-size: 4em;
-        }
+      span {
+        font-size: 4em;
       }
     }
+  }
 
-    #showcase {
-        background: @gray-lighter;
-        padding: 1em 0;
-        text-align: center;
-        color: white;
-        .col-md-3 {
-            padding: 2em 1em;
-            img {
-                height: 180px;
-                width: 100%;
-            }
-        }
-        h1{
-            color: @brand-yellow;
-            font-size: 36px;
-        }
-        h3{
-            font-size: 24px;
-        }
-        h5 {
-            font-weight: 300;
-        }
-        h3, h5 {
-            color: white;
-        }
+  #showcase {
+    background: @gray-lighter;
+    padding: 1em 0;
+    text-align: center;
+    color: white;
+    .col-md-3 {
+      padding: 2em 1em;
+      img {
+        height: 180px;
+        width: 100%;
+      }
+    }
+    h1{
+      color: @brand-yellow;
+      font-size: 36px;
+    }
+    h3{
+      font-size: 24px;
+    }
+    h5 {
+      font-weight: 300;
+    }
+    h3, h5 {
+      color: white;
+    }
 
-        i {
-            color: @brand-yellow;
-        }
+    i {
+      color: @brand-yellow;
+    }
 
-        a:hover {
-            h3{
-                color: @brand-yellow;
-            }
-        }
-		p {
-          font-size: 18px;
-          margin: 30px 0 20px 0;
-        }
-	}
+    a:hover {
+      h3 {
+        color: @brand-yellow;
+      }
+    }
+    p {
+      font-size: 18px;
+      margin: 30px 0 20px 0;
+    }
+  }
 }
 /* autocomplete
 ------------------------*/
@@ -1317,21 +1317,21 @@ nav.filter {
 /* Footer
 ----------------------- */
 footer {
-    background: white;
-    color: #999999;
-    padding: 1.5em;
+  background: white;
+  color: #999999;
+  padding: 1.5em;
 
-    a {
-        color: @brand-gray;
+  a {
+    color: @brand-gray;
 
-        &:hover {
-            color: darken(@brand-gray, 13.5%);
-        }
+    &:hover {
+      color: darken(@brand-gray, 13.5%);
     }
+  }
 
-    form {
-        color: @text-color;
-    }
+  form {
+    color: @text-color;
+  }
 }
 /* Copyright
 ----------------------- */
