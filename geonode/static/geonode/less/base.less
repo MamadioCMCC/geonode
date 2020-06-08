@@ -127,6 +127,18 @@ article.tab-pane {
   background-color: white;
   border: 0;
 
+  .navbar-header .navbar-toggle {
+    i {
+      color: @brand-gray;
+    }
+    &:hover {
+      background-color: @brand-blue;
+      i {
+        color: white;
+      }
+    }
+  }
+
   .navbar-nav > li > a {
     color: @brand-gray;
     font-weight: 600;
@@ -1627,10 +1639,6 @@ footer {
 
   .collapsing {
     overflow: hidden!important;
-  }
-
-  .home .navbar-inverse {
-    background-color: @gray-dark;
   }
 
   .navbar-inverse {
